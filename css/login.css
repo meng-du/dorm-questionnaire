@@ -1,7 +1,17 @@
-#info-form {
-    padding: 20%;
+.central {
+    margin: 15%;
 }
-.submit-btn {
+.label {
+    white-space: nowrap;
+    min-width: 30px;
+}
+.btn {
+    margin: 10px;
+}
+.central-btn {
     display: table;
     margin: auto;
+}
+#correct-info {
+    margin-top: 10px;
 }
