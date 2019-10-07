@@ -24,36 +24,36 @@
             // Initialize Firebase
             firebase.initializeApp(firebaseConfig);
             var db = firebase.firestore();
+            var db_roster_name = "test_roster";
 
             // get roster
-            db.collection("roster").get().then(function(fb_roster) {
-                fb_roster = fb_roster.exists ? fb_roster.data : null;
-                for (sid in roster) {
-                    if (fb_roster && fb_roster.hasOwnProperty(sid)) {
+            for (sid in roster) {
+                db.collection(db_roster_name).doc(sid).get().then((db_sid) => {
+                    query_sid = db_sid.id;
+                    if (db_sid.exists) {
                         $("#log").append($("<p>", {
-                            text: "Found " + sid + " in Firebase. Skipping it.",
+                            text: "Found " + query_sid + " in Firebase. Skipping it.",
                             style: "color: blue;"
-                        }))
+                        }));
                     } else {
-                        db.collection("roster").doc(sid).set({sid: null})
+                        db.collection(db_roster_name).doc(query_sid).set({})
                         .then(function() {
                             $("#log").append($("<p>", {
-                                text: "Successfully wrote " + sid + " to Firebase."
+                                text: "Successfully wrote to Firebase."
                             }));
                         })
                         .catch(function(error) {
                             $("#log").append($("<p>", {
-                                text: "Failed to write " + sid + " to Firebase.",
+                                text: "Failed to write to Firebase.",
                                 style: "color: red;"
                             }));
-                        });;
+                        });
                     }
-                }
-
-            }).catch(function(error) {
-                console.log("Error getting data from Firebase:", error);
-                alert("Error getting data from Firebase: " + error)
-            });
+                }).catch(function(error) {
+                    console.log("Error getting data from Firebase:", error);
+                    alert("Error getting data from Firebase: " + error)
+                });
+            }
 
 
         </script>
