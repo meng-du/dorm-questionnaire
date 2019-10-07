@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.1.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.1.0/firebase-firestore.js"></script>
+    </head>
+
+    <body>
+        <div id="log" style="padding: 10%"></div>
+        <script type="text/javascript" src="js/test_roster.js"></script>
+        <script type="text/javascript">
+            // Firebase configuration
+            var firebaseConfig = {
+                apiKey: "AIzaSyBvPWLV2yjapJKblBLcfkVbpZC3cXtM0PU",
+                authDomain: "dorm-network.firebaseapp.com",
+                databaseURL: "https://dorm-network.firebaseio.com",
+                projectId: "dorm-network",
+                storageBucket: "",
+                messagingSenderId: "804230274072",
+                appId: "1:804230274072:web:dd26c12bba4f85e64df76d"
+            };
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            var db = firebase.firestore();
+
+            // get roster
+            db.collection("roster").get().then(function(fb_roster) {
+                fb_roster = fb_roster.exists ? fb_roster.data : null;
+                for (sid in roster) {
+                    if (fb_roster && fb_roster.hasOwnProperty(sid)) {
+                        $("#log").append($("<p>", {
+                            text: "Found " + sid + " in Firebase. Skipping it.",
+                            style: "color: blue;"
+                        }))
+                    } else {
+                        db.collection("roster").doc(sid).set({sid: null})
+                        .then(function() {
+                            $("#log").append($("<p>", {
+                                text: "Successfully wrote " + sid + " to Firebase."
+                            }));
+                        })
+                        .catch(function(error) {
+                            $("#log").append($("<p>", {
+                                text: "Failed to write " + sid + " to Firebase.",
+                                style: "color: red;"
+                            }));
+                        });;
+                    }
+                }
+
+            }).catch(function(error) {
+                console.log("Error getting data from Firebase:", error);
+                alert("Error getting data from Firebase: " + error)
+            });
+
+
+        </script>
+    </body>
+</html>
