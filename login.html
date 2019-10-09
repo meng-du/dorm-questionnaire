@@ -23,18 +23,19 @@
                 </div>
 
                 <div id="dorm-group" class="form-group input-group">
-                    <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your dorm</span></div>
-                    <input id="dorm" type="text" class="form-control" placeholder="Room #" pattern="[a-zA-Z0-9]+" required>
+                    <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your dorm room</span></div>
+                    <input id="dorm" type="number" class="form-control" placeholder="Room #" pattern="[0-9]+" min="200" max="299" required>
                 </div>
 
                 <div id="uid-group" class="form-group input-group">
                     <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your UID</span></div>
-                    <input id="uid" type="text" class="form-control" placeholder="Make sure you enter correctly (we'll need it to pay you)." pattern="[a-zA-Z0-9]+" required>
+                    <input id="uid" type="number" class="form-control" placeholder="9-digit number on your BruinCard"
+                    pattern="[0-9]+" min="100000000" max="999999999" required>
                 </div>
-
-                <p align="center">SOMETHING ABOUT ANONYMITY HERE</p>
+                <div id="uid-note">Make sure your UID is entered correctly!</div>
 
                 <button id="submit" type="submit" class="btn btn-primary central-btn">Submit</button>
+                <p></p><p align="center">SOMETHING ABOUT ANONYMITY HERE</p>
             </form>
         </div>
         <div id="no-record" class="central">

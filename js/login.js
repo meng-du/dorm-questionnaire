@@ -30,25 +30,21 @@
 
         var firstname = $('#firstname').val();
         var lastname = $('#lastname').val();
+        var dorm = $('#dorm').val();
+        var uid = $('#uid').val();
 
-        var sid =  + '-' +  + '-' + $('#dorm').val();
-
+        // TODO prevent user from entering special chars?
         // TODO error checking
-        // TODO prevent user from entering special chars
-
-        sid = sid.toLowerCase();
 
         // check Firebase
-        db.collection(db_roster_name).doc(sid).get().then((db_sid) => {
+        db.collection(db_roster_name).doc(uid).get().then((db_sid) => {
             if (db_sid.exists) {
                 nextpage();
             } else {
-                var info = sid.split('-')
-
                 $('#info-check').append('<p>Your first name: <strong>' + firstname + '</strong></p>')
                 $('#info-check').append('<p>Your last name: <strong>' + lastname + '</strong></p>')
-                $('#info-check').append('<p>Your dorm room: <strong>' + info[2] + '</strong></p>')
-                $('#info-check').append('<p>Your UID: <strong>' + info[3] + '</strong></p>')
+                $('#info-check').append('<p>Your dorm room: <strong>' + dorm + '</strong></p>')
+                $('#info-check').append('<p>Your UID: <strong>' + uid + '</strong></p>')
                 $('#info-form').hide();
                 $('#no-record').show();
                 $('#correct-info').hide();
