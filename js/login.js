@@ -28,9 +28,11 @@
         $('#name-group').removeClass('bold has-error has-danger');
         $('#dorm-group').removeClass('bold has-error has-danger');
 
-        var sid = $('#firstname').val() + '-' + $('#lastname').val() + '-' +
-                  $('#middleinitial').val() + '-' + $('#dorm').val();
-        
+        var firstname = $('#firstname').val();
+        var lastname = $('#lastname').val();
+
+        var sid =  + '-' +  + '-' + $('#dorm').val();
+
         // TODO error checking
         // TODO prevent user from entering special chars
 
@@ -42,13 +44,11 @@
                 nextpage();
             } else {
                 var info = sid.split('-')
-                var firstname = info[0][0].toUpperCase() + info[0].substring(1);
-                var lastname = info[1][0].toUpperCase() + info[1].substring(1);
-                var middleini = info[2].length == 0 ? 'N/A' : info[2].toUpperCase();
+
                 $('#info-check').append('<p>Your first name: <strong>' + firstname + '</strong></p>')
                 $('#info-check').append('<p>Your last name: <strong>' + lastname + '</strong></p>')
-                $('#info-check').append('<p>Your middle initial(s): <strong>' + middleini + '</strong></p>')
-                $('#info-check').append('<p>Your dorm room: <strong>' + info[3] + '</strong></p>')
+                $('#info-check').append('<p>Your dorm room: <strong>' + info[2] + '</strong></p>')
+                $('#info-check').append('<p>Your UID: <strong>' + info[3] + '</strong></p>')
                 $('#info-form').hide();
                 $('#no-record').show();
                 $('#correct-info').hide();
@@ -67,7 +67,7 @@
     $('#correct-btn').click(() => {
         $('#correct-info').show();
     })
-    
+
     $('#cont').click(() => {
         nextpage();
     })
