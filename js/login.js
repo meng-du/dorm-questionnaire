@@ -18,10 +18,17 @@
     var db = firebase.firestore();
     var db_roster_name = 'test_roster';
 
-
     function nextpage() {
         // TODO
         alert('next');
+    }
+
+    function check_name(name) {
+        return ;
+    }
+
+    function check_room_num(name) {
+        return /^[a-zA-Z '-]+$/.test(str);
     }
 
     function submit_info() {
@@ -33,8 +40,20 @@
         var dorm = $('#dorm').val();
         var uid = $('#uid').val();
 
-        // TODO prevent user from entering special chars?
-        // TODO error checking
+        // error checking
+        for (name in ['#firstname', '#lastname']) {
+            if !(/^[a-zA-Z '-]+$/.test($(name).val())) {
+                $(name).setCustomValidity('Please enter only alphabets');
+            }
+        }
+
+        if !(/^2[0-9][0-9]$/.test($('#dorm').val())) {
+            $('#dorm').setCustomValidity('Please enter your 3-digit room number, starting with 2');
+        }
+
+        if !(/^[0-9]{9}$/.test($('#uid').val())) {
+            $('#uid').setCustomValidity('Please enter your 9-digit UID');
+        }
 
         // check Firebase
         db.collection(db_roster_name).doc(uid).get().then((db_sid) => {

@@ -24,13 +24,12 @@
 
                 <div id="dorm-group" class="form-group input-group">
                     <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your dorm room</span></div>
-                    <input id="dorm" type="number" class="form-control" placeholder="Room #" pattern="[0-9]+" min="200" max="299" required>
+                    <input id="dorm" class="form-control" placeholder="Room #" pattern="[0-9]+" required>
                 </div>
 
                 <div id="uid-group" class="form-group input-group">
                     <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your UID</span></div>
-                    <input id="uid" type="number" class="form-control" placeholder="9-digit number on your BruinCard"
-                    pattern="[0-9]+" min="100000000" max="999999999" required>
+                    <input id="uid" class="form-control" placeholder="9-digit number on your BruinCard" pattern="[0-9]+" required>
                 </div>
                 <div id="uid-note">Make sure your UID is entered correctly!</div>
 
@@ -41,6 +40,7 @@
         <div id="no-record" class="central">
             <p>Please double check if this is correct:</p>
             <div id="info-check"></div>
+            <p style="color:#0064e6;">Make sure your UID is correct. We will use it to do something very important (??!)</p>
             <button id="refresh-btn" class="btn btn-warning">Something is wrong, go back</button>
             <button id="correct-btn" class="btn btn-info">This is correct</button>
 
