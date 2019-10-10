@@ -23,37 +23,28 @@
         alert('next');
     }
 
-    function check_name(name) {
-        return ;
+    function check_name() {
+        var errmsg = 'Please enter only alphabets';
+        $(this)[0].setCustomValidity(/^[a-zA-Z '-]*$/.test($(this).val()) ? '' : errmsg);
     }
+    $('#firstname').change(check_name);
+    $('#lastname').change(check_name);
 
-    function check_room_num(name) {
-        return /^[a-zA-Z '-]+$/.test(str);
-    }
+    $('#dorm').change(() => {
+        var errmsg = 'Please enter your 3-digit room number, starting with 2';
+        $('#dorm')[0].setCustomValidity(/^2[0-9][0-9]$/.test($('#dorm').val()) ? '' : errmsg);
+    });
+
+    $('#uid').change(() => {
+        var errmsg = 'Please enter your 9-digit UID';
+        $('#uid')[0].setCustomValidity(/^[0-9]{9}$/.test($('#uid').val()) ? '' : errmsg);
+    });
 
     function submit_info() {
-        $('#name-group').removeClass('bold has-error has-danger');
-        $('#dorm-group').removeClass('bold has-error has-danger');
-
         var firstname = $('#firstname').val();
         var lastname = $('#lastname').val();
         var dorm = $('#dorm').val();
         var uid = $('#uid').val();
-
-        // error checking
-        for (name in ['#firstname', '#lastname']) {
-            if !(/^[a-zA-Z '-]+$/.test($(name).val())) {
-                $(name).setCustomValidity('Please enter only alphabets');
-            }
-        }
-
-        if !(/^2[0-9][0-9]$/.test($('#dorm').val())) {
-            $('#dorm').setCustomValidity('Please enter your 3-digit room number, starting with 2');
-        }
-
-        if !(/^[0-9]{9}$/.test($('#uid').val())) {
-            $('#uid').setCustomValidity('Please enter your 9-digit UID');
-        }
 
         // check Firebase
         db.collection(db_roster_name).doc(uid).get().then((db_sid) => {
