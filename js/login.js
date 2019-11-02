@@ -18,36 +18,42 @@
     var db = firebase.firestore();
     var db_roster_name = 'test_roster';
 
-
     function nextpage() {
         window.location.replace('survey.html');
     }
 
+    function check_name() {
+        var errmsg = 'Please enter only alphabets';
+        $(this)[0].setCustomValidity(/^[a-zA-Z '-]*$/.test($(this).val()) ? '' : errmsg);
+    }
+    $('#firstname').change(check_name);
+    $('#lastname').change(check_name);
+
+    $('#dorm').change(() => {
+        var errmsg = 'Please enter your 3-digit room number, starting with 2';
+        $('#dorm')[0].setCustomValidity(/^2[0-9][0-9]$/.test($('#dorm').val()) ? '' : errmsg);
+    });
+
+    $('#uid').change(() => {
+        var errmsg = 'Please enter your 9-digit UID';
+        $('#uid')[0].setCustomValidity(/^[0-9]{9}$/.test($('#uid').val()) ? '' : errmsg);
+    });
+
     function submit_info() {
-        $('#name-group').removeClass('bold has-error has-danger');
-        $('#dorm-group').removeClass('bold has-error has-danger');
-
-        var sid = $('#firstname').val() + '-' + $('#lastname').val() + '-' +
-                  $('#middleinitial').val() + '-' + $('#dorm').val();
-        
-        // TODO error checking
-        // TODO prevent user from entering special chars
-
-        sid = sid.toLowerCase();
+        var firstname = $('#firstname').val();
+        var lastname = $('#lastname').val();
+        var dorm = $('#dorm').val();
+        var uid = $('#uid').val();
 
         // check Firebase
-        db.collection(db_roster_name).doc(sid).get().then((db_sid) => {
+        db.collection(db_roster_name).doc(uid).get().then((db_sid) => {
             if (db_sid.exists) {
                 nextpage();
             } else {
-                var info = sid.split('-')
-                var firstname = info[0][0].toUpperCase() + info[0].substring(1);
-                var lastname = info[1][0].toUpperCase() + info[1].substring(1);
-                var middleini = info[2].length == 0 ? 'N/A' : info[2].toUpperCase();
                 $('#info-check').append('<p>Your first name: <strong>' + firstname + '</strong></p>')
                 $('#info-check').append('<p>Your last name: <strong>' + lastname + '</strong></p>')
-                $('#info-check').append('<p>Your middle initial(s): <strong>' + middleini + '</strong></p>')
-                $('#info-check').append('<p>Your dorm room: <strong>' + info[3] + '</strong></p>')
+                $('#info-check').append('<p>Your dorm room: <strong>' + dorm + '</strong></p>')
+                $('#info-check').append('<p>Your UID: <strong>' + uid + '</strong></p>')
                 $('#info-form').hide();
                 $('#no-record').show();
                 $('#correct-info').hide();
@@ -66,7 +72,7 @@
     $('#correct-btn').click(() => {
         $('#correct-info').show();
     })
-    
+
     $('#cont').click(() => {
         nextpage();
     })

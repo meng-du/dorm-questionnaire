@@ -2,6 +2,7 @@
 <html lang="en-us">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <title>Log In</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
@@ -15,36 +16,37 @@
 
     <body>
         <div id="info-form" class="central" data-toggle="validator" role="form">
-            <p>Enter your information here:</p>
             <form action="javascript:submit_info();" class="form-horizontal">
                 <div id="name-group" class="form-group input-group">
                     <div class="input-group-prepend"><span id="name-label" class="input-group-text" id="inputGroup-sizing-default">Your name</span></div>
-                    <input id="firstname" type="text" class="form-control" placeholder="First" pattern="[a-zA-Z]+" required>
-                    <input id="lastname" type="text" class="form-control" placeholder="Last" pattern="[a-zA-Z]+" required>
-                    <input id="middleinitial" type="text" class="form-control" pattern="[a-zA-Z]+" placeholder="M.I.">
+                    <input id="firstname" type="text" class="form-control" placeholder="First" required>
+                    <input id="lastname" type="text" class="form-control" placeholder="Last" required>
                 </div>
 
                 <div id="dorm-group" class="form-group input-group">
-                    <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your dorm</span></div>
-                    <input id="dorm" type="text" class="form-control" placeholder="Room #" pattern="[a-zA-Z0-9]+" required>
+                    <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your dorm room</span></div>
+                    <input id="dorm" class="form-control" placeholder="Room #" required>
                 </div>
 
+                <div id="uid-group" class="form-group input-group">
+                    <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your UID</span></div>
+                    <input id="uid" class="form-control" placeholder="9-digit number on your BruinCard" required>
+                </div>
+                <div id="uid-note">Make sure your UID is entered correctly!</div>
+
                 <button id="submit" type="submit" class="btn btn-primary central-btn">Submit</button>
+                <p></p><p align="center">SOMETHING ABOUT ANONYMITY HERE</p>
             </form>
         </div>
         <div id="no-record" class="central">
-            <p>It seems like we don't have any record of your information. Please double check if this is correct:</p>
+            <p>Please double check if this is correct:</p>
             <div id="info-check"></div>
+            <p style="color:#0064e6;">Make sure your UID is correct. We will use it to save the universe (?)</p>
             <button id="refresh-btn" class="btn btn-warning">Something is wrong, go back</button>
             <button id="correct-btn" class="btn btn-info">This is correct</button>
 
             <div id="correct-info">
-                <p><strong>Since we could not find your information, please contact the experimenter at 
-                    email@email.com about this situation, and include your first name, last name, 
-                    middle initial(s), and dorm room number in the email.</strong></p>
-                <p>You can still continue to finish this part of the experiment. When you are ready, click 
-                    "Continue" to start this part of the experiment. Remember to send us the email either 
-                    now or after you finish the experiment here, so that we can compensate you.</p>
+                <p>When you are ready, click "Continue" to start. </p>
                 <button id="cont" class="btn btn-primary central-btn">Continue</button>
             </div>
         </div>

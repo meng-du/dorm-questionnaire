@@ -1,17 +1,36 @@
 .central {
-    margin: 15%;
+  margin: 15% auto;
+  padding: 0 2rem;
+  max-width: 700px;
 }
 .label {
-    white-space: nowrap;
-    min-width: 30px;
+  white-space: nowrap;
+  min-width: 30px;
 }
 .btn {
-    margin: 10px;
+  margin: 10px;
 }
 .central-btn {
-    display: table;
-    margin: auto;
+  display: table;
+  margin: auto;
+}
+#uid-note {
+  font-size: 10pt;
+  margin-top: -.8rem;
+  margin-left: 6rem;
+  color: #0064e6;
+}
+#submit {
+  margin-top: 2rem;
 }
 #correct-info {
-    margin-top: 10px;
+  margin-top: 10px;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield; /* Firefox */
 }
