@@ -20,7 +20,8 @@
 
 
     function nextpage() {
-        window.location.replace('survey.html');
+        // TODO
+        alert('next');
     }
 
     function submit_info() {

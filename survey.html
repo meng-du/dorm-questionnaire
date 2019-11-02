@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="UTF-8">
+        <title>Log In</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js" integrity="sha256-c4gVE6fn+JRKMRvqjoDp+tlG4laudNYrXI1GncbfAYY=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css" integrity="sha256-EH/CzgoJbNED+gZgymswsIOrM9XhIbdSJ6Hwro09WE4=" crossorigin="anonymous" />
+        <script src="https://www.gstatic.com/firebasejs/7.1.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.1.0/firebase-firestore.js"></script>
+
+        <link rel="stylesheet" href="css/login.css">
+    </head>
+
+    <body>
+        <div id="info-form" class="central" data-toggle="validator" role="form">
+            <p>Enter your information here:</p>
+            <form action="javascript:submit_info();" class="form-horizontal">
+                <div id="name-group" class="form-group input-group">
+                    <div class="input-group-prepend"><span id="name-label" class="input-group-text" id="inputGroup-sizing-default">Your name</span></div>
+                    <input id="firstname" type="text" class="form-control" placeholder="First" pattern="[a-zA-Z]+" required>
+                    <input id="lastname" type="text" class="form-control" placeholder="Last" pattern="[a-zA-Z]+" required>
+                    <input id="middleinitial" type="text" class="form-control" pattern="[a-zA-Z]+" placeholder="M.I.">
+                </div>
+
+                <div id="dorm-group" class="form-group input-group">
+                    <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your dorm</span></div>
+                    <input id="dorm" type="text" class="form-control" placeholder="Room #" pattern="[a-zA-Z0-9]+" required>
+                </div>
+
+                <button id="submit" type="submit" class="btn btn-primary central-btn">Submit</button>
+            </form>
+        </div>
+        <div id="no-record" class="central">
+            <p>It seems like we don't have any record of your information. Please double check if this is correct:</p>
+            <div id="info-check"></div>
+            <button id="refresh-btn" class="btn btn-warning">Something is wrong, go back</button>
+            <button id="correct-btn" class="btn btn-info">This is correct</button>
+
+            <div id="correct-info">
+                <p><strong>Since we could not find your information, please contact the experimenter at 
+                    email@email.com about this situation, and include your first name, last name, 
+                    middle initial(s), and dorm room number in the email.</strong></p>
+                <p>You can still continue to finish this part of the experiment. When you are ready, click 
+                    "Continue" to start this part of the experiment. Remember to send us the email either 
+                    now or after you finish the experiment here, so that we can compensate you.</p>
+                <button id="cont" class="btn btn-primary central-btn">Continue</button>
+            </div>
+        </div>
+        <!-- JavaScript -->
+        <script type="text/javascript" src="js/login.js"></script>
+
+    </body>
+</html>
