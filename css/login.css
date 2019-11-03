@@ -14,11 +14,17 @@
   display: table;
   margin: auto;
 }
-#uid-note {
-  font-size: 10pt;
-  margin-top: -.8rem;
-  margin-left: 6rem;
+#dorm-wing-label {
+  margin-right: 1rem;
+}
+#dorm-wing-group .custom-radio {
+  padding-top: .5rem;
+}
+#warning {
+  font-size: 11pt;
   color: #0064e6;
+  display: table;
+  margin: auto;
 }
 #submit {
   margin-top: 2rem;

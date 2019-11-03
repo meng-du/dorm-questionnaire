@@ -1,0 +1,30 @@
+.central {
+  margin: 5rem auto;
+  padding: 0 2rem;
+  max-width: 800px;
+}
+.btn {
+  margin: 10px;
+}
+.central-btn {
+  display: table;
+  margin: auto;
+}
+.question {
+  margin: 5rem 0;
+}
+.search-choice {
+  background-image: none !important;
+  background-color: #f5f5f5 !important;
+}
+.search-field {
+  padding: 0 5px !important;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield; /* Firefox */
+}

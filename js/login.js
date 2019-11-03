@@ -1,7 +1,10 @@
 'use strict';
 
 (function () {
+    var uid;
+    var dorm_wing;
     $('#no-record').hide();
+    $('#instr').hide();
 
     // Firebase configuration
     var firebaseConfig = {
@@ -18,8 +21,11 @@
     var db = firebase.firestore();
     var db_roster_name = 'test_roster';
 
-    function nextpage() {
-        window.location.replace('survey.html');
+    function instrpage(uid, wing) {
+        $('#info-form').hide();
+        $('#no-record').hide();
+        $('#correct-info').hide();
+        $('#instr').show();
     }
 
     function check_name() {
@@ -40,20 +46,38 @@
     });
 
     function submit_info() {
+        $('#dorm-wing-group input').removeClass('is-invalid');
+        $('#dorm').removeClass('is-invalid');
+        var dorm = $('#dorm').val();
+        dorm_wing = $('input[name="dorm-wing"]:checked').val();
+
+        // check dorm entry
+        if (dorm < 201 || (dorm > 238 && dorm < 252) || dorm > 287) {
+            // wrong dorm #
+            $('#dorm').addClass('is-invalid');
+            return;
+        } else if ((dorm < 250 && dorm_wing == 'south') || (dorm > 250 && dorm_wing == 'north')) {
+            // mismatched dorm and wing
+            $('#dorm').addClass('is-invalid');
+            $('#dorm-wing-group input').addClass('is-invalid');
+            return;
+        }
+
         var firstname = $('#firstname').val();
         var lastname = $('#lastname').val();
-        var dorm = $('#dorm').val();
-        var uid = $('#uid').val();
+        uid = $('#uid').val();
+        var email = $('#email').val();
 
         // check Firebase
         db.collection(db_roster_name).doc(uid).get().then((db_sid) => {
             if (db_sid.exists) {
-                nextpage();
+                instrpage();
             } else {
                 $('#info-check').append('<p>Your first name: <strong>' + firstname + '</strong></p>')
                 $('#info-check').append('<p>Your last name: <strong>' + lastname + '</strong></p>')
-                $('#info-check').append('<p>Your dorm room: <strong>' + dorm + '</strong></p>')
+                $('#info-check').append('<p>Your dorm room: <strong>' + dorm + ' (' + dorm_wing + ')</strong></p>')
                 $('#info-check').append('<p>Your UID: <strong>' + uid + '</strong></p>')
+                $('#info-check').append('<p>Your email: <strong>' + email + '</strong></p>')
                 $('#info-form').hide();
                 $('#no-record').show();
                 $('#correct-info').hide();
@@ -67,14 +91,16 @@
 
     $('#refresh-btn').click(() => {
         location.reload();
-    })
+    });
 
     $('#correct-btn').click(() => {
         $('#correct-info').show();
-    })
+    });
 
-    $('#cont').click(() => {
-        nextpage();
-    })
+    $('#cont').click(instrpage);
+
+    $('#start').click(() => {
+        window.location.replace('survey.html?uid=' + uid + '&wing=' + dorm_wing);
+    });
 
 })();

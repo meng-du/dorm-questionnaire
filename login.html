@@ -18,30 +18,51 @@
         <div id="info-form" class="central" data-toggle="validator" role="form">
             <form action="javascript:submit_info();" class="form-horizontal">
                 <div id="name-group" class="form-group input-group">
-                    <div class="input-group-prepend"><span id="name-label" class="input-group-text" id="inputGroup-sizing-default">Your name</span></div>
+                    <div class="input-group-prepend"><span class="input-group-text">Your name</span></div>
                     <input id="firstname" type="text" class="form-control" placeholder="First" required>
                     <input id="lastname" type="text" class="form-control" placeholder="Last" required>
                 </div>
 
+                <div id="dorm-wing-group" class="form-group input-group">
+                    <label id="dorm-wing-label" class="input-group-text">Which wing is your dorm in?</label>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="dorm-wing-n" name="dorm-wing" class="custom-control-input" value="north" required>
+                        <label class="custom-control-label" for="dorm-wing-n">North</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="dorm-wing-s" name="dorm-wing" class="custom-control-input" value="south">
+                        <label class="custom-control-label" for="dorm-wing-s">South</label>
+                    </div>
+                </div>
+
                 <div id="dorm-group" class="form-group input-group">
-                    <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your dorm room</span></div>
+                    <div class="input-group-prepend"><span class="input-group-text">Your dorm room</span></div>
                     <input id="dorm" class="form-control" placeholder="Room #" required>
+                    <div class="invalid-feedback">Please make sure your room number and wing are correct.</div>
                 </div>
 
                 <div id="uid-group" class="form-group input-group">
                     <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your UID</span></div>
-                    <input id="uid" class="form-control" placeholder="9-digit number on your BruinCard" required>
+                    <input id="uid" class="form-control" placeholder="9 digit # on your BruinCard" required>
                 </div>
-                <div id="uid-note">Make sure your UID is entered correctly!</div>
+
+                <div id="email-group" class="form-group input-group">
+                    <div class="input-group-prepend"><span id="dorm-label" class="input-group-text" id="inputGroup-sizing-default">Your Email</span></div>
+                    <input id="email" type="email" class="form-control" placeholder="Email address" required>
+                </div>
+
+                <div id="warning">Make sure your <strong>UID</strong> and <strong>email</strong> are entered correctly! We will use them to pay you.</div>
 
                 <button id="submit" type="submit" class="btn btn-primary central-btn">Submit</button>
-                <p></p><p align="center">SOMETHING ABOUT ANONYMITY HERE</p>
+                <p></p>
+                <p align="center">SOMETHING ABOUT ANONYMITY HERE</p>
             </form>
         </div>
+
         <div id="no-record" class="central">
-            <p>Please double check if this is correct:</p>
+            <p>Please double check your information:</p>
             <div id="info-check"></div>
-            <p style="color:#0064e6;">Make sure your UID is correct. We will use it to save the universe (?)</p>
+            <p style="color:#0064e6;">Make sure everything is correct. We will need these to pay you and everyone else.</p>
             <button id="refresh-btn" class="btn btn-warning">Something is wrong, go back</button>
             <button id="correct-btn" class="btn btn-info">This is correct</button>
 
@@ -50,8 +71,13 @@
                 <button id="cont" class="btn btn-primary central-btn">Continue</button>
             </div>
         </div>
+
+        <div id="instr" class="central">
+            <p>SOME INSTRUCTIONS ABOUT WHAT YOU NEED TO DO NOW.</p>
+            <button id="start" class="btn btn-primary central-btn">Start</button>
+        </div>
+
         <!-- JavaScript -->
         <script type="text/javascript" src="js/login.js"></script>
-
     </body>
 </html>
