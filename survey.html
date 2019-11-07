@@ -19,50 +19,41 @@
     <body>
         <div id="p1" class="page central">
             <div class="question">
-                <p id="q1">Whose social media posts or messages (like texts, group messages) do you see often?</p>
-                <select id="q1-answer" class="form-control chosen-select form-control-chosen" multiple>
-                    <option>ABC DEF</option>
-                    <option>ASD FDS</option>
-                    <option>ZXC VCX</option>
-                    <option>WERQW QWEFD</option>
-                    <option>SDFSD Cat</option>
-                    <option>ASDFVXC DSFSD</option>
-                    <option>SDFA DSFSDF</option>
-                    <option>ASDFSDF DSFSA</option>
-                    <option>ASDFFASD ASDFSADF</option>
-                </select>
+                <label id="q1" class="question-text">Whose social media posts or messages (like texts, group messages) do you see often?</label>
+                <select id="q1-answer" class="form-control form-control-chosen roster-select" multiple></select>
+                <div class="extra-options">
+                    <span>To add a name outside this list, enter it here and click "Add":</span>
+                    <div class="row"><div class="col"><input id="q1-add-input" class="form-control" placeholder="Enter one name at a time"></div>
+                    <div class="col"><button id="q1-add-btn" class="btn btn-success">Add</button></div></div>
+                    <div class="no-selection"><input type="checkbox" id="q1-no-selection">
+                    <label class="form-check-label" for="q1-no-selection">I don't have an answer for this question</label></div>
+                </div>
             </div>
 
             <div class="question">
-                <p id="q2">Who do you want to hang out with more?</p>
-                <select id="q2-answer" class="form-control chosen-select form-control-chosen" multiple>
-                    <option>ABC DEF</option>
-                    <option>ASD FDS</option>
-                    <option>ZXC VCX</option>
-                    <option>WERQW QWEFD</option>
-                    <option>SDFSD Cat</option>
-                    <option>ASDFVXC DSFSD</option>
-                    <option>SDFA DSFSDF</option>
-                    <option>ASDFSDF DSFSA</option>
-                    <option>ASDFFASD ASDFSADF</option>
-                </select>
+                <label id="q2" class="question-text">Who do you want to hang out with more?</label>
+                <select id="q2-answer" class="form-control form-control-chosen roster-select" multiple></select>
+                <div class="extra-options">
+                    <span>To add a name outside this list, enter it here and click "Add":</span>
+                    <div class="row"><div class="col"><input id="q2-add-input" class="form-control" placeholder="Enter one name at a time"></div>
+                    <div class="col"><button id="q2-add-btn" class="btn btn-success">Add</button></div></div>
+                    <div class="no-selection"><input type="checkbox" id="q2-no-selection">
+                    <label class="form-check-label" for="q2-no-selection">I don't have an answer for this question</label></div>
+                </div>
             </div>
 
             <div class="question">
-                <p id="q3">People often want to be more like other people for their personality traits or characteristics 
-                    (for example: sense of humor, interests, lifestyle, knowledge, being likable, kindness). Who do <i>you</i> 
-                    want to be like (in these or other ways), even if you are not friends with them?</p>
-                <select id="q3-answer" class="form-control chosen-select form-control-chosen" multiple>
-                    <option>ABC DEF</option>
-                    <option>ASD FDS</option>
-                    <option>ZXC VCX</option>
-                    <option>WERQW QWEFD</option>
-                    <option>SDFSD Cat</option>
-                    <option>ASDFVXC DSFSD</option>
-                    <option>SDFA DSFSDF</option>
-                    <option>ASDFSDF DSFSA</option>
-                    <option>ASDFFASD ASDFSADF</option>
-                </select>
+                <label id="q3" class="question-text">People often want to be more like other people for their personality traits or characteristics, 
+                    for example: sense of humor, interests, lifestyle, knowledge, being likable, kindness. Who do <i>you</i> 
+                    want to be like (in these or other ways), even if you are not friends with them?</label>
+                <select id="q3-answer" class="form-control form-control-chosen roster-select" multiple></select>
+                <div class="extra-options">
+                    <span>To add a name outside this list, enter it here and click "Add":</span>
+                    <div class="row"><div class="col"><input id="q3-add-input" class="form-control" placeholder="Enter one name at a time"></div>
+                    <div class="col"><button id="q3-add-btn" class="btn btn-success">Add</button></div></div>
+                    <div class="no-selection"><input type="checkbox" id="q3-no-selection">
+                    <label class="form-check-label" for="q3-no-selection">I don't have an answer for this question</label></div>
+                </div>
             </div>
         </div>
 

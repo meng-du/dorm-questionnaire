@@ -3,15 +3,19 @@
   padding: 0 2rem;
   max-width: 800px;
 }
-.btn {
-  margin: 1rem;
-}
 .central-btn {
   display: table;
   margin: 1rem auto;
 }
-.question {
-  margin-bottom: 16rem;
+.question-text {
+  font-weight: 550;
+}
+.extra-options {
+  margin-top: 16rem;
+  margin-bottom: 3rem;
+}
+.no-selection {
+  margin: 1rem 0;
 }
 .search-choice {
   background-image: none !important;
@@ -21,7 +25,7 @@
   padding: 0 5px !important;
 }
 .chosen-drop .chosen-results {
-  max-height: 13.5rem;
+  height: 13.5rem;
 }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
