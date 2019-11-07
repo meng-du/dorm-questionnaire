@@ -6,8 +6,15 @@
     var page_i = 0;
     var question_i = 0;
 
+    // PARSE PARAMETERS
+
+    var parameters = window.location.search.substring(1).split(/[&=]/);
+    var survey_id = parameters[1];
+    var dorm_wing = parameters[3];
+
     // FIREBASE
 
+    // initialize Firebase
     var firebaseConfig = {
         apiKey: 'AIzaSyBvPWLV2yjapJKblBLcfkVbpZC3cXtM0PU',
         authDomain: 'dorm-network.firebaseapp.com',
@@ -17,11 +24,12 @@
         messagingSenderId: '804230274072',
         appId: '1:804230274072:web:dd26c12bba4f85e64df76d'
     };
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
+
+    // get roster
     db.collection('roster').doc(DB_ROSTER_NAME).get().then((doc) => {
-        var roster = doc.data()['names'];
+        var roster = doc.data()[dorm_wing];
         // success
         // set up roster options for the first few questions
         for (var name of roster) {

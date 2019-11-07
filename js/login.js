@@ -3,6 +3,7 @@
 (function () {
     var DB_DATA_COLLECTION = 'personal_info'
     var firstname, lastname, uid, dorm, dorm_wing, email, timestamp;
+    var survey_id = 'test' + (Date.now() + Math.random()).toString();
     $('#no-record').hide();
     $('#instr').hide();
 
@@ -81,8 +82,7 @@
     });
 
     $('#cont').click(() => {
-        var doc_id = Date.now() + Math.random();
-        db.collection(DB_DATA_COLLECTION).doc(doc_id).set({
+        db.collection(DB_DATA_COLLECTION).doc(survey_id).set({
             firstname: firstname,
             lastname: lastname,
             uid: uid,
@@ -106,7 +106,7 @@
     });
 
     $('#start').click(() => {
-        window.location.replace('survey.html?uid=' + uid + '&wing=' + dorm_wing);
+        window.location.replace('survey.html?survey_id=' + survey_id + '&wing=' + dorm_wing);
     });
 
     timestamp = new Date();

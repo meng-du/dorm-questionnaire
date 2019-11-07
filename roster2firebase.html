@@ -27,7 +27,7 @@
             var db_roster_name = ["roster", "test"];
 
             // get roster
-            db.collection(db_roster_name[0]).doc(db_roster_name[1]).set({'names': roster})
+            db.collection(db_roster_name[0]).doc(db_roster_name[1]).set(roster)
             .then(function() {
                 $("#log").append($("<p>", {
                     text: "Successfully wrote to Firebase."
