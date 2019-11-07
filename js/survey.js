@@ -40,17 +40,14 @@
     // ROSTER BASED QUESTIONS
 
     // set up roster based questions with Chosen
-    function chosen_init() {
-        $('.roster-select').on('chosen:ready', function(ev, args) {
-            // always show placeholder
-            var sender = args.chosen;
-            sender.search_field.attr('placeholder', sender.default_text);
-        }).chosen({placeholder_text_multiple: 'Search here...'});
-        // always show the option list
-        $('.roster-select').trigger('chosen:open');
-        $('.chosen-search-input').blur();
-    };
-    chosen_init();
+    $('.roster-select').on('chosen:ready', function(ev, args) {
+        // always show placeholder
+        var sender = args.chosen;
+        sender.search_field.attr('placeholder', sender.default_text);
+    }).chosen({placeholder_text_multiple: 'Search here...'});
+    // always show the option list
+    $('.roster-select').trigger('chosen:open');
+    $('.chosen-search-input').blur();
 
     // set up Add buttons
     $('#btn-roster-add').click((e) => {
