@@ -1,7 +1,13 @@
 'use strict';
-
+// TODO hook window
 (function () {
-    $('.chosen-select').chosen();
+    $('.chosen-select').on('chosen:ready', function(ev, args) {
+        var sender = args.chosen;
+        sender.search_field.attr('placeholder', sender.default_text);
+      }).chosen({placeholder_text_multiple: 'Search here...'});
+    $('.chosen-select').trigger('chosen:open');
+    $('.chosen-search-input').blur();
+    window.scrollTo(0, 0);
 
     // Firebase configuration
     var firebaseConfig = {

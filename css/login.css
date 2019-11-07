@@ -8,11 +8,11 @@
   min-width: 30px;
 }
 .btn {
-  margin: 10px;
+  margin: 1rem;
 }
 .central-btn {
   display: table;
-  margin: auto;
+  margin: 1rem auto;
 }
 #dorm-wing-label {
   margin-right: 1rem;
