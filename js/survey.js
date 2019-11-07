@@ -1,10 +1,18 @@
 'use strict';
-// TODO hook window
+var hookWindow = false;
+
 (function () {
     var DB_ROSTER_NAME = 'test';
     $('.page').hide();
     var page_i = 0;
     var question_i = 0;
+
+    // prevent closing window
+    window.onbeforeunload = function() {
+        if (hookWindow) {
+            return 'Do you want to leave this page? Your progress will not be saved.';
+        }
+    }
 
     // PARSE PARAMETERS
 
@@ -38,6 +46,8 @@
         $('.roster-select').chosen().trigger("chosen:updated");
         $('#p' + page_i).show();
         $('.question-text').html(question_texts[page_i][question_i]);
+
+        $('#roster-add').css('margin-top', $('.chosen-drop').height() + 30 + 'px');
     })
     .catch(function(error) {
         // error
@@ -47,7 +57,7 @@
 
     // ROSTER BASED QUESTIONS
 
-    // set up roster based questions with Chosen
+    // set up roster based question with Chosen
     $('.roster-select').on('chosen:ready', function(ev, args) {
         // always show placeholder
         var sender = args.chosen;
@@ -57,9 +67,12 @@
     $('.roster-select').trigger('chosen:open');
     $('.chosen-search-input').blur();
 
-    // set up Add buttons
+    // set up Add button
     $('#btn-roster-add').click((e) => {
         var new_name = $('#input-roster-add').val();
+        if (new_name.length == 0) {
+            return;
+        }
         $('#select-roster').append('<option selected>' + new_name + '</option>');
         $('#select-roster').chosen().trigger("chosen:updated");
         $('#select-roster').trigger('change');
@@ -128,5 +141,6 @@
     });
 
 
-
+    // hookWindow = true;
+    var startTime = new Date();
 })();
