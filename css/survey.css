@@ -9,13 +9,14 @@
 }
 .question-text {
   font-weight: 550;
+  margin-bottom: 1rem;
 }
-.extra-options {
+#roster-add {
   margin-top: 16rem;
-  margin-bottom: 3rem;
 }
-.no-selection {
-  margin: 1rem 0;
+#no-selection {
+  margin-top: 1rem;
+  margin-bottom: 3rem;
 }
 .search-choice {
   background-image: none !important;

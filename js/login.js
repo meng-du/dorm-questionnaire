@@ -1,8 +1,8 @@
 'use strict';
 
 (function () {
-    var uid;
-    var dorm_wing;
+    var DB_DATA_COLLECTION = 'personal_info'
+    var firstname, lastname, uid, dorm, dorm_wing, email;
     $('#no-record').hide();
     $('#instr').hide();
 
@@ -19,14 +19,6 @@
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
-    var db_roster_name = 'test_roster';
-
-    function instrpage(uid, wing) {
-        $('#info-form').hide();
-        $('#no-record').hide();
-        $('#correct-info').hide();
-        $('#instr').show();
-    }
 
     function check_name() {
         var errmsg = 'Please enter only alphabets';
@@ -48,7 +40,7 @@
     function submit_info() {
         $('#dorm-wing-group input').removeClass('is-invalid');
         $('#dorm').removeClass('is-invalid');
-        var dorm = $('#dorm').val();
+        dorm = $('#dorm').val();
         dorm_wing = $('input[name="dorm-wing"]:checked').val();
 
         // check dorm entry
@@ -63,29 +55,20 @@
             return;
         }
 
-        var firstname = $('#firstname').val();
-        var lastname = $('#lastname').val();
+        firstname = $('#firstname').val();
+        lastname = $('#lastname').val();
         uid = $('#uid').val();
-        var email = $('#email').val();
+        email = $('#email').val();
 
-        // check Firebase
-        db.collection(db_roster_name).doc(uid).get().then((db_sid) => {
-            if (db_sid.exists) {
-                instrpage();
-            } else {
-                $('#info-check').append('<p>Your first name: <strong>' + firstname + '</strong></p>')
-                $('#info-check').append('<p>Your last name: <strong>' + lastname + '</strong></p>')
-                $('#info-check').append('<p>Your dorm room: <strong>' + dorm + ' (' + dorm_wing + ')</strong></p>')
-                $('#info-check').append('<p>Your UID: <strong>' + uid + '</strong></p>')
-                $('#info-check').append('<p>Your email: <strong>' + email + '</strong></p>')
-                $('#info-form').hide();
-                $('#no-record').show();
-                $('#correct-info').hide();
-            }
-        }).catch(function(error) {
-            alert('Failed to access database, please check your internet connection and try again.');
-            console.log(error);
-        });
+        // ask to double check
+        $('#info-check').append('<p>Your first name: <strong>' + firstname + '</strong></p>')
+        $('#info-check').append('<p>Your last name: <strong>' + lastname + '</strong></p>')
+        $('#info-check').append('<p>Your dorm room: <strong>' + dorm + ' (' + dorm_wing + ')</strong></p>')
+        $('#info-check').append('<p>Your UID: <strong>' + uid + '</strong></p>')
+        $('#info-check').append('<p>Your email: <strong>' + email + '</strong></p>')
+        $('#info-form').hide();
+        $('#confirmation').show();
+        $('#correct-info').hide();
     }
     window.submit_info = submit_info;
 
@@ -97,7 +80,28 @@
         $('#correct-info').show();
     });
 
-    $('#cont').click(instrpage);
+    $('#cont').click(() => {
+        db.collection(DB_DATA_COLLECTION).doc(uid).set({
+            firstname: firstname,
+            lastname: lastname,
+            uid: uid,
+            email: email,
+            dorm: dorm,
+            dorm_wing: dorm_wing
+        })
+        .then(function() {
+            // success
+            $('#info-form').hide();
+            $('#confirmation').hide();
+            $('#correct-info').hide();
+            $('#instr').show();
+        })
+        .catch(function(error) {
+            // error
+            alert('Failed to access database, please check your internet connection and try again.\n' + error);
+            console.log(error);
+        });
+    });
 
     $('#start').click(() => {
         window.location.replace('survey.html?uid=' + uid + '&wing=' + dorm_wing);
