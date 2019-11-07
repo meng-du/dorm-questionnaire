@@ -12,27 +12,29 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css" integrity="sha256-EH/CzgoJbNED+gZgymswsIOrM9XhIbdSJ6Hwro09WE4=" crossorigin="anonymous" />
         <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-firestore.js"></script>
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/bootstrap-slider.min.js" integrity="sha256-oj52qvIP5c7N6lZZoh9z3OYacAIOjsROAcZBHUaJMyw=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/css/bootstrap-slider.min.css" integrity="sha256-G3IAYJYIQvZgPksNQDbjvxd/Ca1SfCDFwu2s2lt0oGo=" crossorigin="anonymous" />
         <link rel="stylesheet" href="css/component-chosen.min.css">
+
         <link rel="stylesheet" href="css/survey.css">
     </head>
 
     <body>
         <div id="p0" class="page central">
-            <div class="question">
-                <label class="question-text"></label>
-                <div id="roster-wrapper"><select id="select-roster" class="form-control form-control-chosen roster-select" multiple></select></div>
-                <div id="roster-add">
-                    <span>To add a name outside this list, enter it here and click "Add":</span>
-                    <div class="row"><div class="col"><input id="input-roster-add" class="form-control" placeholder="Enter one name at a time"></div>
-                    <div class="col"><button id="btn-roster-add" class="btn btn-success">Add</button></div></div>
-                </div>
-                <div id="no-selection"><input type="checkbox" id="check-no-selection">
-                <label class="form-check-label" for="check-no-selection">I don't have an answer to this question</label></div>
+            <label class="question-text"></label>
+            <div id="roster-wrapper"><select id="select-roster" class="form-control form-control-chosen roster-select" multiple></select></div>
+            <div id="roster-add">
+                <span>To add a name outside this list, enter it here and click "Add":</span>
+                <div class="row"><div class="col-8"><input id="input-roster-add" class="form-control" placeholder="Enter one name at a time"></div>
+                <div class="col"><button id="btn-roster-add" class="btn btn-success">Add</button></div></div>
             </div>
+            <div id="no-selection"><input type="checkbox" id="check-no-selection">
+            <label class="form-check-label" for="check-no-selection">I don't have an answer to this question</label></div>
         </div>
 
         <div id="p1" class="page central">
+            <label class="question-text"></label>
+            <div id="slider-wrapper"><input id="slider" type="text" data-slider-value="3"/></div>
         </div>
 
         <button id="btn-next" class="btn btn-primary central-btn disabled">Next</button>

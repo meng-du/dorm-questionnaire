@@ -4,14 +4,26 @@ var hookWindow = false;
 (function () {
     var DB_ROSTER_NAME = 'test';
     $('.page').hide();
-    var page_i = 0;
+    var page_i = 1;
     var question_i = 0;
+    var named_people = new Set([]);  // everyone named in roster-based questions
 
     // prevent closing window
     window.onbeforeunload = function() {
         if (hookWindow) {
             return 'Do you want to leave this page? Your progress will not be saved.';
         }
+    }
+
+    // shuffle array
+    function shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            let temp = a[i];
+            a[i] = a[j];
+            a[j] = temp;
+        }
+        return a;
     }
 
     // PARSE PARAMETERS
@@ -40,11 +52,13 @@ var hookWindow = false;
         var roster = doc.data()[dorm_wing];
         // success
         // set up roster options for the first few questions
-        for (var name of roster) {
+        for (let name of roster) {
             $('.roster-select').append('<option>' + name + '</option>');
         }
         $('.roster-select').chosen().trigger("chosen:updated");
         $('#p' + page_i).show();
+
+        $('#slider').slider('refresh'); // TODO
         $('.question-text').html(question_texts[page_i][question_i]);
 
         $('#roster-add').css('margin-top', $('.chosen-drop').height() + 30 + 'px');
@@ -60,7 +74,7 @@ var hookWindow = false;
     // set up roster based question with Chosen
     $('.roster-select').on('chosen:ready', function(ev, args) {
         // always show placeholder
-        var sender = args.chosen;
+        let sender = args.chosen;
         sender.search_field.attr('placeholder', sender.default_text);
     }).chosen({placeholder_text_multiple: 'Search here...'});
     // always show the option list
@@ -105,9 +119,41 @@ var hookWindow = false;
 
     // reset
     function roster_q_reset() {
+        var data = $('#select-roster').val();
+        named_people = new Set([...data, ...named_people])  // append to set
+        // TODO save data (to firebase?)
         $("#check-no-selection").prop('checked', false);
         $("#check-no-selection").trigger('change');
         $('.roster-select').val([]).trigger("chosen:updated");
+    }
+
+    // TIE STRENGTH QUESTIONS
+    $('#slider').slider({
+        step: 1,
+        min: 1,
+        max: 5,
+        value: 3,
+        ticks: [1, 2, 3, 4, 5],
+        // ticks_positions: [0, 25, 50, 75, 100],
+        ticks_labels: ['Less than once a week',
+                       'About once a week',
+                       '2-3 times a week',
+                       '4-5 times a week',
+                       'Almost everyday'],
+    });
+    // $('.slider-tick-label').
+
+    function tie_q_prepare() {
+        var q_with_names = [];
+        for (let q of tie_questions) {
+            var this_q_with_names = [];
+            for (let name of named_people) {
+                this_q_with_names.push(q.replace('*', name));
+            }
+            shuffle(this_q_with_names);
+            q_with_names.push(...this_q_with_names);
+        }
+        tie_questions = q_with_names;
     }
 
     // NEXT BUTTON
@@ -136,6 +182,7 @@ var hookWindow = false;
             } else {
                 $('.question-text').html(question_texts[page_i][question_i]);
                 $('#p' + page_i).show();
+                // $('#slider').slider('refresh');  //TODO
             }
         }
     });

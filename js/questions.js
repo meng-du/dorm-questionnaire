@@ -6,4 +6,8 @@ var roster_questions = [
     'want to be like (in these or other ways), even if you are not friends with them?',
     'WHO DO YOU SOCIALIZE WITH?'
 ]
-var question_texts = [roster_questions];
+var tie_questions = [
+    'How much time do you spend with <strong>*</strong>?',
+    'How close do you feel to <strong>*</strong>?',
+];
+var question_texts = [roster_questions, tie_questions];
