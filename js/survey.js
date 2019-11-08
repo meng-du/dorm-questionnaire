@@ -23,7 +23,6 @@ var hookWindow = false;
             a[i] = a[j];
             a[j] = temp;
         }
-        return a;
     }
 
     // PARSE PARAMETERS
@@ -31,6 +30,10 @@ var hookWindow = false;
     var parameters = window.location.search.substring(1).split(/[&=]/);
     var survey_id = parameters[1];
     var dorm_wing = parameters[3];
+    if (!survey_id || !dorm_wing) {
+        alert('This URL is invalid. Please contact the experimenters.');
+        return;
+    }
 
     // FIREBASE
 
@@ -132,16 +135,34 @@ var hookWindow = false;
         step: 1,
         min: 1,
         max: 5,
-        value: 3,
+        value: 0,
         ticks: [1, 2, 3, 4, 5],
-        // ticks_positions: [0, 25, 50, 75, 100],
         ticks_labels: ['Less than once a week',
                        'About once a week',
                        '2-3 times a week',
                        '4-5 times a week',
                        'Almost everyday'],
     });
-    // $('.slider-tick-label').
+    var body_width = $('body').width();
+    var rotation = 32 - body_width / 30;
+    rotation = (body_width < 420) ? (130 - body_width * 4 / 15) : rotation;
+    rotation = rotation > 45 ? 90 : rotation;
+    if (rotation >= 3) {
+        $('.slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
+        if (rotation > 30) {
+            $('.slider-tick-label-container').css('transform', 'translateY(12px)');
+        }
+    }
+    // initialize to unselected css
+    $('.label-is-selection').css('font-weight', '400');
+    $('.slider-handle').css('background-image',
+                            'linear-gradient(to bottom,#d5d5d5 0,#d0d0d0 100%)');
+    $("#slider").on('slideStop change', function (ev) {
+        $('#btn-next').removeClass('disabled');
+        // remove unselected css
+        $('.label-is-selection').css('font-weight', '');
+        $('.slider-handle').css('background-image', '');
+    });
 
     function tie_q_prepare() {
         var q_with_names = [];

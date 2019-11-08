@@ -1,7 +1,7 @@
 .central {
   margin: 5rem auto;
   padding: 0 2rem;
-  max-width: 800px;
+  max-width: 880px;
 }
 .central-btn {
   display: table;
@@ -42,15 +42,14 @@
   background-image: linear-gradient(to bottom,#d5d5d5 0,#d0d0d0 100%);
 }
 .slider-handle {
-  /* background: #007bff; */
   background-image: linear-gradient(to bottom,#0079fa 0,#007bff 100%);
 }
 .slider-tick-label {
   font-size: 0.9rem;
 }
-.slider-tick-label:nth-child(even) {
+/* .slider-tick-label:nth-child(even) {
   transform: translateY(-50px);
-}
+} */
 .label-is-selection {
   font-weight: 650;
 }
