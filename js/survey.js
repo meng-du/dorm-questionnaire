@@ -4,7 +4,7 @@ var hookWindow = false;
 (function () {
     var DB_ROSTER_NAME = 'test';
     $('.page').hide();
-    var page_i = 1;
+    var page_i = 2;
     var question_i = 0;
     var named_people = new Set([]);  // everyone named in roster-based questions
 
@@ -68,7 +68,8 @@ var hookWindow = false;
     })
     .catch(function(error) {
         // error
-        alert('Failed to access database, please check your internet connection and try again.\n' + error);
+        alert('Failed to access database, please check ' +
+              'your internet connection and try again.\n' + error);
         console.log(error);
     });
 
@@ -125,27 +126,19 @@ var hookWindow = false;
         var data = $('#select-roster').val();
         named_people = new Set([...data, ...named_people])  // append to set
         // TODO save data (to firebase?)
-        $("#check-no-selection").prop('checked', false);
-        $("#check-no-selection").trigger('change');
+        $('#check-no-selection').prop('checked', false);
+        $('#check-no-selection').trigger('change');
         $('.roster-select').val([]).trigger("chosen:updated");
+        $('#btn-next').addClass('disabled');
     }
 
     // TIE STRENGTH QUESTIONS
-    $('#slider').slider({
-        step: 1,
-        min: 1,
-        max: 5,
-        value: 0,
-        ticks: [1, 2, 3, 4, 5],
-        ticks_labels: ['Less than once a week',
-                       'About once a week',
-                       '2-3 times a week',
-                       '4-5 times a week',
-                       'Almost everyday'],
-    });
+
+    // tick label rotation
+    $('#slider').slider(slider_configs[0]);
     var body_width = $('body').width();
     var rotation = 32 - body_width / 30;
-    rotation = (body_width < 420) ? (130 - body_width * 4 / 15) : rotation;
+    rotation = (body_width < 420) ? (135 - body_width * 4 / 15) : rotation;
     rotation = rotation > 45 ? 90 : rotation;
     if (rotation >= 3) {
         $('.slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
@@ -153,10 +146,12 @@ var hookWindow = false;
             $('.slider-tick-label-container').css('transform', 'translateY(12px)');
         }
     }
+
     // initialize to unselected css
     $('.label-is-selection').css('font-weight', '400');
     $('.slider-handle').css('background-image',
-                            'linear-gradient(to bottom,#d5d5d5 0,#d0d0d0 100%)');
+                            'linear-gradient(to bottom,#ccc 0,#eee 100%)');
+    // slider on change/on click
     $("#slider").on('slideStop change', function (ev) {
         $('#btn-next').removeClass('disabled');
         // remove unselected css
@@ -164,10 +159,11 @@ var hookWindow = false;
         $('.slider-handle').css('background-image', '');
     });
 
+    // replace * in question with user input names
     function tie_q_prepare() {
         var q_with_names = [];
         for (let q of tie_questions) {
-            var this_q_with_names = [];
+            let this_q_with_names = [];
             for (let name of named_people) {
                 this_q_with_names.push(q.replace('*', name));
             }
@@ -177,9 +173,42 @@ var hookWindow = false;
         tie_questions = q_with_names;
     }
 
+    // reset
+    function tie_q_reset() {
+        var data = $('#slider').val();
+        var question = $('.question-text').get(0).textContent;
+        // TODO save data
+        $('#slider').val(1);
+        $('#slider').slider('refresh');
+        $('.label-is-selection').css('font-weight', '400');
+        $('.slider-handle').css('background-image',
+                                'linear-gradient(to bottom,#ccc 0,#eee 100%)');
+        $('#btn-next').addClass('disabled');
+    }
+
+    // FRIENDSHIP QUESTIONS
+
+    // replace * in question with user input names
+    function friend_q_prepare() {
+        var q_with_names = [];
+        for (let q of friend_questions) {
+            let this_q_with_names = [];
+            shuffle(named_people);
+            for (let i in named_people) {
+                for (let j = i + 1; j < named_people.length; ++j) {
+                    let replaced_q = q.replace('*', named_people[i])
+                                      .replace('+', named_people[j]);
+                    this_q_with_names.push(replaced_q);
+                }
+            }
+            q_with_names.push(...this_q_with_names);
+        }
+        friend_questions = q_with_names;
+    }
+
     // NEXT BUTTON
 
-    var reset_funcs = [roster_q_reset];
+    var reset_funcs = [roster_q_reset, tie_q_reset];
 
     $('#btn-next').click((e) => {
         if ($('#btn-next').hasClass('disabled')) {
@@ -196,14 +225,14 @@ var hookWindow = false;
             // next page
             $('#p' + page_i).hide();
             ++page_i;
-            question_i = 0
+            question_i = 0;
             if (page_i >= $('.page').length) {
                 $('#btn-next').hide();
                 alert('DONE');
             } else {
                 $('.question-text').html(question_texts[page_i][question_i]);
                 $('#p' + page_i).show();
-                // $('#slider').slider('refresh');  //TODO
+                $('#slider').slider('refresh');  //TODO
             }
         }
     });

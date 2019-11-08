@@ -15,13 +15,14 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/bootstrap-slider.min.js" integrity="sha256-oj52qvIP5c7N6lZZoh9z3OYacAIOjsROAcZBHUaJMyw=" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/css/bootstrap-slider.min.css" integrity="sha256-G3IAYJYIQvZgPksNQDbjvxd/Ca1SfCDFwu2s2lt0oGo=" crossorigin="anonymous" />
         <link rel="stylesheet" href="css/component-chosen.min.css">
+        <link rel="stylesheet" href="css/realistic_ios_switch.css">
 
         <link rel="stylesheet" href="css/survey.css">
     </head>
 
     <body>
         <div id="p0" class="page central">
-            <label class="question-text"></label>
+            <div class="question-text"></div>
             <div id="roster-wrapper"><select id="select-roster" class="form-control form-control-chosen roster-select" multiple></select></div>
             <div id="roster-add">
                 <span>To add a name outside this list, enter it here and click "Add":</span>
@@ -33,8 +34,24 @@
         </div>
 
         <div id="p1" class="page central">
-            <label class="question-text"></label>
+            <div class="question-text"></div>
             <div id="slider-wrapper"><input id="slider" type="text" data-slider-value="3"/></div>
+        </div>
+
+        <div id="p2" class="page central">
+            <div class="question-text"></div>
+            <div id="pairs-container">
+                <div class="row justify-content-end">
+                    <div class="col-7-auto">Cuba & Egypt</div>
+                    <div id="switch-label" class="col-4 switch-label">Not Friends</div>
+                    <div id="switch-wrapper" class="col-1"><label class="form-switch"><input type="checkbox"><i></i></label></div>
+                </div>
+                <div class="row justify-content-end">
+                    <div class="col-7-auto">Long Long Long Long English Words</div>
+                    <div id="switch-label" class="col-4 switch-label">Not Friends</div>
+                    <div id="switch-wrapper" class="col-1"><label class="form-switch"><input type="checkbox"><i></i></label></div>
+                </div>
+            </div>
         </div>
 
         <button id="btn-next" class="btn btn-primary central-btn disabled">Next</button>
