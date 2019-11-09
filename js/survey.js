@@ -4,7 +4,7 @@ var hookWindow = false;
 (function () {
     var DB_ROSTER_NAME = 'test';
     $('.page').hide();
-    var page_i = 2;
+    var page_i = 0;
     var question_i = 0;
     var named_people = new Set([]);  // everyone named in roster-based questions
 
