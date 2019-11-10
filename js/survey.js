@@ -7,6 +7,7 @@ jQuery(document).ready(function() {
     $('.page').hide();
     var page_i = 0;
     var question_i = 0;
+    var pair_i = 0;
     var named_people = new Set([]);  // everyone named in roster-based questions
 
     // prevent closing window
@@ -124,7 +125,7 @@ jQuery(document).ready(function() {
         }
     });
 
-    // reset
+    // data & reset
     function roster_q_onfinish(next_q_text) {
         var data = $('#select-roster').val();
         named_people = new Set([...data, ...named_people])  // append to set
@@ -185,9 +186,8 @@ jQuery(document).ready(function() {
 
     // replace * in question with user input names
     function tie_q_prepare() {
-        console.log(named_people);
         if (named_people.size < 1) {
-            return [];
+            tie_questions.questions = [];
         }
         var q_with_names = [];
         for (let q of tie_questions.questions) {
@@ -198,10 +198,10 @@ jQuery(document).ready(function() {
             shuffle(this_q_with_names);
             q_with_names.push(...this_q_with_names);
         }
-        return q_with_names;
+        tie_questions.questions = q_with_names;
     }
 
-    // reset
+    // data & reset
     function tie_q_onfinish(next_q_text) {
         var data = $('#slider').val();
         var question = $('.question-text').get(0).textContent;
@@ -229,31 +229,104 @@ jQuery(document).ready(function() {
 
     // FRIENDSHIP QUESTIONS
 
-    // replace * in question with user input names
-    function friend_q_prepare() {
-        if (named_people.length < 2) {
-            return [];
-        }
-        return [];
+    // add a row to to pair container
+    function append_pair_html(pair) {
+        let row = $('<li>', { class: 'row justify-content-end' });
+        row.append($('<div>', {
+            class: 'col-6-auto',
+            html: pair
+        }));
+        row.append($('<div>', { class: 'col-3 switch-label' }));
+        let switch_warpper = $('<div>', { class: 'switch-wrapper' });
+        switch_warpper.append($('<input>', {
+            type: 'checkbox',
+            class: 'multi-switch',
+            'initial-value': 2,
+            'unchecked-value': 0,
+            'checked-value': 1,
+            value: 2
+        }));
+        row.append(switch_warpper);
+        $('#pairs-container').append(row);
     }
 
-    // set up switch
-    $('.multi-switch').multiSwitch({
-        functionOnChange: (elt) => {
-            let label = elt.parentsUntil('#pairs-container', '.row').find('.switch-label');
-            if (elt.val() == 0) {
-                label.text('Not friends');
-                label.css('color', '#d1513f');
-            } else {
-                label.text('Friends');
-                label.css('color', '#46a35e');
+    // get pairs from named people and initialize the first batch of questions
+    function friend_q_prepare() {
+        if (named_people.length < 2) {
+            friend_questions.questions = [];
+        }
+        // get pairs
+        friend_questions.pairs = [];
+        named_people = Array.from(named_people);
+        shuffle(named_people);
+        for (let i = 0; i < named_people.length - 1; ++i) {
+            for (let j = i + 1; j < named_people.length; ++j) {
+                let pair = named_people[i] + ' <strong>&</strong> ' + named_people[j];
+                friend_questions.pairs.push(pair);
             }
         }
-    });
+        // duplicate questions
+        let new_q = [];
+        let num_repeat = Math.ceil(friend_questions.pairs.length / FRIEND_PAIRS_PER_PAGE);
+        for (let q of friend_questions.questions) {
+            new_q.push(...Array.apply(null, Array(num_repeat)).map(_ => q));
+        }
+        friend_questions.questions = new_q;
+        // set up html rows of pairs
+        let pair_i_end = pair_i + FRIEND_PAIRS_PER_PAGE;
+        for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
+            append_pair_html(friend_questions.pairs[pair_i]);
+        }
+        switch_setup();
+    }
+
+    // set up switches
+    function switch_setup() {
+        $('.multi-switch').multiSwitch({
+            functionOnChange: (elt) => {
+                let label = elt.parentsUntil('#pairs-container', '.row').find('.switch-label');
+                if (elt.val() == 0) {
+                    label.text('Not friends');
+                    label.css('color', '#d1513f');
+                } else {
+                    label.text('Friends');
+                    label.css('color', '#46a35e');
+                }
+                // check if all answered
+                var unanswered = 0;
+                $('input.multi-switch').each((i, elt) => {
+                    unanswered += $(elt).val() == 2 ? 1 : 0;
+                });
+                if (unanswered == 0) {
+                    $('#btn-next').removeClass('disabled');
+                } 
+            }
+        });
+    }
+
+    // data & reset
+    function friend_q_onfinish() {
+        let data = [];
+        $('#pairs-container .row').each((i, elm) => {
+            let pair = $(elm).children('.col-6-auto').html().split(' <strong>&amp;</strong> ');
+            data.push({
+                '0': pair[0],
+                '1': pair[1],
+                'answer': $(elm).find('input').val() == '0' ? 'n' : 'y'});
+        });
+        // TODO data
+
+        $('#pairs-container').html('');
+        let pair_i_end = pair_i + FRIEND_PAIRS_PER_PAGE;
+        for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
+            append_pair_html(friend_questions.pairs[pair_i]);
+        }
+        switch_setup();
+    }
 
     // NEXT BUTTON
 
-    var q_onfinish_funcs = [roster_q_onfinish, tie_q_onfinish];
+    var q_onfinish_funcs = [roster_q_onfinish, tie_q_onfinish, friend_q_onfinish];
 
     $('#btn-next').click((e) => {
         if ($('#btn-next').hasClass('disabled')) {
@@ -268,14 +341,13 @@ jQuery(document).ready(function() {
         } else {
             // submit data
             q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
-            // next page
+            // prepare subsequent questions
             $('#p' + page_i).hide();
             if (page_i == 0) {
-                tie_questions.questions = tie_q_prepare();
-                friend_questions.questions = friend_q_prepare();
-                console.log(tie_questions, friend_questions);
-                console.log(question_texts);
+                tie_q_prepare();
+                friend_q_prepare();
             }
+            // next page
             question_i = 0;
             while (page_i < $('.page').length - 1) {
                 ++page_i;
@@ -288,13 +360,12 @@ jQuery(document).ready(function() {
                     return;
                 }
             }
-            if (page_i == $('.page').length) {
+            if (page_i == $('.page').length - 1) {
                 $('#btn-next').hide();
                 alert('DONE');
             }
         }
     });
-
 
     // hookWindow = true;
     var startTime = new Date();

@@ -55,7 +55,7 @@
   font-weight: 650;
 }
 #pairs-container {
-  width: 70%;
+  width: 90%;
   min-width: 180px;
 }
 #pairs-container .row {
@@ -70,7 +70,7 @@
   white-space: nowrap;
   font-size: 0.8rem;
   line-height: 40px;
-  margin: 0 5px;
+  margin: 0 0.5rem;
   padding: 0;
   width: 50px;
 }
