@@ -1,10 +1,10 @@
 'use strict';
 var hookWindow = false;
 
-(function () {
+jQuery(document).ready(function() {
     var DB_ROSTER_NAME = 'test';
     $('.page').hide();
-    var page_i = 0;
+    var page_i = 2;
     var question_i = 0;
     var named_people = new Set([]);  // everyone named in roster-based questions
 
@@ -122,7 +122,10 @@ var hookWindow = false;
     });
 
     // reset
-    function roster_q_reset() {
+    function roster_q_reset(next_q_text) {
+        if (!next_q_text) {
+            return;
+        }
         var data = $('#select-roster').val();
         named_people = new Set([...data, ...named_people])  // append to set
         // TODO save data (to firebase?)
@@ -135,29 +138,47 @@ var hookWindow = false;
     // TIE STRENGTH QUESTIONS
 
     // tick label rotation
-    $('#slider').slider(slider_configs[0]);
-    var body_width = $('body').width();
-    var rotation = 32 - body_width / 30;
-    rotation = (body_width < 420) ? (135 - body_width * 4 / 15) : rotation;
-    rotation = rotation > 45 ? 90 : rotation;
-    if (rotation >= 3) {
-        $('.slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
-        if (rotation > 30) {
-            $('.slider-tick-label-container').css('transform', 'translateY(12px)');
+    var slider_config_i = 0;
+    $('#slider').slider(slider_configs[slider_config_i]);
+    function rotate_labels(num_labels) {
+        // reset
+        $('.slider-tick-label').css('transform', '');
+        $('.slider-tick-label-container').css('transform', '');
+        // calculate
+        var body_width = $('body').width();
+        var rotation = 0;
+        if (num_labels >= 5) {
+            rotation = 32 - body_width / 30;
+            rotation = (body_width < 480) ? (144 - body_width * 4 / 15) : rotation;
+        } else {
+            rotation = 54 - body_width / 10;
+            rotation = (body_width < 380) ? (320 - body_width * 4 / 5) : rotation;
+        }
+        rotation = rotation > 45 ? 90 : rotation;
+        // rotate
+        if (rotation >= 3) {
+            $('.slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
+            if (rotation > 30) {
+                let translate = rotation == 90 ? 18 : 10;
+                translate += num_labels < 5 ? 8 : 0;
+                $('.slider-tick-label-container').css('transform', 'translateY(' + translate + 'px)');
+            }
         }
     }
+    rotate_labels(slider_configs[slider_config_i]['ticks'].length);
 
     // initialize to unselected css
     $('.label-is-selection').css('font-weight', '400');
     $('.slider-handle').css('background-image',
                             'linear-gradient(to bottom,#ccc 0,#eee 100%)');
     // slider on change/on click
-    $("#slider").on('slideStop change', function (ev) {
+    function slider_onclick(ev) {
         $('#btn-next').removeClass('disabled');
         // remove unselected css
         $('.label-is-selection').css('font-weight', '');
         $('.slider-handle').css('background-image', '');
-    });
+    }
+    $("#slider").on('slideStop change', slider_onclick);
 
     // replace * in question with user input names
     function tie_q_prepare() {
@@ -174,10 +195,23 @@ var hookWindow = false;
     }
 
     // reset
-    function tie_q_reset() {
+    function tie_q_reset(next_q_text) {
+        if (!next_q_text) {
+            return;
+        }
         var data = $('#slider').val();
         var question = $('.question-text').get(0).textContent;
         // TODO save data
+
+        if (question.substr(0, 15) != next_q_text.substr(0, 15)) {
+            // changing question, changing slider labels
+            ++slider_config_i;
+            $('#slider').slider('destroy');
+            $('#slider').slider(slider_configs[slider_config_i]);
+            $("#slider").on('slideStop change', slider_onclick);
+            rotate_labels(slider_configs[slider_config_i]['ticks'].length);
+        }
+        // reset slider value and color
         $('#slider').val(1);
         $('#slider').slider('refresh');
         $('.label-is-selection').css('font-weight', '400');
@@ -206,6 +240,8 @@ var hookWindow = false;
         friend_questions = q_with_names;
     }
 
+    $('.multi-switch').multiSwitch();
+
     // NEXT BUTTON
 
     var reset_funcs = [roster_q_reset, tie_q_reset];
@@ -216,10 +252,10 @@ var hookWindow = false;
         }
         // proceed
         if (question_i < question_texts[page_i].length) {
-            // reset question
-            reset_funcs[page_i]();
-            // next question
             ++question_i;
+            // reset question
+            reset_funcs[page_i](question_texts[page_i][question_i]);
+            // next question
             $('.question-text').html(question_texts[page_i][question_i]);
         } else {
             // next page
@@ -240,4 +276,4 @@ var hookWindow = false;
 
     // hookWindow = true;
     var startTime = new Date();
-})();
+});
