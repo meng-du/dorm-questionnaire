@@ -18,6 +18,7 @@ jQuery(document).ready(function() {
 
     // shuffle array
     function shuffle(a) {
+        if (a.length < 2) { return; }
         for (let i = a.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             let temp = a[i];
@@ -63,9 +64,10 @@ jQuery(document).ready(function() {
         $('#p' + page_i).show();
 
         $('#slider').slider('refresh'); // TODO
-        $('.question-text').html(question_texts[page_i][question_i]);
+        $('.question-text').html(question_texts[page_i].questions[question_i]);
 
-        $('#roster-add').css('margin-top', $('.chosen-drop').height() + 50 + 'px');
+        let space = $('.chosen-drop').height() ? $('.chosen-drop').height() + 40 : 40
+        $('#roster-add').css('margin-top', space + 'px');
     })
     .catch(function(error) {
         // error
@@ -123,17 +125,17 @@ jQuery(document).ready(function() {
     });
 
     // reset
-    function roster_q_reset(next_q_text) {
-        if (!next_q_text) {
-            return;
-        }
+    function roster_q_onfinish(next_q_text) {
         var data = $('#select-roster').val();
         named_people = new Set([...data, ...named_people])  // append to set
         // TODO save data (to firebase?)
-        $('#check-no-selection').prop('checked', false);
-        $('#check-no-selection').trigger('change');
-        $('.roster-select').val([]).trigger("chosen:updated");
-        $('#btn-next').addClass('disabled');
+
+        if (next_q_text) {
+            $('#check-no-selection').prop('checked', false);
+            $('#check-no-selection').trigger('change');
+            $('.roster-select').val([]).trigger("chosen:updated");
+            $('#btn-next').addClass('disabled');
+        }
     }
 
     // TIE STRENGTH QUESTIONS
@@ -183,11 +185,12 @@ jQuery(document).ready(function() {
 
     // replace * in question with user input names
     function tie_q_prepare() {
-        if (named_people.length < 1) {
+        console.log(named_people);
+        if (named_people.size < 1) {
             return [];
         }
         var q_with_names = [];
-        for (let q of tie_questions) {
+        for (let q of tie_questions.questions) {
             let this_q_with_names = [];
             for (let name of named_people) {
                 this_q_with_names.push(q.replace('*', name));
@@ -195,18 +198,18 @@ jQuery(document).ready(function() {
             shuffle(this_q_with_names);
             q_with_names.push(...this_q_with_names);
         }
-        tie_questions = q_with_names;
+        return q_with_names;
     }
 
     // reset
-    function tie_q_reset(next_q_text) {
-        if (!next_q_text) {
-            return;
-        }
+    function tie_q_onfinish(next_q_text) {
         var data = $('#slider').val();
         var question = $('.question-text').get(0).textContent;
         // TODO save data
 
+        if (!next_q_text) {
+            return;
+        }
         if (question.substr(0, 15) != next_q_text.substr(0, 15)) {
             // changing question, changing slider labels
             ++slider_config_i;
@@ -231,20 +234,7 @@ jQuery(document).ready(function() {
         if (named_people.length < 2) {
             return [];
         }
-        var q_with_names = [];
-        for (let q of friend_questions) {
-            let this_q_with_names = [];
-            shuffle(named_people);
-            for (let i in named_people) {
-                for (let j = i + 1; j < named_people.length; ++j) {
-                    let replaced_q = q.replace('*', named_people[i])
-                                      .replace('+', named_people[j]);
-                    this_q_with_names.push(replaced_q);
-                }
-            }
-            q_with_names.push(...this_q_with_names);
-        }
-        friend_questions = q_with_names;
+        return [];
     }
 
     // set up switch
@@ -263,31 +253,44 @@ jQuery(document).ready(function() {
 
     // NEXT BUTTON
 
-    var reset_funcs = [roster_q_reset, tie_q_reset];
+    var q_onfinish_funcs = [roster_q_onfinish, tie_q_onfinish];
 
     $('#btn-next').click((e) => {
         if ($('#btn-next').hasClass('disabled')) {
             return;
         }
         // proceed
-        if (question_i < question_texts[page_i].length - 1) {
-            ++question_i;
-            // reset question
-            reset_funcs[page_i](question_texts[page_i][question_i]);
+        if (question_i < question_texts[page_i].questions.length - 1) {
             // next question
-            $('.question-text').html(question_texts[page_i][question_i]);
+            ++question_i;
+            q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);  // reset question
+            $('.question-text').html(question_texts[page_i].questions[question_i]);
         } else {
+            // submit data
+            q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
             // next page
             $('#p' + page_i).hide();
-            ++page_i;
+            if (page_i == 0) {
+                tie_questions.questions = tie_q_prepare();
+                friend_questions.questions = friend_q_prepare();
+                console.log(tie_questions, friend_questions);
+                console.log(question_texts);
+            }
             question_i = 0;
-            if (page_i >= $('.page').length) {
+            while (page_i < $('.page').length - 1) {
+                ++page_i;
+                if (question_texts[page_i].questions.length > 0) {
+                    $('.question-text').html(question_texts[page_i].questions[question_i]);
+                    $('#p' + page_i).show();
+                    if (page_i == 1) {
+                        $('#slider').slider('refresh');  //TODO
+                    }
+                    return;
+                }
+            }
+            if (page_i == $('.page').length) {
                 $('#btn-next').hide();
                 alert('DONE');
-            } else {
-                $('.question-text').html(question_texts[page_i][question_i]);
-                $('#p' + page_i).show();
-                $('#slider').slider('refresh');  //TODO
             }
         }
     });
