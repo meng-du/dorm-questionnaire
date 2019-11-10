@@ -10,9 +10,7 @@ var tie_questions = [
     'How much time do you spend with <strong>*</strong>?',
     'How close do you feel to <strong>*</strong>?',
 ];
-var friend_questions = [
-    'Are these pairs of people friends with each other?',
-];
+var friend_questions = ['Are these pairs of people friends with each other?'];
 var slider_configs = [{
     step: 1, min: 1, max: 5, value: 0,
     ticks: [1, 2, 3, 4, 5],

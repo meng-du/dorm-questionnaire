@@ -3,8 +3,9 @@ var hookWindow = false;
 
 jQuery(document).ready(function() {
     var DB_ROSTER_NAME = 'test';
+    var FRIEND_PAIRS_PER_PAGE = 15;
     $('.page').hide();
-    var page_i = 2;
+    var page_i = 0;
     var question_i = 0;
     var named_people = new Set([]);  // everyone named in roster-based questions
 
@@ -64,7 +65,7 @@ jQuery(document).ready(function() {
         $('#slider').slider('refresh'); // TODO
         $('.question-text').html(question_texts[page_i][question_i]);
 
-        $('#roster-add').css('margin-top', $('.chosen-drop').height() + 30 + 'px');
+        $('#roster-add').css('margin-top', $('.chosen-drop').height() + 50 + 'px');
     })
     .catch(function(error) {
         // error
@@ -182,6 +183,9 @@ jQuery(document).ready(function() {
 
     // replace * in question with user input names
     function tie_q_prepare() {
+        if (named_people.length < 1) {
+            return [];
+        }
         var q_with_names = [];
         for (let q of tie_questions) {
             let this_q_with_names = [];
@@ -224,6 +228,9 @@ jQuery(document).ready(function() {
 
     // replace * in question with user input names
     function friend_q_prepare() {
+        if (named_people.length < 2) {
+            return [];
+        }
         var q_with_names = [];
         for (let q of friend_questions) {
             let this_q_with_names = [];
@@ -240,7 +247,19 @@ jQuery(document).ready(function() {
         friend_questions = q_with_names;
     }
 
-    $('.multi-switch').multiSwitch();
+    // set up switch
+    $('.multi-switch').multiSwitch({
+        functionOnChange: (elt) => {
+            let label = elt.parentsUntil('#pairs-container', '.row').find('.switch-label');
+            if (elt.val() == 0) {
+                label.text('Not friends');
+                label.css('color', '#d1513f');
+            } else {
+                label.text('Friends');
+                label.css('color', '#46a35e');
+            }
+        }
+    });
 
     // NEXT BUTTON
 
@@ -251,7 +270,7 @@ jQuery(document).ready(function() {
             return;
         }
         // proceed
-        if (question_i < question_texts[page_i].length) {
+        if (question_i < question_texts[page_i].length - 1) {
             ++question_i;
             // reset question
             reset_funcs[page_i](question_texts[page_i][question_i]);

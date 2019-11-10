@@ -54,19 +54,28 @@
 .label-is-selection {
   font-weight: 650;
 }
-#switch-wrapper {
-  margin-left: -20px;
-}
 #pairs-container {
   width: 70%;
+  min-width: 180px;
 }
 #pairs-container .row {
-  height: 40px;
+  line-height: 40px;
+}
+#pairs-container li:nth-child(even) {
+  background: #f3f3f3;
 }
 .switch-label {
+  display: inline-block;
   text-align: right;
+  white-space: nowrap;
   font-size: 0.8rem;
-  line-height: 31px;
+  line-height: 40px;
+  margin: 0 5px;
+  padding: 0;
+  width: 50px;
+}
+.switch-wrapper {
+  padding: 4px 10px;
 }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
