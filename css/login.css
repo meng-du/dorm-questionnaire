@@ -1,7 +1,7 @@
 .central {
   margin: 15% auto;
   padding: 0 2rem;
-  max-width: 700px;
+  max-width: 800px;
 }
 .label {
   white-space: nowrap;
@@ -14,6 +14,9 @@
   display: table;
   margin: 1rem auto;
 }
+.blue {
+    color: #0064e6;
+}
 #dorm-wing-label {
   margin-right: 1rem;
 }
@@ -22,7 +25,6 @@
 }
 #warning {
   font-size: 11pt;
-  color: #0064e6;
   display: table;
   margin: auto;
 }
@@ -31,6 +33,22 @@
 }
 #correct-info {
   margin-top: 10px;
+}
+#frame-wrapper {
+  display: block;
+  overflow: hidden;
+  border-radius: 8px;
+  transform: translateZ(0px);
+  border: 2px solid #eee;
+}
+#consent-frame {
+  display: table;
+  margin: auto;
+  width: 100%;
+  height: 420px;
+}
+#agreement {
+  margin: 10px 0;
 }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

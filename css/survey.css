@@ -1,5 +1,6 @@
 .central {
-  margin: 5rem auto;
+  margin: auto;
+  margin-top: 4rem;
   padding: 0 2rem;
   max-width: 880px;
 }

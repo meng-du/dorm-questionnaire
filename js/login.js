@@ -6,6 +6,7 @@
     var survey_id = 'test' + (Date.now() + Math.random()).toString();
     $('#no-record').hide();
     $('#instr').hide();
+    $('#confirmation').hide();
 
     // Firebase configuration
     var firebaseConfig = {
@@ -77,11 +78,7 @@
         location.reload();
     });
 
-    $('#correct-btn').click(() => {
-        $('#correct-info').show();
-    });
-
-    $('#cont').click(() => {
+    $('#confirm-btn').click(() => {
         db.collection(DB_DATA_COLLECTION).doc(survey_id).set({
             firstname: firstname,
             lastname: lastname,

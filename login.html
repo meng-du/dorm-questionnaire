@@ -51,7 +51,7 @@
                     <input id="email" type="email" class="form-control" placeholder="Email address" required>
                 </div>
 
-                <div id="warning">Make sure your <strong>UID</strong> and <strong>email</strong> are entered correctly! We will use them to pay you.</div>
+                <div id="warning" class="blue">Make sure your <strong>UID</strong> and <strong>email</strong> are entered correctly! We will use them to pay you.</div>
 
                 <button id="submit" type="submit" class="btn btn-primary central-btn">Submit</button>
                 <p></p>
@@ -62,18 +62,18 @@
         <div id="confirmation" class="central">
             <p>Please double check your information:</p>
             <div id="info-check"></div>
-            <p style="color:#0064e6;">Make sure everything is correct. We will need these to pay you and everyone else.</p>
+            <p class="blue">Make sure everything is correct. We will need these to pay you and everyone else.</p>
             <button id="refresh-btn" class="btn btn-warning">Something is wrong, go back</button>
-            <button id="correct-btn" class="btn btn-info">This is correct</button>
-
-            <div id="correct-info">
-                <p>When you are ready, click "Continue" to start. </p>
-                <button id="cont" class="btn btn-primary central-btn">Continue</button>
-            </div>
+            <button id="confirm-btn" class="btn btn-info">This is correct</button>
         </div>
 
         <div id="instr" class="central">
-            <p>SOME INSTRUCTIONS ABOUT WHAT YOU NEED TO DO NOW.</p>
+            <p>Please read the consent below.</p>
+            <div id="frame-wrapper"><iframe id="consent-frame" src="consent.html"></iframe></div>
+            <div id="agreement" class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="agree-check">
+                <label class="custom-control-label" for="agree-check">I have read the above information about this research study and agree to participate</label>
+            </div>
             <button id="start" class="btn btn-primary central-btn">Start</button>
         </div>
 
