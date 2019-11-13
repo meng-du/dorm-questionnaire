@@ -89,6 +89,9 @@ jQuery(document).ready(function() {
     $('.roster-select').trigger('chosen:open');
     $('.chosen-search-input').blur();
 
+    // set up instructions to include wing
+    $('#scroll-instr').text($('#scroll-instr').text() + '2' + dorm_wing[0].toUpperCase());
+
     // set up Add button
     $('#btn-roster-add').click((e) => {
         var new_name = $('#input-roster-add').val();
@@ -299,7 +302,7 @@ jQuery(document).ready(function() {
                 });
                 if (unanswered == 0) {
                     $('#btn-next').removeClass('disabled');
-                } 
+                }
             }
         });
     }
@@ -334,6 +337,11 @@ jQuery(document).ready(function() {
         }
         // proceed
         if (question_i < question_texts[page_i].questions.length - 1) {
+            // add public figure instructions for non-first questions
+            if (question_i == 0 && page_i == 0) {
+                let instr = $('#add-instr').text().slice(0, -1) + ' (public figures don\'t count):';
+                $('#add-instr').text(instr);
+            }
             // next question
             ++question_i;
             q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);  // reset question
