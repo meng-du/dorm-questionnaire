@@ -23,6 +23,29 @@
 
     <body>
         <div id="p0" class="page central">
+            <form id="demographic">
+                <div class="form-group">
+                    <label class="demo-q" for="other-name">If you have other name(s) that is not your legal name (like a nickname) that people call you by, please write them here.</label>
+                    <input id="other-name" class="form-control" placeholder="Enter name(s)">
+                </div>
+                <div class="form-group">
+                    <label class="demo-q" for="major">What is (or will be) your major?</label>
+                    <input id="major" class="form-control" placeholder="Enter major" required>
+                </div>
+                <div class="form-group">
+                    <label class="demo-q" for="zipcode">What was your home zipcode before moving to UCLA? If it's outside the US, please also indicate the country you moved here from.</label>
+                    <div id="international-zip" class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="international-check">
+                        <label class="custom-control-label" for="international-check">Check this box if you moved from outside the US</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-6"><input id="zipcode" class="form-control" placeholder="Zipcode/postal code" required></div>
+                        <div class="col-6"><input id="country" class="form-control" placeholder="Your country"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="p1" class="page central">
             <div class="question-text"></div>
             <p id="scroll-instr" class="list-instr">i) Please scroll through the list below to add names from Hedrick Hall </p>
             <div id="roster-wrapper"><select id="select-roster" class="form-control form-control-chosen roster-select" multiple></select></div>
@@ -35,17 +58,17 @@
             <label class="form-check-label" for="check-no-selection">I don't have an answer to this question</label></div>
         </div>
 
-        <div id="p1" class="page central">
+        <div id="p2" class="page central">
             <div class="question-text"></div>
             <div id="slider-wrapper"><input id="slider" type="text" data-slider-value="3"/></div>
         </div>
 
-        <div id="p2" class="page central">
+        <div id="p3" class="page central">
             <div class="question-text"></div>
             <ul id="pairs-container"></ul>
         </div>
 
-        <button id="btn-next" class="btn btn-primary central-btn disabled">Next</button>
+        <button id="btn-next" class="btn btn-primary central-btn">Next</button>
 
         <div id="end" class="page central">
             <h4>Your response has been recorded. Thank you for participating!</h4>

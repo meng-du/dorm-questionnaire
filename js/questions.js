@@ -27,4 +27,4 @@ var slider_configs = [{
                    'Very close',
                    'Extremely close'],
 }];
-var question_texts = [roster_questions, tie_questions, friend_questions];
+var question_texts = [{questions: []}, roster_questions, tie_questions, friend_questions];

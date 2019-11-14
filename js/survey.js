@@ -64,12 +64,6 @@ jQuery(document).ready(function() {
         }
         $('.roster-select').chosen().trigger("chosen:updated");
         $('#p' + page_i).show();
-
-        $('#slider').slider('refresh'); // TODO
-        $('.question-text').html(question_texts[page_i].questions[question_i]);
-
-        let space = $('.chosen-drop').height() ? $('.chosen-drop').height() + 40 : 40
-        $('#roster-add').css('margin-top', space + 'px');
     })
     .catch(function(error) {
         // error
@@ -77,6 +71,52 @@ jQuery(document).ready(function() {
               'your internet connection and try again.\n' + error);
         console.log(error);
     });
+
+    // DEMOGRAPHIC QUESTIONS
+
+    $('#country').hide();
+
+    // set up checkbox for international zipcode
+    $('#international-check').change((e) => {
+        if ($(e.target).prop('checked')) {
+            $('#country').show();
+            $('#country').prop('required', true);
+            $('#zipcode').get(0).setCustomValidity('');
+        } else {
+            $('#country').hide();
+            $('#country').prop('required', false);
+            if (! /^([0-9]{5})$/.test($('#zipcode').val())) {
+                $('#zipcode').get(0).setCustomValidity('Please enter a 5-digit zipcode');
+            } else {
+                $('#zipcode').get(0).setCustomValidity('');
+            }
+        }
+    });
+
+    $('#zipcode').change(() => {
+        if ($('#international-check').is(':checked')) {
+            $('#zipcode').get(0).setCustomValidity('');
+        } else if (! /^([0-9]{5})$/.test($('#zipcode').val())) {
+            $('#zipcode').get(0).setCustomValidity('Please enter a 5-digit zipcode');
+        } else {
+            $('#zipcode').get(0).setCustomValidity('');
+        }
+    });
+
+    function demographic_onfinish() {
+        if (! $('#demographic').get(0).reportValidity()) {
+            return false;
+        }
+        var other_name = $('other-name').val();
+        var major = $('major').val();
+        var zipcode = $('zipcode').val();
+        var country = $('#international-check').is(':checked') ? $('country').val() : 'US';
+
+        // TODO data
+
+        $('#btn-next').addClass('disabled');
+        return true;
+    }
 
     // ROSTER BASED QUESTIONS
 
@@ -143,6 +183,7 @@ jQuery(document).ready(function() {
             $('.roster-select').val([]).trigger("chosen:updated");
             $('#btn-next').addClass('disabled');
         }
+        return true;
     }
 
     // TIE STRENGTH QUESTIONS
@@ -168,10 +209,13 @@ jQuery(document).ready(function() {
         // rotate
         if (rotation >= 3) {
             $('.slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
+            console.log(rotation);
             if (rotation > 30) {
                 let translate = rotation == 90 ? 18 : 10;
                 translate += num_labels < 5 ? 8 : 0;
                 $('.slider-tick-label-container').css('transform', 'translateY(' + translate + 'px)');
+                let add_margin = rotation == 90 ? 9 : 6;
+                $('#slider-wrapper').css('margin-bottom', add_margin + 'rem');
             }
         }
     }
@@ -231,6 +275,8 @@ jQuery(document).ready(function() {
         $('.slider-handle').css('background-image',
                                 'linear-gradient(to bottom,#ccc 0,#eee 100%)');
         $('#btn-next').addClass('disabled');
+
+        return true;
     }
 
     // FRIENDSHIP QUESTIONS
@@ -330,11 +376,13 @@ jQuery(document).ready(function() {
         $('#btn-next').addClass('disabled');
 
         switch_setup();
+
+        return true;
     }
 
     // NEXT BUTTON
 
-    var q_onfinish_funcs = [roster_q_onfinish, tie_q_onfinish, friend_q_onfinish];
+    var q_onfinish_funcs = [demographic_onfinish, roster_q_onfinish, tie_q_onfinish, friend_q_onfinish];
 
     $('#btn-next').click((e) => {
         if ($('#btn-next').hasClass('disabled')) {
@@ -343,7 +391,7 @@ jQuery(document).ready(function() {
         // proceed
         if (question_i < question_texts[page_i].questions.length - 1) {
             // add public figure instructions for non-first questions
-            if (question_i == 0 && page_i == 0) {
+            if (question_i == 0 && page_i == 1) {
                 let instr = $('#add-instr').text().slice(0, -1) + ' (public figures don\'t count):';
                 $('#add-instr').text(instr);
             }
@@ -353,10 +401,13 @@ jQuery(document).ready(function() {
             $('.question-text').html(question_texts[page_i].questions[question_i]);
         } else {
             // submit data
-            q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
+            let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
+            if (!result) {
+                return;
+            }
             // prepare subsequent questions
             $('#p' + page_i).hide();
-            if (page_i == 0) {
+            if (page_i == 1) {
                 tie_q_prepare();
                 friend_q_prepare();
             }
@@ -368,6 +419,11 @@ jQuery(document).ready(function() {
                     $('.question-text').html(question_texts[page_i].questions[question_i]);
                     $('#p' + page_i).show();
                     if (page_i == 1) {
+                        // add space between i and ii
+                        let space = $('.chosen-drop').height() ? $('.chosen-drop').height() + 40 : 40
+                        $('#roster-add').css('margin-top', space + 'px');
+                    }
+                    if (page_i == 2) {
                         $('#slider').slider('refresh');  //TODO
                     }
                     return;
