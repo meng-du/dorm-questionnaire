@@ -102,7 +102,18 @@
         });
     });
 
+    $('#agree-check').change((e) => {
+        if ($(e.target).prop('checked')) {
+            $('#start').removeClass('disabled');
+        } else {
+            $('#start').addClass('disabled');
+        }
+    });
+
     $('#start').click(() => {
+        if ($('#start').hasClass('disabled')) {
+            return;
+        }
         window.location.replace('survey.html?survey_id=' + survey_id + '&wing=' + dorm_wing);
     });
 

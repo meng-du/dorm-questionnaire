@@ -5,6 +5,7 @@ jQuery(document).ready(function() {
     var DB_ROSTER_NAME = 'test';
     var FRIEND_PAIRS_PER_PAGE = 15;
     $('.page').hide();
+    $('#end').hide();
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
@@ -116,10 +117,12 @@ jQuery(document).ready(function() {
     // set up checkbox for no answer
     $('#check-no-selection').change((e) => {
         if ($(e.target).prop('checked')) {
+            $('#scroll-instr').hide();
             $('#roster-wrapper').hide();
             $('#roster-add').hide();
             $('#btn-next').removeClass('disabled');
         } else {
+            $('#scroll-instr').show();
             $('#roster-wrapper').show();
             $('#roster-add').show();
             if ($('#select-roster').val().length == 0) {
@@ -324,6 +327,8 @@ jQuery(document).ready(function() {
         for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
             append_pair_html(friend_questions.pairs[pair_i]);
         }
+        $('#btn-next').addClass('disabled');
+
         switch_setup();
     }
 
@@ -357,7 +362,7 @@ jQuery(document).ready(function() {
             }
             // next page
             question_i = 0;
-            while (page_i < $('.page').length - 1) {
+            while (page_i < $('.page').length - 2) {
                 ++page_i;
                 if (question_texts[page_i].questions.length > 0) {
                     $('.question-text').html(question_texts[page_i].questions[question_i]);
@@ -368,9 +373,10 @@ jQuery(document).ready(function() {
                     return;
                 }
             }
-            if (page_i == $('.page').length - 1) {
+            if (page_i == $('.page').length - 2) {
                 $('#btn-next').hide();
-                alert('DONE');
+                $('#end').show();
+                hookWindow = false;
             }
         }
     });
