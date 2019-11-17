@@ -12,6 +12,15 @@
   font-weight: 550;
   margin-bottom: 1rem;
 }
+#btn-next {
+  margin-bottom: 2rem;
+}
+#invalid {
+  margin: -1.8rem auto 0 auto;
+  display: table;
+  color: #dc3545;
+  font-size: 0.8rem;
+}
 .demo-q {
   font-weight: 550;
   margin-top: 1rem;

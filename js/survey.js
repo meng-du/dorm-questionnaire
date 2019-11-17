@@ -6,6 +6,7 @@ jQuery(document).ready(function() {
     var FRIEND_PAIRS_PER_PAGE = 15;
     $('.page').hide();
     $('#end').hide();
+    $('#invalid').hide();
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
@@ -209,7 +210,6 @@ jQuery(document).ready(function() {
         // rotate
         if (rotation >= 3) {
             $('.slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
-            console.log(rotation);
             if (rotation > 30) {
                 let translate = rotation == 90 ? 18 : 10;
                 translate += num_labels < 5 ? 8 : 0;
@@ -386,6 +386,10 @@ jQuery(document).ready(function() {
 
     $('#btn-next').click((e) => {
         if ($('#btn-next').hasClass('disabled')) {
+            $('#invalid').show();
+            setTimeout(() => {
+                $('#invalid').hide();
+            }, 5000);
             return;
         }
         // proceed
