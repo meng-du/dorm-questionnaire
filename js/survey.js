@@ -292,12 +292,13 @@ jQuery(document).ready(function() {
         let q = $('.question-text').html().split(' ')[1]
         let key = (q == 'close' ? 'close' : 'time') + ' - ' + person;
 
-        save2firebase({
+        data[page_i][key] = {
             question: question,
             response: response,
             response_text: $('.label-is-selection').text(),
             timestamp: Date.now()
-        }, key);
+        }
+        save2firebase(data[page_i][key], key);
 
         // next question
         if (!next_q_text) {
@@ -406,12 +407,13 @@ jQuery(document).ready(function() {
             let pair = $(elm).children('.col-6-auto').html().split(' <strong>&amp;</strong> ');
 
             let key = [pair[0], pair[1]].sort().join('&');
-            save2firebase({
+            data[page_i][key] = {
                 '0': pair[0],
                 '1': pair[1],
                 response: $(elm).find('input').val() == '0' ? 'n' : 'y',
                 timestamp: Date.now()
-            }, key);
+            }
+            save2firebase(data[page_i][key], key);
         });
 
         // next question
@@ -427,6 +429,16 @@ jQuery(document).ready(function() {
         return true;
     }
 
+    // PREVIOUS BUTTON
+
+    $('#btn-prev').click((e) => {
+        if ($('#btn-prev').hasClass('disabled')) {
+            return;
+        }
+        // go back
+        //TODO
+    });
+
     // NEXT BUTTON
 
     var q_onfinish_funcs = [demographic_onfinish, roster_q_onfinish, tie_q_onfinish, friend_q_onfinish];
@@ -440,6 +452,7 @@ jQuery(document).ready(function() {
             return;
         }
         // proceed
+        $('#btn-prev').removeClass('disabled');
         if (question_i < question_texts[page_i].questions.length - 1) {
             // add public figure instructions for non-first questions
             if (question_i == 0 && page_i == 1) {
