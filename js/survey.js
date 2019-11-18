@@ -3,6 +3,7 @@ var hookWindow = false;
 
 jQuery(document).ready(function() {
     var DB_ROSTER_NAME = 'test';
+    var DB_DATA_COLLECTION = 'test_data';
     var FRIEND_PAIRS_PER_PAGE = 15;
     $('.page').hide();
     $('#end').hide();
@@ -11,6 +12,7 @@ jQuery(document).ready(function() {
     var question_i = 0;
     var pair_i = 0;
     var named_people = new Set([]);  // everyone named in roster-based questions
+    var data = {};
 
     // prevent closing window
     window.onbeforeunload = function() {
@@ -70,8 +72,22 @@ jQuery(document).ready(function() {
         // error
         alert('Failed to access database, please check ' +
               'your internet connection and try again.\n' + error);
+        location.reload();  // refresh page
         console.log(error);
     });
+
+    // send data
+    function save2firebase(data, q_key=-1) {
+        q_key = q_key == -1 ? question_i : q_key;
+        let db_key = page_i + '.' + q_key;
+        db.collection(DB_DATA_COLLECTION).doc(survey_id).update({ [db_key]: data })
+        .catch(function(error) {
+            // error
+            alert('Failed to save your data. Please check your internet connection and try again.\nIf this message shows up multiple times, please contact the experimenters.\n' + error);
+            location.reload();  // refresh page
+            console.log(error);
+        });
+    }
 
     // DEMOGRAPHIC QUESTIONS
 
@@ -108,12 +124,16 @@ jQuery(document).ready(function() {
         if (! $('#demographic').get(0).reportValidity()) {
             return false;
         }
-        var other_name = $('other-name').val();
-        var major = $('major').val();
-        var zipcode = $('zipcode').val();
-        var country = $('#international-check').is(':checked') ? $('country').val() : 'US';
 
-        // TODO data
+        data[page_i] = {
+            'other_name': $('#other-name').val(),
+            major: $('#major').val(),
+            zipcode: $('#zipcode').val(),
+            country: $('#international-check').is(':checked') ? $('#country').val() : 'US',
+            timestamp: Date.now()
+        }
+
+        save2firebase(data[page_i]);
 
         $('#btn-next').addClass('disabled');
         return true;
@@ -174,10 +194,21 @@ jQuery(document).ready(function() {
 
     // data & reset
     function roster_q_onfinish(next_q_text) {
-        var data = $('#select-roster').val();
-        named_people = new Set([...data, ...named_people])  // append to set
-        // TODO save data (to firebase?)
+        let names = $('#select-roster').val();
+        named_people = new Set([...names, ...named_people])  // append to set
 
+        // save to firebase
+        if (!data.hasOwnProperty(page_i)) {
+            data[page_i] = {};
+        }
+        data[page_i][question_i] = {
+            question: $('.question-text').get(0).textContent,
+            response: names,
+            timestamp: Date.now()
+        };
+        save2firebase(data[page_i][question_i]);
+
+        // next question
         if (next_q_text) {
             $('#check-no-selection').prop('checked', false);
             $('#check-no-selection').trigger('change');
@@ -253,12 +284,24 @@ jQuery(document).ready(function() {
 
     // data & reset
     function tie_q_onfinish(next_q_text) {
-        var data = $('#slider').val();
-        var question = $('.question-text').get(0).textContent;
-        // TODO save data
+        let response = $('#slider').val();
+        let question = $('.question-text').get(0).textContent;
 
+        // save data
+        let person = $('.question-text').html().split('>')[1].split('<')[0];
+        let q = $('.question-text').html().split(' ')[1]
+        let key = (q == 'close' ? 'close' : 'time') + ' - ' + person;
+
+        save2firebase({
+            question: question,
+            response: response,
+            response_text: $('.label-is-selection').text(),
+            timestamp: Date.now()
+        }, key);
+
+        // next question
         if (!next_q_text) {
-            return;
+            return true;
         }
         if (question.substr(0, 15) != next_q_text.substr(0, 15)) {
             // changing question, changing slider labels
@@ -358,16 +401,20 @@ jQuery(document).ready(function() {
 
     // data & reset
     function friend_q_onfinish() {
-        let data = [];
+        // save data
         $('#pairs-container .row').each((i, elm) => {
             let pair = $(elm).children('.col-6-auto').html().split(' <strong>&amp;</strong> ');
-            data.push({
+
+            let key = [pair[0], pair[1]].sort().join('&');
+            save2firebase({
                 '0': pair[0],
                 '1': pair[1],
-                'answer': $(elm).find('input').val() == '0' ? 'n' : 'y'});
+                response: $(elm).find('input').val() == '0' ? 'n' : 'y',
+                timestamp: Date.now()
+            }, key);
         });
-        // TODO data
 
+        // next question
         $('#pairs-container').html('');
         let pair_i_end = pair_i + FRIEND_PAIRS_PER_PAGE;
         for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
@@ -400,9 +447,14 @@ jQuery(document).ready(function() {
                 $('#add-instr').text(instr);
             }
             // next question
+            q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i + 1]);  // reset question
             ++question_i;
-            q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);  // reset question
             $('.question-text').html(question_texts[page_i].questions[question_i]);
+            if ((page_i == $('.page').length - 2) &&
+                (question_i == question_texts[page_i].questions.length - 1)) {
+                // last page, last question
+                $('#btn-next').text('Finish');
+            }
         } else {
             // submit data
             let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
@@ -428,7 +480,12 @@ jQuery(document).ready(function() {
                         $('#roster-add').css('margin-top', space + 'px');
                     }
                     if (page_i == 2) {
-                        $('#slider').slider('refresh');  //TODO
+                        $('#slider').slider('refresh');
+                    }
+                    if ((page_i == $('.page').length - 2) &&
+                        (question_i == question_texts[page_i].questions.length - 1)) {
+                        // last page, last question
+                        $('#btn-next').text('Finish');
                     }
                     return;
                 }

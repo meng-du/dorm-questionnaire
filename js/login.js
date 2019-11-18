@@ -1,7 +1,8 @@
 'use strict';
 
 (function () {
-    var DB_DATA_COLLECTION = 'personal_info'
+    var DB_INFO_COLLECTION = 'personal_info';
+    var DB_DATA_COLLECTION = 'test_data';
     var firstname, lastname, uid, dorm, dorm_wing, email, timestamp;
     var survey_id = 'test' + (Date.now() + Math.random()).toString();
     $('#no-record').hide();
@@ -79,14 +80,14 @@
     });
 
     $('#confirm-btn').click(() => {
-        db.collection(DB_DATA_COLLECTION).doc(survey_id).set({
+        db.collection(DB_INFO_COLLECTION).doc(survey_id).set({
             firstname: firstname,
             lastname: lastname,
             uid: uid,
             email: email,
             dorm: dorm,
             dorm_wing: dorm_wing,
-            timestamp: timestamp.toString()
+            time: timestamp.toString()
         })
         .then(function() {
             // success
@@ -94,6 +95,10 @@
             $('#confirmation').hide();
             $('#correct-info').hide();
             $('#instr').show();
+            db.collection(DB_DATA_COLLECTION).doc(survey_id).set({
+                start_time: timestamp.toString(),
+                login_timestamp: Date.now()
+            });
         })
         .catch(function(error) {
             // error
