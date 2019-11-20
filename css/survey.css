@@ -1,6 +1,6 @@
 .central {
   margin: auto;
-  margin-top: 4rem;
+  margin-top: 3rem;
   padding: 0 2rem;
   max-width: 880px;
 }
@@ -21,6 +21,12 @@
   color: #dc3545;
   font-size: 0.8rem;
 }
+#no-prev {
+  margin: 0 auto -2.5rem auto;
+  display: table;
+  color: #0064e6;
+  font-size: 0.8rem;
+}
 .demo-q {
   font-weight: 550;
   margin-top: 1rem;
@@ -33,7 +39,7 @@
 }
 #no-selection {
   margin-top: 1rem;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
 }
 .search-choice {
   background-image: none !important;

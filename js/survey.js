@@ -9,6 +9,7 @@ jQuery(document).ready(function() {
     $('#end').hide();
     $('#invalid').hide();
     $('#btn-prev').hide();
+    $('#no-prev').hide();
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
@@ -482,6 +483,11 @@ jQuery(document).ready(function() {
             ++question_i;
             $('.question-text').html(question_texts[page_i].questions[question_i]);
 
+            // roster last question
+            if (page_i == 1 && question_i == question_texts[page_i].questions.length - 1) {
+                $('#no-prev').show();
+            }
+
             // add data if there is any
             if ((page_i == 1) && (data[page_i].hasOwnProperty(question_i)) &&
                 (data[page_i][question_i].response.length > 0)) {
@@ -521,6 +527,7 @@ jQuery(document).ready(function() {
                 ++page_i;
                 if (page_i == 2) {
                     $('#btn-prev').hide();
+                    $('#no-prev').hide();
                 }
                 if (question_texts[page_i].questions.length > 0) {
                     $('.question-text').html(question_texts[page_i].questions[question_i]);
@@ -558,5 +565,5 @@ jQuery(document).ready(function() {
         }
     });
 
-    // hookWindow = true;
+    hookWindow = true;
 });
