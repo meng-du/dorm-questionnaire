@@ -139,7 +139,6 @@ jQuery(document).ready(function() {
 
         save2firebase(data[page_i]);
 
-        $('#btn-next').addClass('disabled');
         return true;
     }
 
@@ -199,14 +198,16 @@ jQuery(document).ready(function() {
     // data & reset
     function roster_q_onfinish(next_q_text) {
         let names = $('#select-roster').val();
-        named_people = new Set([...names, ...named_people])  // append to set
+        named_people = new Set([...names, ...named_people])  // append to set TODO
 
         // save to firebase
+        console.log(question_i);
         data[page_i][question_i] = {
             question: $('.question-text').get(0).textContent,
             response: names,
             timestamp: Date.now()
         };
+        console.log(data[page_i][question_i]);
         save2firebase(data[page_i][question_i]);
 
         // next question
@@ -214,7 +215,6 @@ jQuery(document).ready(function() {
             $('#check-no-selection').prop('checked', false);
             $('#check-no-selection').trigger('change');
             $('.roster-select').val([]).trigger("chosen:updated");
-            $('#btn-next').addClass('disabled');
         }
         return true;
     }
@@ -319,7 +319,6 @@ jQuery(document).ready(function() {
         $('.label-is-selection').css('font-weight', '400');
         $('.slider-handle').css('background-image',
                                 'linear-gradient(to bottom,#ccc 0,#eee 100%)');
-        $('#btn-next').addClass('disabled');
 
         return true;
     }
@@ -423,7 +422,6 @@ jQuery(document).ready(function() {
         for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
             append_pair_html(friend_questions.pairs[pair_i]);
         }
-        $('#btn-next').addClass('disabled');
 
         switch_setup();
 
@@ -438,18 +436,24 @@ jQuery(document).ready(function() {
         }
         // save current data
         q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i - 1]);
+
         // go back to previous question
         --question_i;
         $('.question-text').html(question_texts[page_i].questions[question_i]);
-        if (question_i == 0 && page_i == 1) {
-             // remove the public figure wording
-            let instr = $('#add-instr').text().split(' (')[0];
-            $('#add-instr').text(instr);
-        }
-
         // show previous data
         $('.roster-select').val(data[page_i][question_i].response)
                            .trigger("chosen:updated");
+        $('#btn-next').removeClass('disabled');
+
+        // first question
+        if (page_i == 1 && question_i == 0) {
+             // remove the public figure wording
+            let instr = $('#add-instr').text().split(' (')[0];
+            $('#add-instr').text(instr);
+            // remove prev button
+            $('#btn-prev').hide();
+        }
+
     });
 
     // NEXT BUTTON
@@ -467,20 +471,31 @@ jQuery(document).ready(function() {
         // proceed
         if (question_i < question_texts[page_i].questions.length - 1) {
             // add public figure instructions for non-first questions
-            if (question_i == 0 && page_i == 1) {
+            if (page_i == 1 && question_i == 0) {
                 let instr = $('#add-instr').text().slice(0, -1) + ' (public figures don\'t count):';
                 $('#add-instr').text(instr);
             }
+
             // next question
             q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i + 1]);  // reset question
             ++question_i;
             $('.question-text').html(question_texts[page_i].questions[question_i]);
+
+            // add data if there is any
+            if ((page_i == 1) && (data[page_i].hasOwnProperty(question_i)) &&
+                (data[page_i][question_i].response.length > 0)) {
+                $('.roster-select').val(data[page_i][question_i].response)
+                                   .trigger("chosen:updated");
+            } else {
+                $('#btn-next').addClass('disabled');
+            }
         } else {
             // submit data
             let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
             if (!result) {
                 return;
             }
+            $('#btn-next').addClass('disabled');
             // prepare subsequent questions
             $('#p' + page_i).hide();
             if (page_i == 1) {
@@ -532,5 +547,4 @@ jQuery(document).ready(function() {
     });
 
     // hookWindow = true;
-    var startTime = new Date();
 });
