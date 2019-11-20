@@ -8,11 +8,15 @@ jQuery(document).ready(function() {
     $('.page').hide();
     $('#end').hide();
     $('#invalid').hide();
+    $('#btn-prev').hide();
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
     var named_people = new Set([]);  // everyone named in roster-based questions
     var data = {};
+    for (let i in question_texts) {
+        data[i] = {};  // initialize to empty
+    }
 
     // prevent closing window
     window.onbeforeunload = function() {
@@ -198,9 +202,6 @@ jQuery(document).ready(function() {
         named_people = new Set([...names, ...named_people])  // append to set
 
         // save to firebase
-        if (!data.hasOwnProperty(page_i)) {
-            data[page_i] = {};
-        }
         data[page_i][question_i] = {
             question: $('.question-text').get(0).textContent,
             response: names,
@@ -435,8 +436,20 @@ jQuery(document).ready(function() {
         if ($('#btn-prev').hasClass('disabled')) {
             return;
         }
-        // go back
-        //TODO
+        // save current data
+        q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i - 1]);
+        // go back to previous question
+        --question_i;
+        $('.question-text').html(question_texts[page_i].questions[question_i]);
+        if (question_i == 0 && page_i == 1) {
+             // remove the public figure wording
+            let instr = $('#add-instr').text().split(' (')[0];
+            $('#add-instr').text(instr);
+        }
+
+        // show previous data
+        $('.roster-select').val(data[page_i][question_i].response)
+                           .trigger("chosen:updated");
     });
 
     // NEXT BUTTON
@@ -452,7 +465,6 @@ jQuery(document).ready(function() {
             return;
         }
         // proceed
-        $('#btn-prev').removeClass('disabled');
         if (question_i < question_texts[page_i].questions.length - 1) {
             // add public figure instructions for non-first questions
             if (question_i == 0 && page_i == 1) {
@@ -463,11 +475,6 @@ jQuery(document).ready(function() {
             q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i + 1]);  // reset question
             ++question_i;
             $('.question-text').html(question_texts[page_i].questions[question_i]);
-            if ((page_i == $('.page').length - 2) &&
-                (question_i == question_texts[page_i].questions.length - 1)) {
-                // last page, last question
-                $('#btn-next').text('Finish');
-            }
         } else {
             // submit data
             let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
@@ -482,8 +489,12 @@ jQuery(document).ready(function() {
             }
             // next page
             question_i = 0;
+            let done = false;
             while (page_i < $('.page').length - 2) {
                 ++page_i;
+                if (page_i == 2) {
+                    $('#btn-prev').hide();
+                }
                 if (question_texts[page_i].questions.length > 0) {
                     $('.question-text').html(question_texts[page_i].questions[question_i]);
                     $('#p' + page_i).show();
@@ -495,19 +506,28 @@ jQuery(document).ready(function() {
                     if (page_i == 2) {
                         $('#slider').slider('refresh');
                     }
-                    if ((page_i == $('.page').length - 2) &&
-                        (question_i == question_texts[page_i].questions.length - 1)) {
-                        // last page, last question
-                        $('#btn-next').text('Finish');
-                    }
-                    return;
+                    done = true;
+                    break;
                 }
             }
-            if (page_i == $('.page').length - 2) {
+            // the end
+            if ((!done) && page_i == $('.page').length - 2) {
+                // show end page
                 $('#btn-next').hide();
                 $('#end').show();
                 hookWindow = false;
             }
+        }
+        // hide warning
+        $('#invalid').hide();
+        // show previous button
+        if (page_i == 1 && question_i > 0) {
+            $('#btn-prev').show();
+        }
+        // last page last question, change button text
+        if ((page_i == $('.page').length - 2) &&
+            (question_i == question_texts[page_i].questions.length - 1)) {
+            $('#btn-next').text('Finish');
         }
     });
 
