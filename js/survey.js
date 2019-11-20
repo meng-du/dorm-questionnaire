@@ -12,7 +12,6 @@ jQuery(document).ready(function() {
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
-    var named_people = new Set([]);  // everyone named in roster-based questions
     var data = {};
     for (let i in question_texts) {
         data[i] = {};  // initialize to empty
@@ -197,17 +196,14 @@ jQuery(document).ready(function() {
 
     // data & reset
     function roster_q_onfinish(next_q_text) {
-        let names = $('#select-roster').val();
-        named_people = new Set([...names, ...named_people])  // append to set TODO
+        let names = $('#check-no-selection').is(':checked') ? [] : $('#select-roster').val();
 
         // save to firebase
-        console.log(question_i);
         data[page_i][question_i] = {
             question: $('.question-text').get(0).textContent,
             response: names,
             timestamp: Date.now()
         };
-        console.log(data[page_i][question_i]);
         save2firebase(data[page_i][question_i]);
 
         // next question
@@ -267,7 +263,7 @@ jQuery(document).ready(function() {
     $("#slider").on('slideStop change', slider_onclick);
 
     // replace * in question with user input names
-    function tie_q_prepare() {
+    function tie_q_prepare(named_people) {
         if (named_people.size < 1) {
             tie_questions.questions = [];
         }
@@ -347,7 +343,7 @@ jQuery(document).ready(function() {
     }
 
     // get pairs from named people and initialize the first batch of questions
-    function friend_q_prepare() {
+    function friend_q_prepare(named_people) {
         if (named_people.length < 2) {
             friend_questions.questions = [];
         }
@@ -443,6 +439,11 @@ jQuery(document).ready(function() {
         // show previous data
         $('.roster-select').val(data[page_i][question_i].response)
                            .trigger("chosen:updated");
+        if (data[page_i][question_i].response.length == 0) {
+            // none named
+            $('#check-no-selection').prop('checked', true);
+            $('#check-no-selection').trigger('change');
+        }
         $('#btn-next').removeClass('disabled');
 
         // first question
@@ -453,7 +454,7 @@ jQuery(document).ready(function() {
             // remove prev button
             $('#btn-prev').hide();
         }
-
+        $('#invalid').hide();
     });
 
     // NEXT BUTTON
@@ -486,6 +487,12 @@ jQuery(document).ready(function() {
                 (data[page_i][question_i].response.length > 0)) {
                 $('.roster-select').val(data[page_i][question_i].response)
                                    .trigger("chosen:updated");
+                if (data[page_i][question_i].response.length == 0) {
+                    // none named
+                    $('#check-no-selection').prop('checked', true);
+                    $('#check-no-selection').trigger('change');
+                }
+                $('#btn-next').removeClass('disabled');
             } else {
                 $('#btn-next').addClass('disabled');
             }
@@ -499,8 +506,13 @@ jQuery(document).ready(function() {
             // prepare subsequent questions
             $('#p' + page_i).hide();
             if (page_i == 1) {
-                tie_q_prepare();
-                friend_q_prepare();
+                // get all named people
+                var named_people = new Set([]);
+                for (let q_i in data[1]) {
+                    named_people = new Set([...data[1][q_i].response, ...named_people])  // append to set
+                }
+                tie_q_prepare(named_people);
+                friend_q_prepare(named_people);
             }
             // next page
             question_i = 0;
