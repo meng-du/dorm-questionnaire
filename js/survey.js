@@ -69,8 +69,8 @@ jQuery(document).ready(function() {
         // for (let name of roster) {
         //     $('.roster-select').append('<option>' + name + '</option>');
         // }
-        // $('.roster-select').chosen().trigger("chosen:updated");
-        // $('#p' + page_i).show();
+        $('.roster-select').chosen().trigger("chosen:updated");
+        $('#p' + page_i).show();
     })
     .catch(function(error) {
         // error
