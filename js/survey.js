@@ -76,9 +76,15 @@ jQuery(document).ready(function() {
         // error
         alert('Failed to access database, please check ' +
               'your internet connection and try again.\n' + error);
+        hookWindow = false;
         location.reload();  // refresh page
         console.log(error);
     });
+
+    // +1 to # of completions
+    function increase_completion_count() {
+        db.collection('count').doc('count').update('count', firebase.firestore.FieldValue.increment(1));
+    }
 
     // send data
     function save2firebase(data, q_key=-1) {
@@ -425,6 +431,19 @@ jQuery(document).ready(function() {
         return true;
     }
 
+    // PAYMENT QUESTION
+
+    $('input[type=radio][name=payment]').change(() => {
+        $('#btn-next').removeClass('disabled');
+    });
+
+    function payment_q_onfinish() {
+        save2firebase({
+            payment: $('input[name=payment]:checked', '#p4').val()
+        });
+        return true;
+    }
+
     // PREVIOUS BUTTON
 
     $('#btn-prev').click((e) => {
@@ -456,11 +475,13 @@ jQuery(document).ready(function() {
             $('#btn-prev').hide();
         }
         $('#invalid').hide();
+        $('#no-prev').hide();
     });
 
     // NEXT BUTTON
 
-    var q_onfinish_funcs = [demographic_onfinish, roster_q_onfinish, tie_q_onfinish, friend_q_onfinish];
+    var q_onfinish_funcs = [demographic_onfinish, roster_q_onfinish, tie_q_onfinish,
+                            friend_q_onfinish, payment_q_onfinish];
 
     $('#btn-next').click((e) => {
         if ($('#btn-next').hasClass('disabled')) {
@@ -523,11 +544,15 @@ jQuery(document).ready(function() {
             // next page
             question_i = 0;
             let done = false;
-            while (page_i < $('.page').length - 2) {
+            while (page_i < $('.page').length - 1) {
                 ++page_i;
                 if (page_i == 2) {
                     $('#btn-prev').hide();
                     $('#no-prev').hide();
+                }
+                if (page_i == 4) {
+                    $('#btn-next').text('Confirm');
+                    increase_completion_count(); // completed + 1
                 }
                 if (question_texts[page_i].questions.length > 0) {
                     $('.question-text').html(question_texts[page_i].questions[question_i]);
@@ -544,12 +569,10 @@ jQuery(document).ready(function() {
                     break;
                 }
             }
-            // the end
-            if ((!done) && page_i == $('.page').length - 2) {
+            if ((!done) && page_i == $('.page').length - 1) {
                 // show end page
-                $('#btn-next').hide();
-                $('#end').show();
                 hookWindow = false;
+                window.location.replace('progress.html?completed=' + survey_id.split('.')[0]);
             }
         }
         // hide warning

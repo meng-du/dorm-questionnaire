@@ -11,6 +11,7 @@ var tie_questions = {questions: [
     'How close do you feel to <strong>*</strong>?',
 ]};
 var friend_questions = {questions: ['Are these pairs of people connected with each other? Please choose "connected" if they socialize with each other regularly, or "not connected" otherwise.']};
+var payment_question = {questions: ['Thank you for completing the survey! Would you like to be paid through Bruincard or cash?']};
 var slider_configs = [{
     step: 1, min: 1, max: 5, value: 0,
     ticks: [1, 2, 3, 4, 5],
@@ -27,4 +28,4 @@ var slider_configs = [{
                    'Very close',
                    'Extremely close'],
 }];
-var question_texts = [{questions: []}, roster_questions, tie_questions, friend_questions];
+var question_texts = [{questions: []}, roster_questions, tie_questions, friend_questions, payment_question];
