@@ -379,10 +379,10 @@ jQuery(document).ready(function() {
             functionOnChange: (elt) => {
                 let label = elt.parentsUntil('#pairs-container', '.row').find('.switch-label');
                 if (elt.val() == 0) {
-                    label.text('Not friends');
+                    label.text('Not connected');
                     label.css('color', '#d1513f');
                 } else {
-                    label.text('Friends');
+                    label.text('Connected');
                     label.css('color', '#46a35e');
                 }
                 // check if all answered

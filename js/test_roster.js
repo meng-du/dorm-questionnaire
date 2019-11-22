@@ -1,32 +1,4 @@
 var roster = {
-'south': [
-    'This Person S',
-    'Stupid Student S',
-    'That Person S',
-    'Some Student S',
-    'An Alien S',
-    'Normal Person S',
-    'Weird Person S',
-    'Crazy Student S',
-    'College Student S',
-    'Drug Dealer S',
-    'Depressed Student S',
-    'The Queen S',
-    'The King S',
-],
-'north': [
-    'This Person N',
-    'Stupid Student N',
-    'That Person N',
-    'Some Student N',
-    'An Alien N',
-    'Normal Person N',
-    'Weird Person N',
-    'Crazy Student N',
-    'College Student N',
-    'Drug Dealer N',
-    'Depressed Student N',
-    'The Queen N',
-    'The King N',
-]
+'south': ['Krystyna Natoli', 'Joseph Brickley', 'Lexie Strauch', 'Stephane Clack', 'Juanita Brezinski', 'Imogene Pitcher', 'Leandra Calmes', 'Angelica Hirschman', 'Enriqueta Beaty', 'Anita Brekke', 'Erik Skeete', 'Margareta Auerbach', 'Charita Haight', 'Adan Eichhorn', 'Derick Alessi', 'Theo Jenks', 'Cary Barcenas', 'Jenette Love', 'Carl Brantley', 'Marcelle Paulo', 'Jim Lathan', 'Antonetta Donnellan', 'Siu Nicholson', 'Devin Roff', 'Bernardo Logsdon', 'Ashley Bertrand', 'Barbara Welle', 'Lisabeth Dame', 'Hoyt Mcneal', 'Tisha Mack', 'Sherri Pope', 'Tatum Parsley', 'Gertrud Hove', 'Elissa Noggle', 'Emory Fackler', 'Etsuko Tamashiro', 'Jarvis Higley', 'Caroll Mcdougal', 'Angila Sand', 'Mandy Troupe', 'Rodney Vandever', 'Wanda Laughlin', 'Sharita Velasques', 'Melda Reinert', 'Amanda Chea', 'Francene Mcraney', 'Romana Axford', 'Theressa Mcelravy', 'Kasey Younkin', 'Randy Seigler', 'Arminda Kuhl', 'Glennie Trigg', 'Divina Mease', 'Eda Gallaway', 'Cher Cordell', 'Cordelia Hartzog', 'Delbert Alejandro', 'Jolynn Starnes', 'Nichole Weed', 'Jalisa Ollison', 'Raymundo Levey', 'Janett Nurse', 'Chrissy Bagwell', 'Christin Tristan', 'Lea Aubert', 'Reda Haubert', 'Tanesha Ewell', 'Annis Emigh', 'Tawna Shew', 'Yoshiko Kreger', 'Will Laskowski', 'Le Couturier', 'Elwanda Maycock', 'Mitzi Belote', 'Cassie Santore', 'Bernardo Estevez', 'Suzanne Foland', 'Henrietta Aumann', 'Casimira Carboni', 'Glen Cottingham', 'Dalton Bethel', 'Annelle Mccloskey', 'Gidget Munroe', 'Tuyet Riggan', 'Nam Lucchesi', 'Penelope Gammage', 'Sadye Ramsey', 'Yetta Baptista', 'Loralee Armagost', 'Solange Trembath', 'Sharie Garlick', 'Delphia Nosal'],
+'north': ['Gerda Biddy', 'Barabara Holdaway', 'Vinnie Stancill', 'Richie Marcum', 'Milly Bitting', 'Arlene Holiday', 'Stanley Snell', 'Verlene Muise', 'Rafaela Lando', 'Rea Laramee', 'Flora Schoenberger', 'Doyle Sweatt', 'Wilda Desjardin', 'Jane Fuhrman', 'Briana Presler', 'Melva Stolp', 'An Stpeter', 'Gil Wann', 'Dell Schlegel', 'Nelia Patillo', 'Allyson Gruver', 'Raylene Lorraine', 'Irene Mcgahey', 'Kelsey Race', 'Helene Mcroy', 'Sherryl Claw', 'Junie Kaufmann', 'Gail Gunderson', 'Lien Hoskins', 'Zoraida Schumann', 'Cindi Matzke', 'Antonetta Peltier', 'Kirby Ocasio', 'Maragret Rosenbalm', 'Hana Blazer', 'Temeka Petre', 'Carri Darst', 'Claud Mccroy', 'Edwina Hostetter', 'Murray Call', 'Blanche Cornette', 'Brandi Lipari', 'Katharine Voyles', 'Lorette Hollenbach', 'Nancey Rux', 'Eli Clopton', 'Nina Flanary', 'Nakia Maloof', 'Bernardina Adams', 'Milford Riggenbach', 'Thomasina Hiler', 'Pedro Cayer', 'Deja Pressnell', 'Cassaundra Wanamaker', 'Lissette Greening', 'Delsie Maske', 'Maire Rich', 'Mose Bethel', 'Lovella Demartini', 'Deanne Kantner', 'Sina Hollin', 'Gricelda Brightwell', 'Vanetta Heitmann', 'Isa Perrigo', 'Elease Izzard', 'Richard Mona', 'Keva Castelli', 'Barrett Reason', 'Emanuel Relyea', 'Ayesha Sienkiewicz', 'Etha Beekman', 'Bonnie Tippin', 'Ollie Failla', 'Thersa Imburgia', 'Dorthy Puckett', 'Anh Rasco', 'Wade Regner', 'Rigoberto Breit', 'Phylis Walker', 'Zachery File', 'Stefan Breazeale', 'Sharolyn Kellett', 'Mirella Biscoe', 'Buddy Tardiff', 'Anneliese Isreal', 'Emory Mcbroom', 'Daysi Pedro', 'Avril Job', 'Kendall Hodapp', 'Noelle Werth', 'Brady Taketa', 'Tam Salley', 'Johanna Bad', 'Mellie Bucci']
 }
