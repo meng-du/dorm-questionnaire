@@ -17,9 +17,6 @@
 .blue {
     color: #0064e6;
 }
-#info-form {
-  margin-top: 15%;
-}
 #dorm-wing-label {
   margin-right: 1rem;
 }
@@ -33,6 +30,10 @@
 }
 #submit {
   margin-top: 2rem;
+}
+#confidential {
+  font-size: 0.8rem;
+  text-align: center;
 }
 #correct-info {
   margin-top: 10px;

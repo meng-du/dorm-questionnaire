@@ -63,12 +63,12 @@ jQuery(document).ready(function() {
 
     // get roster
     db.collection('roster').doc(DB_ROSTER_NAME).get().then((doc) => {
-        // var roster = doc.data()[dorm_wing].sort();
-        // // success
-        // // set up roster options for the first few questions
-        // for (let name of roster) {
-        //     $('.roster-select').append('<option>' + name + '</option>');
-        // }
+        var roster = doc.data()[dorm_wing].sort();
+        // success
+        // set up roster options for the first few questions
+        for (let name of roster) {
+            $('.roster-select').append('<option>' + name + '</option>');
+        }
         $('.roster-select').chosen().trigger("chosen:updated");
         $('#p' + page_i).show();
     })
