@@ -10,7 +10,7 @@ jQuery(document).ready(function() {
     $('#invalid').hide();
     $('#btn-prev').hide();
     $('#no-prev').hide();
-    var page_i = 0;
+    var page_i = 1;
     var question_i = 0;
     var pair_i = 0;
     var data = {};
@@ -60,26 +60,6 @@ jQuery(document).ready(function() {
     };
     firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
-
-    // get roster
-    db.collection('roster').doc(DB_ROSTER_NAME).get().then((doc) => {
-        var roster = doc.data()[dorm_wing].sort();
-        // success
-        // set up roster options for the first few questions
-        for (let name of roster) {
-            $('.roster-select').append('<option>' + name + '</option>');
-        }
-        $('.roster-select').chosen().trigger("chosen:updated");
-        $('#p' + page_i).show();
-    })
-    .catch(function(error) {
-        // error
-        alert('Failed to access database, please check ' +
-              'your internet connection and try again.\n' + error);
-        hookWindow = false;
-        location.reload();  // refresh page
-        console.log(error);
-    });
 
     // +1 to # of completions
     function increase_completion_count() {
@@ -148,20 +128,43 @@ jQuery(document).ready(function() {
         return true;
     }
 
-    // ROSTER BASED QUESTIONS
+    // NAMING QUESTIONS
 
-    // set up roster based question with Chosen
-    $('.roster-select').on('chosen:ready', function(ev, args) {
-        // always show placeholder
-        let sender = args.chosen;
-        sender.search_field.attr('placeholder', sender.default_text);
-    }).chosen({placeholder_text_multiple: 'Search here...'});
-    // always show the option list
-    $('.roster-select').trigger('chosen:open');
-    $('.chosen-search-input').blur();
+    // set up naming question
+    $('#dorm-names').tagsManager({
+        deleteTagsOnBackspace: false,
+        tagsContainer: '#dorm-name-container',
+        blinkBGColor_1: '#d90000',
+        blinkBGColor_2: '#ffc107',
+        typeahead: true,
+        typeaheadSource: [],
+        tagCloseIcon: '×',
+    });
+    $('#outsider-names').tagsManager({
+        deleteTagsOnBackspace: false,
+        tagsContainer: '#outsider-name-container',
+        blinkBGColor_1: '#d90000',
+        blinkBGColor_2: '#ffc107',
+        typeahead: true,
+        typeaheadSource: [],
+        tagCloseIcon: '×',
+    });
+
+    // "add" button
+    $('#btn-dorm-add').click(() => {
+        let name = $('#dorm-names').val();
+        $('#dorm-names').tagsManager('pushTag', name);
+        $('#dorm-names').val('');
+    })
+
+    $('#btn-outsider-add').click(() => {
+        let name = $('#outsider-names').val();
+        $('#outsider-names').tagsManager('pushTag', name);
+        $('#outsider-names').val('');
+    })
 
     // set up instructions to include wing
-    $('#scroll-instr').text($('#scroll-instr').text() + '2' + dorm_wing[0].toUpperCase());
+    $('#dorm-name-instr').text($('#dorm-name-instr').text() + '2' + dorm_wing[0].toUpperCase());
 
     // set up Add button
     $('#btn-roster-add').click((e) => {
@@ -181,23 +184,6 @@ jQuery(document).ready(function() {
             $('#btn-next').removeClass('disabled');
         } else {
             $('#btn-next').addClass('disabled');
-        }
-    });
-
-    // set up checkbox for no answer
-    $('#check-no-selection').change((e) => {
-        if ($(e.target).prop('checked')) {
-            $('#scroll-instr').hide();
-            $('#roster-wrapper').hide();
-            $('#roster-add').hide();
-            $('#btn-next').removeClass('disabled');
-        } else {
-            $('#scroll-instr').show();
-            $('#roster-wrapper').show();
-            $('#roster-add').show();
-            if ($('#select-roster').val().length == 0) {
-                $('#btn-next').addClass('disabled');
-            }
         }
     });
 
@@ -469,8 +455,8 @@ jQuery(document).ready(function() {
         // first question
         if (page_i == 1 && question_i == 0) {
              // remove the public figure wording
-            let instr = $('#add-instr').text().split(' (')[0];
-            $('#add-instr').text(instr);
+            let instr = $('#outsider-name-instr').text().split(' (')[0];
+            $('#outsider-name-instr').text(instr);
             // remove prev button
             $('#btn-prev').hide();
         }
@@ -495,8 +481,8 @@ jQuery(document).ready(function() {
         if (question_i < question_texts[page_i].questions.length - 1) {
             // add public figure instructions for non-first questions
             if (page_i == 1 && question_i == 0) {
-                let instr = $('#add-instr').text().slice(0, -1) + ' (public figures don\'t count):';
-                $('#add-instr').text(instr);
+                let instr = $('#outsider-name-instr').text().slice(0, -1) + ' (public figures don\'t count):';
+                $('#outsider-name-instr').text(instr);
             }
 
             // next question
