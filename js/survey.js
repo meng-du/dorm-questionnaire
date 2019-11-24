@@ -2,7 +2,6 @@
 var hookWindow = false;
 
 jQuery(document).ready(function() {
-    var DB_ROSTER_NAME = 'test';
     var DB_DATA_COLLECTION = 'test_data';
     var FRIEND_PAIRS_PER_PAGE = 15;
     $('.page').hide();
@@ -10,13 +9,14 @@ jQuery(document).ready(function() {
     $('#invalid').hide();
     $('#btn-prev').hide();
     $('#no-prev').hide();
-    var page_i = 1;
+    var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
     var data = {};
     for (let i in question_texts) {
         data[i] = {};  // initialize to empty
     }
+    $('#p' + page_i).show();
 
     // prevent closing window
     window.onbeforeunload = function() {
