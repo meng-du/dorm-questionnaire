@@ -44,7 +44,14 @@
   margin: .3rem 0;
 }
 #p1 p {
-  margin-bottom: .5rem;
+  margin-top: 2rem;
+  margin-bottom: 0;
+}
+#p1 .row {
+  margin-top: .2rem;
+}
+#instr-public {
+  margin-left: 1rem;
 }
 #duplicate {
   margin-bottom: 1.5rem !important;

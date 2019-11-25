@@ -130,33 +130,80 @@ jQuery(document).ready(function() {
 
     // NAMING QUESTIONS
 
+    // validator
+    function validate_name(tag) {
+        let valid = true;
+        let fields = ['#dorm-names', '#outsider-names'];
+        for (let i in fields) {
+            let field = $(fields[i]);
+            if (tag == field.val().trim()) {
+                // test if using alphabets and spaces
+                if (! /^[a-zA-Z]+\s+[a-zA-Z\s]*[a-zA-Z]+$/.test(tag)) {
+                    field.get(0).setCustomValidity('Please enter one name at a time (first name last initial) with alphabets and spaces only');
+                    field.get(0).reportValidity();
+                    valid = false;
+                } else {
+                    field.get(0).setCustomValidity('');
+                    field.get(0).reportValidity();
+                }
+                // test if repeated
+                let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);
+                if (field.tagsManager('tags').includes(tag) || repeat_other_field > -1) {
+                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Danial K artist, Danial K newYorkCity, Danial K chessClub, etc.).');
+                    field.get(0).reportValidity();
+                    if (repeat_other_field > -1) {
+                        field.val('');
+                        valid = false;
+                        // blinks
+                        $($(fields[1 - i] + '-container' + ' .tm-tag')[repeat_other_field]).stop()
+                        .animate({ backgroundColor: '#d90000' }, 100)
+                        .animate({ backgroundColor: '#ffc107' }, 100)
+                        .animate({ backgroundColor: '#d90000' }, 100)
+                        .animate({ backgroundColor: '#ffc107' }, 100)
+                        .animate({ backgroundColor: '#d90000' }, 100)
+                        .animate({ backgroundColor: '#ffc107' }, 100);
+                    }
+                } else if (valid) {
+                    field.get(0).setCustomValidity('');
+                    field.get(0).reportValidity();
+                }
+            }
+        }
+        if (valid) {
+            $('.tm-tag').css('background-color', '');  // remove any blinked bg color
+        }
+        return valid;
+    }
+
     // set up naming question
+    var name_typeahead_source = ['abc a', 'fdsa f']; // todo
     $('#dorm-names').tagsManager({
         deleteTagsOnBackspace: false,
-        tagsContainer: '#dorm-name-container',
+        tagsContainer: '#dorm-names-container',
         blinkBGColor_1: '#d90000',
         blinkBGColor_2: '#ffc107',
         typeahead: true,
-        typeaheadSource: [],
+        typeaheadSource: name_typeahead_source,
         tagCloseIcon: '×',
+        validator: validate_name
     });
     $('#outsider-names').tagsManager({
         deleteTagsOnBackspace: false,
-        tagsContainer: '#outsider-name-container',
+        tagsContainer: '#outsider-names-container',
         blinkBGColor_1: '#d90000',
         blinkBGColor_2: '#ffc107',
         typeahead: true,
-        typeaheadSource: [],
+        typeaheadSource: name_typeahead_source,
         tagCloseIcon: '×',
+        validator: validate_name
     });
 
-    // "add" button
+    // "add" buttons
     $('#btn-dorm-add').click(() => {
         let name = $('#dorm-names').val();
         $('#dorm-names').tagsManager('pushTag', name);
         $('#dorm-names').val('');
     })
-
     $('#btn-outsider-add').click(() => {
         let name = $('#outsider-names').val();
         $('#outsider-names').tagsManager('pushTag', name);
@@ -166,44 +213,33 @@ jQuery(document).ready(function() {
     // set up instructions to include wing
     $('#dorm-name-instr').text($('#dorm-name-instr').text() + '2' + dorm_wing[0].toUpperCase());
 
-    // set up Add button
-    $('#btn-roster-add').click((e) => {
-        var new_name = $('#input-roster-add').val();
-        if (new_name.length == 0) {
-            return;
-        }
-        $('#select-roster').append('<option selected>' + new_name + '</option>');
-        $('#select-roster').chosen().trigger("chosen:updated");
-        $('#select-roster').trigger('change');
-        $('#input-roster-add').val('');  // clear input
-    });
-
-    // enable/disable Next button based on input change
-    $('.roster-select').change((e) => {
-        if ($(e.target).val().length > 0) {
-            $('#btn-next').removeClass('disabled');
-        } else {
-            $('#btn-next').addClass('disabled');
-        }
-    });
-
     // data & reset
     function roster_q_onfinish(next_q_text) {
-        let names = $('#check-no-selection').is(':checked') ? [] : $('#select-roster').val();
+        let dorm_names = $('#dorm-names').tagsManager('tags');
+        let outsider_names = $('#outsider-names').tagsManager('tags');
+        if ($('#dorm-names').val().length > 0) {
+            dorm_names.push(); // todo
+        }
+        if (dorm_names.length + outsider_names.length == 0) {
+            // todo
+        }
+        $('#dorm-names').val('');
+        $('#outsider-names').val('');
+        name_typeahead_source.push(...dorm_names, ...outsider_names);
 
         // save to firebase
         data[page_i][question_i] = {
             question: $('.question-text').get(0).textContent,
-            response: names,
+            names_in_dorm: Object.assign([], dorm_names),
+            names_outside: Object.assign([], outsider_names),
             timestamp: Date.now()
         };
         save2firebase(data[page_i][question_i]);
 
         // next question
         if (next_q_text) {
-            $('#check-no-selection').prop('checked', false);
-            $('#check-no-selection').trigger('change');
-            $('.roster-select').val([]).trigger("chosen:updated");
+            $('#dorm-names').tagsManager('empty');
+            $('#outsider-names').tagsManager('empty');
         }
         return true;
     }
@@ -443,20 +479,18 @@ jQuery(document).ready(function() {
         --question_i;
         $('.question-text').html(question_texts[page_i].questions[question_i]);
         // show previous data
-        $('.roster-select').val(data[page_i][question_i].response)
-                           .trigger("chosen:updated");
-        if (data[page_i][question_i].response.length == 0) {
-            // none named
-            $('#check-no-selection').prop('checked', true);
-            $('#check-no-selection').trigger('change');
-        }
-        $('#btn-next').removeClass('disabled');
+        data[page_i][question_i].names_in_dorm.forEach(
+            (tag) => $('#dorm-names').tagsManager('pushTag', tag)
+        )
+        data[page_i][question_i].names_outside.forEach(
+            (tag) => $('#outsider-names').tagsManager('pushTag', tag)
+        )
+        
 
         // first question
         if (page_i == 1 && question_i == 0) {
-             // remove the public figure wording
-            let instr = $('#outsider-name-instr').text().split(' (')[0];
-            $('#outsider-name-instr').text(instr);
+            // remove the public figure wording
+            $('#instr-public').hide();
             // remove prev button
             $('#btn-prev').hide();
         }
@@ -481,8 +515,7 @@ jQuery(document).ready(function() {
         if (question_i < question_texts[page_i].questions.length - 1) {
             // add public figure instructions for non-first questions
             if (page_i == 1 && question_i == 0) {
-                let instr = $('#outsider-name-instr').text().slice(0, -1) + ' (public figures don\'t count):';
-                $('#outsider-name-instr').text(instr);
+                $('#instr-public').show();
             }
 
             // next question
@@ -496,17 +529,14 @@ jQuery(document).ready(function() {
             }
 
             // add data if there is any
-            if ((page_i == 1) && (data[page_i].hasOwnProperty(question_i)) &&
-                (data[page_i][question_i].response.length > 0)) {
-                $('.roster-select').val(data[page_i][question_i].response)
-                                   .trigger("chosen:updated");
-                if (data[page_i][question_i].response.length == 0) {
-                    // none named
-                    $('#check-no-selection').prop('checked', true);
-                    $('#check-no-selection').trigger('change');
-                }
-                $('#btn-next').removeClass('disabled');
-            } else {
+            if (page_i == 1 && data[page_i].hasOwnProperty(question_i)) {
+                data[page_i][question_i].names_in_dorm.forEach(
+                    (tag) => $('#dorm-names').tagsManager('pushTag', tag)
+                )
+                data[page_i][question_i].names_outside.forEach(
+                    (tag) => $('#outsider-names').tagsManager('pushTag', tag)
+                )
+            } else if (page_i != 1) {
                 $('#btn-next').addClass('disabled');
             }
         } else {
@@ -515,14 +545,18 @@ jQuery(document).ready(function() {
             if (!result) {
                 return;
             }
-            $('#btn-next').addClass('disabled');
+            if (page_i != 0) {
+                $('#btn-next').addClass('disabled');
+            }
             // prepare subsequent questions
             $('#p' + page_i).hide();
             if (page_i == 1) {
                 // get all named people
                 var named_people = new Set([]);
                 for (let q_i in data[1]) {
-                    named_people = new Set([...data[1][q_i].response, ...named_people])  // append to set
+                    named_people = new Set([...data[1][q_i].names_in_dorm,
+                                            ...data[1][q_i].names_outside,
+                                            ...named_people])  // append to set
                 }
                 tie_q_prepare(named_people);
                 friend_q_prepare(named_people);
@@ -574,5 +608,5 @@ jQuery(document).ready(function() {
         }
     });
 
-    hookWindow = true;
+    // hookWindow = true;
 });
