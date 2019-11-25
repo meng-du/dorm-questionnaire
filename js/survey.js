@@ -6,9 +6,10 @@ jQuery(document).ready(function() {
     var FRIEND_PAIRS_PER_PAGE = 15;
     $('.page').hide();
     $('#end').hide();
-    $('#invalid').hide();
+    $('.invalid').hide();
     $('#btn-prev').hide();
     $('#no-prev').hide();
+    $('#instr-public').hide();
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
@@ -156,12 +157,12 @@ jQuery(document).ready(function() {
                         valid = false;
                         // blinks
                         $($(fields[1 - i] + '-container' + ' .tm-tag')[repeat_other_field]).stop()
-                        .animate({ backgroundColor: '#d90000' }, 100)
-                        .animate({ backgroundColor: '#ffc107' }, 100)
-                        .animate({ backgroundColor: '#d90000' }, 100)
-                        .animate({ backgroundColor: '#ffc107' }, 100)
-                        .animate({ backgroundColor: '#d90000' }, 100)
-                        .animate({ backgroundColor: '#ffc107' }, 100);
+                            .animate({ backgroundColor: '#d90000' }, 100)
+                            .animate({ backgroundColor: '#ffc107' }, 100)
+                            .animate({ backgroundColor: '#d90000' }, 100)
+                            .animate({ backgroundColor: '#ffc107' }, 100)
+                            .animate({ backgroundColor: '#d90000' }, 100)
+                            .animate({ backgroundColor: '#ffc107' }, 100);
                     }
                 } else if (valid) {
                     field.get(0).setCustomValidity('');
@@ -213,15 +214,29 @@ jQuery(document).ready(function() {
     // set up instructions to include wing
     $('#dorm-name-instr').text($('#dorm-name-instr').text() + '2' + dorm_wing[0].toUpperCase());
 
+    // enable/disable next button
+    function tag_onchange(e, tag) {
+        let dorm_names = $('#dorm-names').tagsManager('tags');
+        let outsider_names = $('#outsider-names').tagsManager('tags');
+        if (dorm_names.length + outsider_names.length == 0) {
+            $('#btn-next').addClass('disabled');
+        } else {
+            $('#btn-next').removeClass('disabled');
+        }
+    }
+    $('.tm-input').on('tm:pushed', tag_onchange);
+    $('.tm-input').on('tm:spliced', tag_onchange);
+    $('.tm-input').change(() => {
+        normal_next_btn();
+        $('.invalid').hide();
+    })
+
     // data & reset
     function roster_q_onfinish(next_q_text) {
         let dorm_names = $('#dorm-names').tagsManager('tags');
         let outsider_names = $('#outsider-names').tagsManager('tags');
         if ($('#dorm-names').val().length > 0) {
             dorm_names.push(); // todo
-        }
-        if (dorm_names.length + outsider_names.length == 0) {
-            // todo
         }
         $('#dorm-names').val('');
         $('#outsider-names').val('');
@@ -468,6 +483,19 @@ jQuery(document).ready(function() {
 
     // PREVIOUS BUTTON
 
+    function add_data() {
+        // show previous data
+        data[page_i][question_i].names_in_dorm.forEach(
+            (tag) => $('#dorm-names').tagsManager('pushTag', tag)
+        )
+        data[page_i][question_i].names_outside.forEach(
+            (tag) => $('#outsider-names').tagsManager('pushTag', tag)
+        )
+        if (data[page_i][question_i].names_in_dorm.length + data[page_i][question_i].names_outside.length == 0) {
+            $('#btn-next').addClass('disabled');
+        }
+    }
+
     $('#btn-prev').click((e) => {
         if ($('#btn-prev').hasClass('disabled')) {
             return;
@@ -478,14 +506,7 @@ jQuery(document).ready(function() {
         // go back to previous question
         --question_i;
         $('.question-text').html(question_texts[page_i].questions[question_i]);
-        // show previous data
-        data[page_i][question_i].names_in_dorm.forEach(
-            (tag) => $('#dorm-names').tagsManager('pushTag', tag)
-        )
-        data[page_i][question_i].names_outside.forEach(
-            (tag) => $('#outsider-names').tagsManager('pushTag', tag)
-        )
-        
+        add_data();
 
         // first question
         if (page_i == 1 && question_i == 0) {
@@ -494,7 +515,8 @@ jQuery(document).ready(function() {
             // remove prev button
             $('#btn-prev').hide();
         }
-        $('#invalid').hide();
+        $('.invalid').hide();
+        normal_next_btn();
         $('#no-prev').hide();
     });
 
@@ -502,18 +524,32 @@ jQuery(document).ready(function() {
 
     var q_onfinish_funcs = [demographic_onfinish, roster_q_onfinish, tie_q_onfinish,
                             friend_q_onfinish, payment_q_onfinish];
+    
+    function normal_next_btn() {
+        $('#btn-next').text('Next');
+        $('#btn-next').removeClass('btn-warning');
+        $('#btn-next').removeClass('btn-sm');
+    }
 
     $('#btn-next').click((e) => {
         if ($('#btn-next').hasClass('disabled')) {
-            $('#invalid').show();
-            setTimeout(() => {
-                $('#invalid').hide();
-            }, 5000);
+            if (page_i == 1) {
+                $('#invalid1').show();
+                $('#btn-next').text('Yes, I can\'t think of anyone that fits this question');
+                $('#btn-next').addClass('btn-warning');
+                $('#btn-next').addClass('btn-sm');
+                $('#btn-next').removeClass('disabled');
+            } else {
+                $('#invalid2').show();
+                setTimeout(() => {
+                    $('#invalid2').hide();
+                }, 5000);
+            }
             return;
         }
         // proceed
         if (question_i < question_texts[page_i].questions.length - 1) {
-            // add public figure instructions for non-first questions
+            // add public figure instructions for non-first naming questions
             if (page_i == 1 && question_i == 0) {
                 $('#instr-public').show();
             }
@@ -530,13 +566,8 @@ jQuery(document).ready(function() {
 
             // add data if there is any
             if (page_i == 1 && data[page_i].hasOwnProperty(question_i)) {
-                data[page_i][question_i].names_in_dorm.forEach(
-                    (tag) => $('#dorm-names').tagsManager('pushTag', tag)
-                )
-                data[page_i][question_i].names_outside.forEach(
-                    (tag) => $('#outsider-names').tagsManager('pushTag', tag)
-                )
-            } else if (page_i != 1) {
+                add_data();
+            } else {
                 $('#btn-next').addClass('disabled');
             }
         } else {
@@ -545,11 +576,9 @@ jQuery(document).ready(function() {
             if (!result) {
                 return;
             }
-            if (page_i != 0) {
-                $('#btn-next').addClass('disabled');
-            }
-            // prepare subsequent questions
+            $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
+            // prepare subsequent questions
             if (page_i == 1) {
                 // get all named people
                 var named_people = new Set([]);
@@ -577,11 +606,6 @@ jQuery(document).ready(function() {
                 if (question_texts[page_i].questions.length > 0) {
                     $('.question-text').html(question_texts[page_i].questions[question_i]);
                     $('#p' + page_i).show();
-                    if (page_i == 1) {
-                        // add space between i and ii
-                        let space = $('.chosen-drop').height() ? $('.chosen-drop').height() + 40 : 40
-                        $('#roster-add').css('margin-top', space + 'px');
-                    }
                     if (page_i == 2) {
                         $('#slider').slider('refresh');
                     }
@@ -596,7 +620,8 @@ jQuery(document).ready(function() {
             }
         }
         // hide warning
-        $('#invalid').hide();
+        $('.invalid').hide();
+        normal_next_btn();
         // show previous button
         if (page_i == 1 && question_i > 0) {
             $('#btn-prev').show();

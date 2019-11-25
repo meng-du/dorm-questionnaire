@@ -15,14 +15,21 @@
 #btn-next {
   margin-bottom: 2rem;
 }
-#invalid {
-  margin: -1.8rem auto 0 auto;
+.invalid {
+  margin: auto;
   display: table;
   color: #dc3545;
+}
+#invalid1 {
+  margin: 2rem auto -2.5rem auto;
+  font-size: 0.9rem;
+}
+#invalid2 {
+  margin: -1.8rem auto 0 auto;
   font-size: 0.8rem;
 }
 #no-prev {
-  margin: 0 auto -2.5rem auto;
+  margin: 1.8rem auto -1rem auto;
   display: table;
   color: #0064e6;
   font-size: 0.8rem;
