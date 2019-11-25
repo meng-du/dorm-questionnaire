@@ -1,6 +1,7 @@
 'use strict';
 
 jQuery(document).ready(function() {
+    $('#copied').hide();
     if (window.location.search.substring(1).length > 0) {
         let completed = window.location.search.substring(1).split(/[&=]/)[1];
         console.log(completed);
@@ -10,6 +11,14 @@ jQuery(document).ready(function() {
     } else {
         $('#end-survey').hide();
     }
+
+    $('#copy-btn').click(() => {
+        var copyText = document.getElementById('link');
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);  // For mobile devices
+        document.execCommand('copy');
+        $('#copied').show();
+    });
 
     // Firebase
     var firebaseConfig = {

@@ -487,10 +487,10 @@ jQuery(document).ready(function() {
         // show previous data
         data[page_i][question_i].names_in_dorm.forEach(
             (tag) => $('#dorm-names').tagsManager('pushTag', tag)
-        )
+        );
         data[page_i][question_i].names_outside.forEach(
             (tag) => $('#outsider-names').tagsManager('pushTag', tag)
-        )
+        );
         if (data[page_i][question_i].names_in_dorm.length + data[page_i][question_i].names_outside.length == 0) {
             $('#btn-next').addClass('disabled');
         }
@@ -524,7 +524,7 @@ jQuery(document).ready(function() {
 
     var q_onfinish_funcs = [demographic_onfinish, roster_q_onfinish, tie_q_onfinish,
                             friend_q_onfinish, payment_q_onfinish];
-    
+
     function normal_next_btn() {
         $('#btn-next').text('Next');
         $('#btn-next').removeClass('btn-warning');
@@ -583,7 +583,11 @@ jQuery(document).ready(function() {
                 // get all named people
                 var named_people = new Set([]);
                 for (let q_i in data[1]) {
-                    named_people = new Set([...data[1][q_i].names_in_dorm,
+                    let dorm_names = [];
+                    data[1][q_i].names_in_dorm.forEach(
+                        (tag) => dorm_names.push(tag + ' (2' + dorm_wing[0].toUpperCase() + ')')
+                    );
+                    named_people = new Set([...dorm_names,
                                             ...data[1][q_i].names_outside,
                                             ...named_people])  // append to set
                 }

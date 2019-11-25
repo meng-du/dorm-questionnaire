@@ -20,8 +20,17 @@
           max-width: 800px;
           text-align: center;
         }
-        .link {
-          font-size: 0.95rem;
+        #link-div {
+          margin-bottom: 2rem;
+        }
+        #link-div .col {
+          padding-right: 5px;
+          padding-left: 5px;
+        }
+        #share {
+          font-size: 90%;
+        }
+        .blue {
           color: #0064e6;
         }
         #progress-bar {
@@ -44,7 +53,13 @@
                 <div id="bar" class="progress-bar bg-warning progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
             <p>&nbsp;</p>
-            <p class="small">Link to the survey: https://metad.github.io/dorm-questionnaire/login.html</p>
+            <div id="share" class="small">Please share the link to this survey with others on your floor:</div>
+            <div id="link-div" class="row align-items-center">
+                <div class="col col-3"></div>
+                <div class="col col-5"><input type="text" id="link" class="form-control form-control-sm" value="https://metad.github.io/dorm-questionnaire/login.html"></div>
+                <div class="col col-auto"><button id="copy-btn" class="btn btn-primary btn-sm">Copy</button></div>
+                <div id="copied" class="col col-auto small blue">Copied!</div>
+            </div>
             <p class="small">If you have additional questions, please contact Karina Lopez at karinalopez@ucla.edu.</p>
         </div>
 

@@ -19,6 +19,7 @@
   margin: auto;
   display: table;
   color: #dc3545;
+  text-align: center;
 }
 #invalid1 {
   margin: 2rem auto -2.5rem auto;
@@ -33,6 +34,7 @@
   display: table;
   color: #0064e6;
   font-size: 0.8rem;
+  text-align: center;
 }
 .demo-q {
   font-weight: 550;
