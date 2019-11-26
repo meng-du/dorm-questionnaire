@@ -150,7 +150,7 @@ jQuery(document).ready(function() {
                 // test if repeated
                 let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);
                 if (field.tagsManager('tags').includes(tag) || repeat_other_field > -1) {
-                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Danial K artist, Danial K newYorkCity, Danial K chessClub, etc.).');
+                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Daniel K artist, Daniel K newYorkCity, Daniel K chessClub, etc.).');
                     field.get(0).reportValidity();
                     if (repeat_other_field > -1) {
                         field.val('');
@@ -655,5 +655,5 @@ jQuery(document).ready(function() {
         }
     });
 
-    // hookWindow = true;
+    hookWindow = true;
 });
