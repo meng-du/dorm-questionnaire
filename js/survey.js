@@ -177,14 +177,14 @@ jQuery(document).ready(function() {
     }
 
     // set up naming question
-    var name_typeahead_source = ['abc a', 'fdsa f']; // todo
+    // var name_typeahead_source = [];
     $('#dorm-names').tagsManager({
         deleteTagsOnBackspace: false,
         tagsContainer: '#dorm-names-container',
         blinkBGColor_1: '#d90000',
         blinkBGColor_2: '#ffc107',
-        typeahead: true,
-        typeaheadSource: name_typeahead_source,
+        // typeahead: true,
+        // typeaheadSource: name_typeahead_source,
         tagCloseIcon: '×',
         validator: validate_name
     });
@@ -193,8 +193,8 @@ jQuery(document).ready(function() {
         tagsContainer: '#outsider-names-container',
         blinkBGColor_1: '#d90000',
         blinkBGColor_2: '#ffc107',
-        typeahead: true,
-        typeaheadSource: name_typeahead_source,
+        // typeahead: true,
+        // typeaheadSource: name_typeahead_source,
         tagCloseIcon: '×',
         validator: validate_name
     });
@@ -226,21 +226,33 @@ jQuery(document).ready(function() {
     }
     $('.tm-input').on('tm:pushed', tag_onchange);
     $('.tm-input').on('tm:spliced', tag_onchange);
-    $('.tm-input').change(() => {
+    $('input').change(() => {
         normal_next_btn();
         $('.invalid').hide();
     })
 
+    // check if entered text but didn't add
+    function check_entered_text() {
+        for (let field of ['#dorm-names', '#outsider-names']) {
+            if ($(field).val().length > 0) {
+                $(field).get(0).setCustomValidity('You entered a name but did\'t add it. Please either add or remove it.');
+                $(field).get(0).reportValidity();
+                return false;
+            }
+        }
+        return true;
+    }
+
     // data & reset
     function roster_q_onfinish(next_q_text) {
+        if (!check_entered_text()) {
+            return false;
+        }
         let dorm_names = $('#dorm-names').tagsManager('tags');
         let outsider_names = $('#outsider-names').tagsManager('tags');
-        if ($('#dorm-names').val().length > 0) {
-            dorm_names.push(); // todo
-        }
         $('#dorm-names').val('');
         $('#outsider-names').val('');
-        name_typeahead_source.push(...dorm_names, ...outsider_names);
+        // name_typeahead_source.push(...dorm_names, ...outsider_names);
 
         // save to firebase
         data[page_i][question_i] = {
@@ -501,7 +513,10 @@ jQuery(document).ready(function() {
             return;
         }
         // save current data
-        q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i - 1]);
+        let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i - 1]);
+        if (!result) {
+            return;
+        }
 
         // go back to previous question
         --question_i;
@@ -532,6 +547,10 @@ jQuery(document).ready(function() {
     }
 
     $('#btn-next').click((e) => {
+        if (page_i == 1 && !check_entered_text()) {
+            return;  // entered text but didn't add for naming question
+        }
+        // no answer
         if ($('#btn-next').hasClass('disabled')) {
             if (page_i == 1) {
                 $('#invalid1').show();
@@ -547,6 +566,11 @@ jQuery(document).ready(function() {
             }
             return;
         }
+        // submit data
+        let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
+        if (!result) {
+            return;
+        }
         // proceed
         if (question_i < question_texts[page_i].questions.length - 1) {
             // add public figure instructions for non-first naming questions
@@ -555,7 +579,6 @@ jQuery(document).ready(function() {
             }
 
             // next question
-            q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i + 1]);  // reset question
             ++question_i;
             $('.question-text').html(question_texts[page_i].questions[question_i]);
 
@@ -571,11 +594,6 @@ jQuery(document).ready(function() {
                 $('#btn-next').addClass('disabled');
             }
         } else {
-            // submit data
-            let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
-            if (!result) {
-                return;
-            }
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
             // prepare subsequent questions

@@ -18,6 +18,7 @@ jQuery(document).ready(function() {
         copyText.setSelectionRange(0, 99999);  // For mobile devices
         document.execCommand('copy');
         $('#copied').show();
+        setTimeout(() => $('#copied').hide(), 7000);
     });
 
     // Firebase
