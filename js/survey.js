@@ -575,7 +575,7 @@ jQuery(document).ready(function() {
             return;
         }
         // submit data
-        let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i]);
+        let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i + 1]);
         if (!result) {
             return;
         }
