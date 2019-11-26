@@ -62,6 +62,14 @@ jQuery(document).ready(function() {
     firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
 
+    // sign in
+    firebase.auth().signInWithEmailAndPassword(user.email, user.pw).catch(function(error) {
+        // error
+        alert('Failed to access database. Please check your internet connection and try again.\nIf it doesn\'t work, please contact the experimenters.\n' + error);
+        window.location.replace('login.html');  // refresh page
+        console.log(error);
+    });
+
     // +1 to # of completions
     function increase_completion_count() {
         db.collection('count').doc('count').update('count', firebase.firestore.FieldValue.increment(1));

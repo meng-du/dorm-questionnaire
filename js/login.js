@@ -22,6 +22,13 @@
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
+    // sign in
+    firebase.auth().signInWithEmailAndPassword(user.email, user.pw).catch(function(error) {
+        // error
+        alert('Failed to access database. Please check your internet connection and try again.\nIf it doesn\'t work, please contact the experimenters.\n' + error);
+        location.reload();  // refresh page
+        console.log(error);
+    });
 
     function check_name() {
         var errmsg = 'Please enter only alphabets';
