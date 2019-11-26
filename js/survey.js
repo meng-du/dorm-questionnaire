@@ -221,6 +221,7 @@ jQuery(document).ready(function() {
 
     // set up instructions to include wing
     $('#dorm-name-instr').text($('#dorm-name-instr').text() + '2' + dorm_wing[0].toUpperCase());
+    $('#name-note').html($('#name-note').html().replace(/2</g, '2' + dorm_wing[0].toUpperCase() + '<'));
 
     // enable/disable next button
     function tag_onchange(e, tag) {
@@ -615,7 +616,7 @@ jQuery(document).ready(function() {
                         (tag) => dorm_names.push(tag + ' (2' + dorm_wing[0].toUpperCase() + ')')
                     );
                     data[1][q_i].names_outside.forEach(
-                        (tag) => outside_names.push(tag + ' (outside of 2' + dorm_wing[0].toUpperCase() + ')')
+                        (tag) => outside_names.push(tag + ' (non-2' + dorm_wing[0].toUpperCase() + ')')
                     );
                     named_people = new Set([...dorm_names,
                                             ...outside_names,
