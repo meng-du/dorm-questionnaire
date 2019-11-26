@@ -610,11 +610,15 @@ jQuery(document).ready(function() {
                 var named_people = new Set([]);
                 for (let q_i in data[1]) {
                     let dorm_names = [];
+                    let outside_names = [];
                     data[1][q_i].names_in_dorm.forEach(
                         (tag) => dorm_names.push(tag + ' (2' + dorm_wing[0].toUpperCase() + ')')
                     );
+                    data[1][q_i].names_outside.forEach(
+                        (tag) => outside_names.push(tag + ' (outside of 2' + dorm_wing[0].toUpperCase() + ')')
+                    );
                     named_people = new Set([...dorm_names,
-                                            ...data[1][q_i].names_outside,
+                                            ...outside_names,
                                             ...named_people])  // append to set
                 }
                 tie_q_prepare(named_people);
