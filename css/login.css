@@ -1,5 +1,5 @@
 .central {
-  margin: 10% auto;
+  margin: 8% auto;
   padding: 0 2rem;
   max-width: 800px;
 }
@@ -54,7 +54,7 @@
   display: table;
   margin: auto;
   width: 100%;
-  height: 400px;
+  height: 350px;
 }
 #agreement {
   margin: 15px 0;
