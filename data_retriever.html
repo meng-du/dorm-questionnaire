@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <title>Data</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-auth.js"></script>
+    </head>
+
+    <body>
+        <div id="data"></div>
+
+        <!-- JavaScript -->
+        <script type="text/javascript" src="js/user.js"></script>
+        <script>
+            var collection = 'personal_info';
+
+            // Firebase
+            var firebaseConfig = {
+                apiKey: 'AIzaSyBvPWLV2yjapJKblBLcfkVbpZC3cXtM0PU',
+                authDomain: 'dorm-network.firebaseapp.com',
+                databaseURL: 'https://dorm-network.firebaseio.com',
+                projectId: 'dorm-network',
+                storageBucket: '',
+                messagingSenderId: '804230274072',
+                appId: '1:804230274072:web:dd26c12bba4f85e64df76d'
+            };
+            firebase.initializeApp(firebaseConfig);
+            var db = firebase.firestore();
+
+            // sign in
+            firebase.auth().signInWithEmailAndPassword(user.email, user.pw).then(function () {
+                db.collection(collection).get().then((querySnapshot) => {
+                    querySnapshot.forEach(function(doc) {
+                        // doc.data() is never undefined for query doc snapshots
+                        console.log(doc);
+                        $('#data').append('<div>{"' + doc.id + '": ' + JSON.stringify(doc.data()) + '},</div>');
+                    });
+                })
+                .catch(function(error) {
+                    // error
+                    alert('Failed to access the database, please check ' +
+                          'your internet connection and try again.\n' + error);
+                    console.log(error);
+                });
+            })
+            .catch(function(error) {
+                // error
+                alert('Failed to log in. Please check your internet connection and try again.\n' + error);
+                window.location.replace('progress.html');  // refresh page
+                console.log(error);
+            });
+
+        </script>
+    </body>
+</html>
