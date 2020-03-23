@@ -16,7 +16,7 @@
         <!-- JavaScript -->
         <script type="text/javascript" src="js/user.js"></script>
         <script>
-            var collection = 'personal_info';
+            var collection = 'personal_info';  // personal_info, 2019nov_data
 
             // Firebase
             var firebaseConfig = {
@@ -37,7 +37,7 @@
                     querySnapshot.forEach(function(doc) {
                         // doc.data() is never undefined for query doc snapshots
                         console.log(doc);
-                        $('#data').append('<div>{"' + doc.id + '": ' + JSON.stringify(doc.data()) + '},</div>');
+                        $('#data').append('<div>{"' + doc.id + '": ' + JSON.stringify(doc.data()) + '}</div>');
                     });
                 })
                 .catch(function(error) {
