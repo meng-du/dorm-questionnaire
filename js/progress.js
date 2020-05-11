@@ -34,7 +34,8 @@ jQuery(document).ready(function() {
     firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
     // sign in
-    firebase.auth().signInWithEmailAndPassword(user.email, user.pw).then(function () {
+    // firebase.auth().signInWithEmailAndPassword(user.email, user.pw).then(function () {
+    firebase.auth().signInAnonymously().then(function () {
         db.collection('count').doc('count').get().then((doc) => {
             let count = doc.data().count;
             let percent = Math.floor(count/194 * 100);
