@@ -43,7 +43,8 @@ def convert_data(datafile, ftype='response'):
     # convert to csv
     data = [flatten(subj) for subj in data]
     col_names, data = fill_missing_keys(data)
-    list2csv(data, datafile.split('.')[0] + '_wide.csv', col_names)
+    csv_name = datafile.split('.')[0] + ('_wide.csv' if ftype == 'response' else '.csv')
+    list2csv(data, csv_name, col_names)
 
     if ftype == 'response':
         q2_long_cols, q2_long_data = cut_and_stack(col_names, data,
