@@ -1,3 +1,9 @@
+var time_instr = {past_q:
+    ['For the following questions, please think back to the time period <strong>before</strong> the transition to ' +
+    'remote learning at UCLA (before you and other residents left the residential hall). before in-person classes ' +
+    'were suspended/when people started leaving campus, generally'],
+    current_q:
+    ['SOME INSTRUCTIONS ABOUT TIME POINT']}
 var roster_questions = {past_q: [
     'Consider the people you liked to spend your free time with. Before UCLA’s transition to remote learning, ' +
     'who were the people you socialized with most often? (Examples: ate meals with, hung out with, studied with, ' +
@@ -27,19 +33,22 @@ var person_questions = {past_q: [
     'How close did you feel to <strong>*</strong>?',
     'How far away do you live to <strong>*</strong>?',
     'How long have you known <strong>*</strong>?',
-    'How often do you socially interact with this alter <strong>1-on-1</strong> through ...',
+    'How often do you socially interact with <strong>*</strong> <strong>1-on-1</strong> through ...',
     '1-on-1 video chat (Zoom, FaceTime, etc.) or phone call?',
     '1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.)?',
     '1-on-1 social media (direct messages on Facebook, Instagram, TikTok, etc.)?',
     'Other (specify) for example, video games, games over video chat?',
-    'How often do you socially interact with this alter <strong>in a group setting</strong> through ...',
+    'How often do you socially interact with <strong>*</strong> <strong>in a group setting</strong> through ...',
     'Group conference call or group video chat (Zoom, FaceTime, etc.)?',
     'Group text or group messaging (iMessage, GroupMe, WhatsApp, etc.)?',
     'Social media (group messages on Facebook, Instagram, TikTok, etc.)?',
     'Other (specify) for example, video games, games over video chat?'
 ]};
-var friend_questions = {questions: ['Are these pairs of people connected with each other?<br><br>' +
-                                    'Please choose "connected" if they socialize with each other regularly, or "not connected" otherwise.']};
+var friend_questions = {past_q: [
+    'Were these pairs of people connected with each other?<br><br>' +
+    'Please choose "connected" if they socialize with each other regularly, or "not connected" otherwise.'],
+    current_q: ['Are these pairs of people connected with each other?<br><br>' +
+                'Please choose "connected" if they socialize with each other regularly, or "not connected" otherwise.']};
 var payment_question = {questions: ['Thank you for completing the survey! Would you like to be paid through Bruincard or cash?']};
 var freq_slider = {
     step: 1, min: 1, max: 5, value: 0,
@@ -112,4 +121,10 @@ var slider_configs = {past_q: [{
                    'More than 5 years'],
 }, {}, freq_slider, freq_slider, freq_slider, freq_slider,
 {}, freq_slider, freq_slider, freq_slider, freq_slider]};
-var question_texts = [{questions: []}, roster_questions, person_questions, friend_questions, payment_question];
+var question_texts = [{past_q: {}}, time_instr, roster_questions, person_questions, friend_questions, payment_question];
+
+// constants
+var NAME_GEN_PAGE = 2;
+var N_REPEATED_Q = 4;
+var N_NONREPEATED_Q = 1;
+var n_questions = N_REPEATED_Q * 2 + N_NONREPEATED_Q;

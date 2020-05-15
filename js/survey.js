@@ -10,11 +10,12 @@ jQuery(document).ready(function() {
     $('#btn-prev').hide();
     $('#no-prev').hide();
     $('#instr-public').hide();
-    var page_i = 0;
+    var page_i = 1;
     var question_i = 0;
     var pair_i = 0;
+    var q_type = 'past_q';  // 'past_q', 'current_q', 'questions'
     var data = {};
-    for (let i in question_texts) {
+    for (let i = 0; i < n_questions; i++) {
         data[i] = {};  // initialize to empty
     }
     $('#p' + page_i).show();
@@ -149,7 +150,7 @@ jQuery(document).ready(function() {
             if (tag == field.val().trim()) {
                 // test if using alphabets and spaces
                 if (! /^[a-zA-Z]+\s+[a-zA-Z\s]*[a-zA-Z]+$/.test(tag)) {
-                    field.get(0).setCustomValidity('Please enter one name at a time (first name last initial) with alphabets and spaces only');
+                    field.get(0).setCustomValidity('Please enter one name at a time (first name & last name) with alphabets and spaces only');
                     field.get(0).reportValidity();
                     valid = false;
                 } else {
@@ -159,7 +160,7 @@ jQuery(document).ready(function() {
                 // test if repeated
                 let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);
                 if (field.tagsManager('tags').includes(tag) || repeat_other_field > -1) {
-                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Daniel K artist, Daniel K newYorkCity, Daniel K chessClub, etc.).');
+                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim newYorkCity, Daniel Kim chessClub, etc.).');
                     field.get(0).reportValidity();
                     if (repeat_other_field > -1) {
                         field.val('');
@@ -186,7 +187,6 @@ jQuery(document).ready(function() {
     }
 
     // set up naming question
-    // var name_typeahead_source = [];
     $('#dorm-names').tagsManager({
         deleteTagsOnBackspace: false,
         tagsContainer: '#dorm-names-container',
@@ -285,7 +285,7 @@ jQuery(document).ready(function() {
 
     // tick label rotation
     var slider_config_i = 0;
-    $('#slider').slider(slider_configs[slider_config_i]);
+    $('#slider').slider(slider_configs[q_type][slider_config_i]);
     function rotate_labels(num_labels) {
         // reset
         $('.slider-tick-label').css('transform', '');
@@ -313,7 +313,7 @@ jQuery(document).ready(function() {
             }
         }
     }
-    rotate_labels(slider_configs[slider_config_i]['ticks'].length);
+    rotate_labels(slider_configs[q_type][slider_config_i]['ticks'].length);
 
     // initialize to unselected css
     $('.label-is-selection').css('font-weight', '400');
@@ -329,12 +329,12 @@ jQuery(document).ready(function() {
     $("#slider").on('slideStop change', slider_onclick);
 
     // replace * in question with user input names
-    function tie_q_prepare(named_people) {
+    function person_q_prepare(named_people) {
         if (named_people.size < 1) {
-            tie_questions.questions = [];
+            person_questions[q_type] = [];
         }
         var q_with_names = [];
-        for (let q of tie_questions.questions) {
+        for (let q of person_questions[q_type]) {
             let this_q_with_names = [];
             for (let name of named_people) {
                 this_q_with_names.push(q.replace('*', name));
@@ -342,11 +342,11 @@ jQuery(document).ready(function() {
             shuffle(this_q_with_names);
             q_with_names.push(...this_q_with_names);
         }
-        tie_questions.questions = q_with_names;
+        person_questions[q_type] = q_with_names;
     }
 
     // data & reset
-    function tie_q_onfinish(next_q_text) {
+    function person_q_onfinish(next_q_text) {
         let response = $('#slider').val();
         let question = $('.question-text').get(0).textContent;
 
@@ -371,9 +371,9 @@ jQuery(document).ready(function() {
             // changing question, changing slider labels
             ++slider_config_i;
             $('#slider').slider('destroy');
-            $('#slider').slider(slider_configs[slider_config_i]);
+            $('#slider').slider(slider_configs[q_type][slider_config_i]);
             $("#slider").on('slideStop change', slider_onclick);
-            rotate_labels(slider_configs[slider_config_i]['ticks'].length);
+            rotate_labels(slider_configs[q_type][slider_config_i]['ticks'].length);
         }
         // reset slider value and color
         $('#slider').val(1);
@@ -411,7 +411,7 @@ jQuery(document).ready(function() {
     // get pairs from named people and initialize the first batch of questions
     function friend_q_prepare(named_people) {
         if (named_people.length < 2) {
-            friend_questions.questions = [];
+            friend_questions[q_type] = [];
         }
         // get pairs
         friend_questions.pairs = [];
@@ -426,10 +426,10 @@ jQuery(document).ready(function() {
         // duplicate questions
         let new_q = [];
         let num_repeat = Math.ceil(friend_questions.pairs.length / FRIEND_PAIRS_PER_PAGE);
-        for (let q of friend_questions.questions) {
+        for (let q of friend_questions[q_type]) {
             new_q.push(...Array.apply(null, Array(num_repeat)).map(_ => q));
         }
-        friend_questions.questions = new_q;
+        friend_questions[q_type] = new_q;
         // set up html rows of pairs
         let pair_i_end = pair_i + FRIEND_PAIRS_PER_PAGE;
         for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
@@ -523,18 +523,18 @@ jQuery(document).ready(function() {
             return;
         }
         // save current data
-        let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i - 1]);
+        let result = q_onfinish_funcs[page_i](question_texts[page_i][q_type][question_i - 1]);
         if (!result) {
             return;
         }
 
         // go back to previous question
         --question_i;
-        $('.question-text').html(question_texts[page_i].questions[question_i]);
+        $('.question-text').html(question_texts[page_i][q_type][question_i]);
         add_data();
 
         // first question
-        if (page_i == 1 && question_i == 0) {
+        if (page_i == NAME_GEN_PAGE && question_i == 0) {
             // remove the public figure wording
             $('#instr-public').hide();
             // remove prev button
@@ -547,7 +547,8 @@ jQuery(document).ready(function() {
 
     // NEXT BUTTON
 
-    var q_onfinish_funcs = [demographic_onfinish, roster_q_onfinish, tie_q_onfinish,
+    var q_onfinish_funcs = [demographic_onfinish, function(){return true;},
+                            roster_q_onfinish, person_q_onfinish,
                             friend_q_onfinish, payment_q_onfinish];
 
     function normal_next_btn() {
@@ -557,12 +558,12 @@ jQuery(document).ready(function() {
     }
 
     $('#btn-next').click((e) => {
-        if (page_i == 1 && !check_entered_text()) {
+        if (page_i == NAME_GEN_PAGE && !check_entered_text()) {
             return;  // entered text but didn't add for naming question
         }
         // no answer
         if ($('#btn-next').hasClass('disabled')) {
-            if (page_i == 1) {
+            if (page_i == NAME_GEN_PAGE) {
                 $('#invalid1').show();
                 $('#btn-next').text('Yes, I can\'t think of anyone that fits this question');
                 $('#btn-next').addClass('btn-warning');
@@ -577,12 +578,12 @@ jQuery(document).ready(function() {
             return;
         }
         // submit data
-        let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i + 1]);
+        let result = q_onfinish_funcs[page_i](question_texts[page_i][q_type][question_i + 1]);
         if (!result) {
             return;
         }
         // proceed
-        if (question_i < question_texts[page_i].questions.length - 1) {
+        if (question_i < question_texts[page_i][q_type].length - 1) {
             // add public figure instructions for non-first naming questions
             if (page_i == 1 && question_i == 0) {
                 $('#instr-public').show();
@@ -590,10 +591,10 @@ jQuery(document).ready(function() {
 
             // next question
             ++question_i;
-            $('.question-text').html(question_texts[page_i].questions[question_i]);
+            $('.question-text').html(question_texts[page_i][q_type][question_i]);
 
             // roster last question
-            if (page_i == 1 && question_i == question_texts[page_i].questions.length - 1) {
+            if (page_i == 1 && question_i == question_texts[page_i][q_type].length - 1) {
                 $('#no-prev').show();
             }
 
@@ -607,7 +608,7 @@ jQuery(document).ready(function() {
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
             // prepare subsequent questions
-            if (page_i == 1) {
+            if (page_i == NAME_GEN_PAGE) {
                 // get all named people
                 var named_people = new Set([]);
                 for (let q_i in data[1]) {
@@ -623,26 +624,39 @@ jQuery(document).ready(function() {
                                             ...outside_names,
                                             ...named_people])  // append to set
                 }
-                tie_q_prepare(named_people);
+                person_q_prepare(named_people);
                 friend_q_prepare(named_people);
             }
             // next page
             question_i = 0;
             let done = false;
             while (page_i < $('.page').length - 1) {
-                ++page_i;
-                if (page_i == 2) {
+                if (page_i == N_REPEATED_Q) {
+                    if (q_type == 'past_q') {
+                        page_i = 1;  // restart from name gen 1
+                        q_type = 'current_q';  // change to current time
+                    } else if (q_type == 'current_q') {
+                        q_type = 'questions'
+                        ++page_i;
+                    }
+                } else {
+                    ++page_i;
+                }
+                if (page_i == NAME_GEN_PAGE - 1) {
+                    $('#btn-next').removeClass('disabled');
+                }
+                if (page_i == NAME_GEN_PAGE + 1) {
                     $('#btn-prev').hide();
                     $('#no-prev').hide();
                 }
-                if (page_i == 4) {
+                if (page_i == n_questions) {
                     $('#btn-next').text('Confirm');
                     increase_completion_count(); // completed + 1
                 }
-                if (question_texts[page_i].questions.length > 0) {
-                    $('.question-text').html(question_texts[page_i].questions[question_i]);
+                if (Object.keys(question_texts[page_i]).length > 0) {
+                    $('.question-text').html(question_texts[page_i][q_type][question_i]);
                     $('#p' + page_i).show();
-                    if (page_i == 2) {
+                    if (page_i == 3) {  // TODO magic num
                         $('#slider').slider('refresh');
                     }
                     done = true;
@@ -659,15 +673,15 @@ jQuery(document).ready(function() {
         $('.invalid').hide();
         normal_next_btn();
         // show previous button
-        if (page_i == 1 && question_i > 0) {
+        if (page_i == NAME_GEN_PAGE && question_i > 0) {
             $('#btn-prev').show();
         }
         // last page last question, change button text
         if ((page_i == $('.page').length - 2) &&
-            (question_i == question_texts[page_i].questions.length - 1)) {
+            (question_i == question_texts[page_i][q_type].length - 1)) {
             $('#btn-next').text('Finish');
         }
     });
 
-    hookWindow = true;
+    // hookWindow = true;
 });
