@@ -6,11 +6,14 @@ var roster_questions = {questions: [
     'for example: sense of humor, interests, lifestyle, knowledge, being likable, kindness.<br><br>Who do <i>you</i> ' +
     'want to be more like (in these or other ways), even if you are not friends with them?',
 ]}
-var tie_questions = {questions: [
-    'How often do you interact with <strong>*</strong>, either in person or online?',
-    'How close do you feel to <strong>*</strong>?',
+var person_questions = {questions: [
+    'How often did you interact with <strong>*</strong>, either in person or online?',
+    'How close did you feel to <strong>*</strong>?',
+    'How far away did you live to <strong>*</strong>?',
+    'How long have you known <strong>*</strong>?'
 ]};
-var friend_questions = {questions: ['Are these pairs of people connected with each other?<br><br>Please choose "connected" if they socialize with each other regularly, or "not connected" otherwise.']};
+var friend_questions = {questions: ['Are these pairs of people connected with each other?<br><br>' +
+                                    'Please choose "connected" if they socialize with each other regularly, or "not connected" otherwise.']};
 var payment_question = {questions: ['Thank you for completing the survey! Would you like to be paid through Bruincard or cash?']};
 var slider_configs = [{
     step: 1, min: 1, max: 5, value: 0,
@@ -28,4 +31,4 @@ var slider_configs = [{
                    'Very close',
                    'Extremely close'],
 }];
-var question_texts = [{questions: []}, roster_questions, tie_questions, friend_questions, payment_question];
+var question_texts = [{questions: []}, roster_questions, person_questions, friend_questions, payment_question];
