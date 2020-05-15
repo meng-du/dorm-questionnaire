@@ -3,7 +3,7 @@ from data_conversion_util import *
 
 def convert_data(datafile, ftype='response'):
     """
-    :param type: (string) either 'response' or 'subj_info'
+    :param ftype: (string) either 'response' or 'subj_info'
     """
     data = load_json(datafile, multiple_obj=True)
     # change id to a value not key
@@ -13,7 +13,7 @@ def convert_data(datafile, ftype='response'):
         if ftype == 'subj_info':
             continue
 
-        # now type == response
+        # now ftype == response
         # closeness/time question
         close_i, time_i = 0, 0
         close_dict, time_dict = {}, {}
@@ -43,19 +43,25 @@ def convert_data(datafile, ftype='response'):
     # convert to csv
     data = [flatten(subj) for subj in data]
     col_names, data = fill_missing_keys(data)
-    list2csv(data, datafile.split('.')[0] + '.csv', col_names)
+    csv_name = datafile.split('.')[0] + ('_wide.csv' if ftype == 'response' else '.csv')
+    list2csv(data, csv_name, col_names)
 
     if ftype == 'response':
         q2_long_cols, q2_long_data = cut_and_stack(col_names, data,
                                                 cut_start=131, cut_length=5, cut_number=114,
                                                 skip_cols=list(range(5, 131)) + list(range(701, 7085)))
+        q2_long_data = [row for row in q2_long_data if len(row[5]) > 0]
+        q2_long_cols[5:10] = ('question', 'response', 'response_text', 'timestamp', 'name')
         list2csv(q2_long_data, 'closeness_data_long.csv', q2_long_cols)
 
         q3_long_cols, q3_long_data = cut_and_stack(col_names, data,
                                                 cut_start=701, cut_length=4, cut_number=1596,
                                                 skip_cols=range(5, 701))
+        q3_long_data = [row for row in q3_long_data if len(row[5]) > 0]
+        q3_long_cols[5:7] = ('name1', 'name2')
         list2csv(q3_long_data, 'friendship_data_long.csv', q3_long_cols)
 
 
-convert_data('subj_info.txt', ftype='subj_info')
-# convert_data('2019nov_data.txt', ftype='response')
+if __name__ == '__main__':
+    # convert_data('subj_info.txt', ftype='subj_info')
+    convert_data('2019nov_data.txt', ftype='response')
