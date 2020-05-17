@@ -10,14 +10,11 @@ jQuery(document).ready(function() {
     $('#btn-prev').hide();
     $('#no-prev').hide();
     $('#instr-public').hide();
-    var page_i = 1;
+    var page_i = 2;
     var question_i = 0;
     var pair_i = 0;
     var q_type = 'past_q';  // 'past_q', 'current_q', 'questions'
-    var data = {};
-    for (let i = 0; i < n_questions; i++) {
-        data[i] = {};  // initialize to empty
-    }
+    var roster_data = {past_q: {}, current_q: {}};
     $('#p' + page_i).show();
 
     // prevent closing window
@@ -80,7 +77,11 @@ jQuery(document).ready(function() {
     // send data
     function save2firebase(data, q_key=-1) {
         q_key = q_key == -1 ? question_i : q_key;
-        let db_key = page_i + '.' + q_key;
+        let db_key = page_i + '.';
+        if (page_i >= NAME_GEN_PAGE && q_type != 'questions') {
+            db_key += q_type + '.';
+        }
+        db_key += q_key;
         db.collection(DB_DATA_COLLECTION).doc(survey_id).update({ [db_key]: data })
         .catch(function(error) {
             // error
@@ -126,7 +127,7 @@ jQuery(document).ready(function() {
             return false;
         }
 
-        data[page_i] = {
+        let data = {
             'other_name': $('#other-name').val(),
             major: $('#major').val(),
             zipcode: $('#zipcode').val(),
@@ -134,7 +135,7 @@ jQuery(document).ready(function() {
             timestamp: Date.now()
         }
 
-        save2firebase(data[page_i]);
+        save2firebase(data);
 
         return true;
     }
@@ -265,13 +266,13 @@ jQuery(document).ready(function() {
         // name_typeahead_source.push(...dorm_names, ...outsider_names);
 
         // save to firebase
-        data[page_i][question_i] = {
+        roster_data[q_type][question_i] = {
             question: $('.question-text').get(0).textContent,
             names_in_dorm: Object.assign([], dorm_names),
             names_outside: Object.assign([], outsider_names),
             timestamp: Date.now()
         };
-        save2firebase(data[page_i][question_i]);
+        save2firebase(roster_data[q_type][question_i]);
 
         // next question
         if (next_q_text) {
@@ -281,11 +282,37 @@ jQuery(document).ready(function() {
         return true;
     }
 
-    // TIE STRENGTH QUESTIONS
+    // PERSON QUESTIONS
 
+    // var slider_config_i = 0; // todo
+    var slider_clicks = [];
+
+    function slider_onclick(ev) {  // slider on change/on click
+        let parent = $(ev.target).parent().attr('id');
+        slider_clicks[parent[14]] = true;  // last char of parent id
+        if (slider_clicks.every((elt) => {return elt})) {
+            $('#btn-next').removeClass('disabled');
+        }
+        // remove unselected css
+        $('#' + parent + ' .label-is-selection').css('font-weight', '');
+        $('#' + parent + ' .slider-handle').css('background-image', '');
+    }
+
+    function create_slider(elt, wrapper, config) {
+        $(elt).slider(config);
+        $(wrapper + ' .slider').css('height', config.max * 1.4 + 'rem');
+        $(elt).slider('refresh');
+
+        // initialize to unselected css
+        $('.label-is-selection').css('font-weight', '400');
+        $('.slider-handle').css('background-image',
+                                'linear-gradient(to bottom,#ccc 0,#eee 100%)');
+        // clicks
+        $(elt).on('slideStop change', slider_onclick);
+        slider_clicks.push(false);
+    }
+    create_slider('#slider', '#slider-wrapper0', slider_configs[q_type][0])
     // tick label rotation
-    var slider_config_i = 0;
-    $('#slider').slider(slider_configs[q_type][slider_config_i]);
     function rotate_labels(num_labels) {
         // reset
         $('.slider-tick-label').css('transform', '');
@@ -309,27 +336,15 @@ jQuery(document).ready(function() {
                 translate += num_labels < 5 ? 8 : 0;
                 $('.slider-tick-label-container').css('transform', 'translateY(' + translate + 'px)');
                 let add_margin = rotation == 90 ? 9 : 6;
-                $('#slider-wrapper').css('margin-bottom', add_margin + 'rem');
+                $('#slider-wrapper0').css('margin-bottom', add_margin + 'rem');
             }
         }
     }
-    rotate_labels(slider_configs[q_type][slider_config_i]['ticks'].length);
-
-    // initialize to unselected css
-    $('.label-is-selection').css('font-weight', '400');
-    $('.slider-handle').css('background-image',
-                            'linear-gradient(to bottom,#ccc 0,#eee 100%)');
-    // slider on change/on click
-    function slider_onclick(ev) {
-        $('#btn-next').removeClass('disabled');
-        // remove unselected css
-        $('.label-is-selection').css('font-weight', '');
-        $('.slider-handle').css('background-image', '');
-    }
-    $("#slider").on('slideStop change', slider_onclick);
+    // rotate_labels(slider_configs[q_type][slider_config_i]['ticks'].length);
 
     // replace * in question with user input names
     function person_q_prepare(named_people) {
+        // generate questions given names
         if (named_people.size < 1) {
             person_questions[q_type] = [];
         }
@@ -343,25 +358,49 @@ jQuery(document).ready(function() {
             q_with_names.push(...this_q_with_names);
         }
         person_questions[q_type] = q_with_names;
+
+        // append questions to DOM
+        if (q_type == 'current_q') {
+            $('#slider').slider('destroy');
+            create_slider('#slider', '#slider-wrapper0', slider_configs[q_type][0])
+            $('#more-questions').empty();
+        }
+        for (let q_i = 1; q_i < slider_configs[q_type].length; q_i++) {
+            $('#more-questions').append($('<div>', {
+                class: "question-text later-q-text",
+                html: person_questions[q_type][q_i]
+            }));
+            $('#more-questions').append($('<div>', {
+                id: "slider-wrapper" + q_i,
+                class: "slider-wrapper"
+            }).append($('<input>', {
+                id: "slider" + q_i,
+                class: "slide",
+                type: "text",
+                'data-slider-value': 1,
+                'data-slider-orientation': "vertical"
+            })));
+            create_slider('#slider' + q_i, '#slider-wrapper' + q_i, slider_configs[q_type][q_i])
+        }
     }
 
     // data & reset
     function person_q_onfinish(next_q_text) {
         let response = $('#slider').val();
-        let question = $('.question-text').get(0).textContent;
+        let question = $('.question-text').get(0).textContent; // todo
 
         // save data
         let person = $('.question-text').html().split('>')[1].split('<')[0];
         let q = $('.question-text').html().split(' ')[1]
         let key = (q == 'close' ? 'close' : 'time') + ' - ' + person;
 
-        data[page_i][key] = {
+        let data = {
             question: question,
             response: response,
             response_text: $('.label-is-selection').text(),
             timestamp: Date.now()
         }
-        save2firebase(data[page_i][key], key);
+        save2firebase(data, key);
 
         // next question
         if (!next_q_text) {
@@ -373,15 +412,17 @@ jQuery(document).ready(function() {
             $('#slider').slider('destroy');
             $('#slider').slider(slider_configs[q_type][slider_config_i]);
             $("#slider").on('slideStop change', slider_onclick);
-            rotate_labels(slider_configs[q_type][slider_config_i]['ticks'].length);
+            // rotate_labels(slider_configs[q_type][slider_config_i]['ticks'].length);
         }
         // reset slider value and color
         $('#slider').val(1);
-        $('#slider').slider('refresh');
+        $('.slide').slider('refresh');
         $('.label-is-selection').css('font-weight', '400');
         $('.slider-handle').css('background-image',
                                 'linear-gradient(to bottom,#ccc 0,#eee 100%)');
-
+        for (let i in slider_clicks) {
+            slider_clicks[i] = false;
+        }
         return true;
     }
 
@@ -469,13 +510,13 @@ jQuery(document).ready(function() {
             let pair = $(elm).children('.col-6-auto').html().split(' <strong>&amp;</strong> ');
 
             let key = [pair[0], pair[1]].sort().join('&');
-            data[page_i][key] = {
+            let data = {
                 '0': pair[0],
                 '1': pair[1],
                 response: $(elm).find('input').val() == '0' ? 'n' : 'y',
                 timestamp: Date.now()
             }
-            save2firebase(data[page_i][key], key);
+            save2firebase(data, key);
         });
 
         // next question
@@ -507,13 +548,13 @@ jQuery(document).ready(function() {
 
     function add_data() {
         // show previous data
-        data[page_i][question_i].names_in_dorm.forEach(
+        roster_data[q_type][question_i].names_in_dorm.forEach(
             (tag) => $('#dorm-names').tagsManager('pushTag', tag)
         );
-        data[page_i][question_i].names_outside.forEach(
+        roster_data[q_type][question_i].names_outside.forEach(
             (tag) => $('#outsider-names').tagsManager('pushTag', tag)
         );
-        if (data[page_i][question_i].names_in_dorm.length + data[page_i][question_i].names_outside.length == 0) {
+        if (roster_data[q_type][question_i].names_in_dorm.length + roster_data[q_type][question_i].names_outside.length == 0) {
             $('#btn-next').addClass('disabled');
         }
     }
@@ -585,7 +626,7 @@ jQuery(document).ready(function() {
         // proceed
         if (question_i < question_texts[page_i][q_type].length - 1) {
             // add public figure instructions for non-first naming questions
-            if (page_i == 1 && question_i == 0) {
+            if (page_i == NAME_GEN_PAGE && question_i == 0) {
                 $('#instr-public').show();
             }
 
@@ -594,12 +635,12 @@ jQuery(document).ready(function() {
             $('.question-text').html(question_texts[page_i][q_type][question_i]);
 
             // roster last question
-            if (page_i == 1 && question_i == question_texts[page_i][q_type].length - 1) {
+            if (page_i == NAME_GEN_PAGE && question_i == question_texts[page_i][q_type].length - 1) {
                 $('#no-prev').show();
             }
 
             // add data if there is any
-            if (page_i == 1 && data[page_i].hasOwnProperty(question_i)) {
+            if (page_i == NAME_GEN_PAGE && roster_data[q_type].hasOwnProperty(question_i)) {
                 add_data();
             } else {
                 $('#btn-next').addClass('disabled');
@@ -608,16 +649,17 @@ jQuery(document).ready(function() {
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
             // prepare subsequent questions
+            let named_people = new Set([]);
             if (page_i == NAME_GEN_PAGE) {
                 // get all named people
-                var named_people = new Set([]);
-                for (let q_i in data[1]) {
+                let num_q = 2;  // just the first two roster questions
+                for (let q_i = 0; q_i < num_q; q_i++) {
                     let dorm_names = [];
                     let outside_names = [];
-                    data[1][q_i].names_in_dorm.forEach(
+                    roster_data[q_type][q_i].names_in_dorm.forEach(
                         (tag) => dorm_names.push(tag + ' (2' + dorm_wing[0].toUpperCase() + ')')
                     );
-                    data[1][q_i].names_outside.forEach(
+                    roster_data[q_type][q_i].names_outside.forEach(
                         (tag) => outside_names.push(tag + ' (non-2' + dorm_wing[0].toUpperCase() + ')')
                     );
                     named_people = new Set([...dorm_names,
@@ -653,11 +695,11 @@ jQuery(document).ready(function() {
                     $('#btn-next').text('Confirm');
                     increase_completion_count(); // completed + 1
                 }
-                if (Object.keys(question_texts[page_i]).length > 0) {
+                if (question_texts[page_i][q_type].length > 0) {
                     $('.question-text').html(question_texts[page_i][q_type][question_i]);
                     $('#p' + page_i).show();
-                    if (page_i == 3) {  // TODO magic num
-                        $('#slider').slider('refresh');
+                    if (page_i == NAME_GEN_PAGE + 1) {
+                        $('.slide').slider('refresh');
                     }
                     done = true;
                     break;

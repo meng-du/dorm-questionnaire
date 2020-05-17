@@ -1,9 +1,9 @@
 var time_instr = {past_q:
-    ['For the following questions, please think back to the time period <strong>before</strong> the transition to ' +
-    'remote learning at UCLA (before you and other residents left the residential hall). before in-person classes ' +
-    'were suspended/when people started leaving campus, generally'],
+    ['For the following questions, please think back to the time period before the transition to remote learning ' +
+     'at UCLA (before people started leaving campus/before in-person classes were suspended)'],
     current_q:
-    ['SOME INSTRUCTIONS ABOUT TIME POINT']}
+    ['For the following questions, please consider the people you interact with now (during physical ' +
+    'distancing/COVID-19 pandemic)']}
 var roster_questions = {past_q: [
     'Consider the people you liked to spend your free time with. Before UCLA’s transition to remote learning, ' +
     'who were the people you socialized with most often? (Examples: ate meals with, hung out with, studied with, ' +
@@ -36,7 +36,7 @@ var person_questions = {past_q: [
     'How often do you socially interact with <strong>*</strong> <strong>1-on-1</strong> through ...',
     '1-on-1 video chat (Zoom, FaceTime, etc.) or phone call?',
     '1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.)?',
-    '1-on-1 social media (direct messages on Facebook, Instagram, TikTok, etc.)?',
+    '1-on-1 on social media (direct messages on Facebook, Instagram, TikTok, etc.)?',
     'Other (specify) for example, video games, games over video chat?',
     'How often do you socially interact with <strong>*</strong> <strong>in a group setting</strong> through ...',
     'Group conference call or group video chat (Zoom, FaceTime, etc.)?',
