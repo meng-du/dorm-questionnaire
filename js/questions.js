@@ -46,7 +46,7 @@ var person_questions = {past_q: [
 ]};
 var friend_questions = {past_q: [
     'Were these pairs of people connected with each other?<br><br>' +
-    'Please choose "connected" if they socialize with each other regularly, or "not connected" otherwise.'],
+    'Please choose "connected" if they socialized with each other regularly, or "not connected" otherwise.'],
     current_q: ['Are these pairs of people connected with each other?<br><br>' +
                 'Please choose "connected" if they socialize with each other regularly, or "not connected" otherwise.']};
 var payment_question = {questions: ['Thank you for completing the survey! Would you like to be paid through Bruincard or cash?']};
@@ -125,6 +125,3 @@ var question_texts = [{past_q: {}}, time_instr, roster_questions, person_questio
 
 // constants
 var NAME_GEN_PAGE = 2;
-var N_REPEATED_Q = 4;
-var N_NONREPEATED_Q = 1;
-var n_questions = N_REPEATED_Q * 2 + N_NONREPEATED_Q;

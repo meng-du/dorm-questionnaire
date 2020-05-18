@@ -275,10 +275,8 @@ jQuery(document).ready(function() {
         save2firebase(roster_data[q_type][question_i]);
 
         // next question
-        if (next_q_text) {
-            $('#dorm-names').tagsManager('empty');
-            $('#outsider-names').tagsManager('empty');
-        }
+        $('#dorm-names').tagsManager('empty');
+        $('#outsider-names').tagsManager('empty');
         return true;
     }
 
@@ -673,7 +671,7 @@ jQuery(document).ready(function() {
             question_i = 0;
             let done = false;
             while (page_i < $('.page').length - 1) {
-                if (page_i == N_REPEATED_Q) {
+                if (page_i == NAME_GEN_PAGE + 2) {
                     if (q_type == 'past_q') {
                         page_i = 1;  // restart from name gen 1
                         q_type = 'current_q';  // change to current time
@@ -691,7 +689,7 @@ jQuery(document).ready(function() {
                     $('#btn-prev').hide();
                     $('#no-prev').hide();
                 }
-                if (page_i == n_questions) {
+                if (page_i == $('.page').length - 2) {
                     $('#btn-next').text('Confirm');
                     increase_completion_count(); // completed + 1
                 }
