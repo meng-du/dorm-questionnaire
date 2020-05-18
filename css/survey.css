@@ -12,9 +12,9 @@
   font-weight: 500;
   margin-bottom: 1rem;
 }
-.later-q-text {
-  margin-top: 3rem;
-  margin-bottom: 1.2rem;
+.p3-q-text {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
 }
 #btn-next {
   margin-bottom: 2rem;
@@ -68,9 +68,6 @@
 }
 #duplicate {
   margin-bottom: 1.5rem !important;
-}
-#slider-wrapper0 {
-  margin-top: 30px;
 }
 .slider-wrapper {
   margin-left: 2rem;

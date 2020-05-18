@@ -267,7 +267,7 @@ jQuery(document).ready(function() {
 
         // save to firebase
         roster_data[q_type][question_i] = {
-            question: $('.question-text').get(0).textContent,
+            question: $('#p' + NAME_GEN_PAGE + ' .question-text').get(0).textContent,
             names_in_dorm: Object.assign([], dorm_names),
             names_outside: Object.assign([], outsider_names),
             timestamp: Date.now()
@@ -284,7 +284,6 @@ jQuery(document).ready(function() {
 
     // PERSON QUESTIONS
 
-    // var slider_config_i = 0; // todo
     var slider_clicks = [];
 
     function slider_onclick(ev) {  // slider on change/on click
@@ -311,7 +310,6 @@ jQuery(document).ready(function() {
         $(elt).on('slideStop change', slider_onclick);
         slider_clicks.push(false);
     }
-    create_slider('#slider', '#slider-wrapper0', slider_configs[q_type][0])
     // tick label rotation
     function rotate_labels(num_labels) {
         // reset
@@ -342,35 +340,14 @@ jQuery(document).ready(function() {
     }
     // rotate_labels(slider_configs[q_type][slider_config_i]['ticks'].length);
 
-    // replace * in question with user input names
-    function person_q_prepare(named_people) {
-        // generate questions given names
-        if (named_people.size < 1) {
-            person_questions[q_type] = [];
-        }
-        var q_with_names = [];
-        for (let q of person_questions[q_type]) {
-            let this_q_with_names = [];
-            for (let name of named_people) {
-                this_q_with_names.push(q.replace('*', name));
-            }
-            shuffle(this_q_with_names);
-            q_with_names.push(...this_q_with_names);
-        }
-        person_questions[q_type] = q_with_names;
-
-        // append questions to DOM
-        if (q_type == 'current_q') {
-            $('#slider').slider('destroy');
-            create_slider('#slider', '#slider-wrapper0', slider_configs[q_type][0])
-            $('#more-questions').empty();
-        }
-        for (let q_i = 1; q_i < slider_configs[q_type].length; q_i++) {
-            $('#more-questions').append($('<div>', {
-                class: "question-text later-q-text",
-                html: person_questions[q_type][q_i]
+    function append_slider_qs(questions, configs) {
+        for (let q_i in questions) {
+            $('#p3-questions').append($('<div>', {
+                id: 'q-text' + q_i,
+                class: "question-text p3-q-text",
+                html: questions[q_i]
             }));
-            $('#more-questions').append($('<div>', {
+            $('#p3-questions').append($('<div>', {
                 id: "slider-wrapper" + q_i,
                 class: "slider-wrapper"
             }).append($('<input>', {
@@ -380,39 +357,54 @@ jQuery(document).ready(function() {
                 'data-slider-value': 1,
                 'data-slider-orientation': "vertical"
             })));
-            create_slider('#slider' + q_i, '#slider-wrapper' + q_i, slider_configs[q_type][q_i])
+            create_slider('#slider' + q_i, '#slider-wrapper' + q_i, configs[q_i])
         }
     }
 
-    // data & reset
-    function person_q_onfinish(next_q_text) {
-        let response = $('#slider').val();
-        let question = $('.question-text').get(0).textContent; // todo
-
-        // save data
-        let person = $('.question-text').html().split('>')[1].split('<')[0];
-        let q = $('.question-text').html().split(' ')[1]
-        let key = (q == 'close' ? 'close' : 'time') + ' - ' + person;
-
-        let data = {
-            question: question,
-            response: response,
-            response_text: $('.label-is-selection').text(),
-            timestamp: Date.now()
+    // replace * in question with user input names
+    function person_q_prepare(named_people) {
+        // generate questions given names
+        if (named_people.size < 1) {
+            person_questions[q_type] = [];
         }
-        save2firebase(data, key);
+        var q_with_names = [];
+        for (let name of named_people) {
+            let this_q_with_names = [];
+            for (let q of person_questions[q_type]) {
+                this_q_with_names.push(q.replace('*', name));
+            }
+            q_with_names.push(this_q_with_names);
+        }
+        person_questions[q_type] = q_with_names;
+
+        // append questions to DOM
+        if (q_type == 'current_q') {
+            $('#p3-questions').empty();
+        }
+        append_slider_qs(person_questions[q_type][0], slider_configs[q_type])
+    }
+
+    // data & reset
+    function person_q_onfinish(next_q) {
+        // save data
+        $('.p3-q-text').each((i, elt) => {
+            let question = $(elt).get(0).textContent;
+            let response = $('#slider' + i).val();
+            let resp_txt = $('#slider-wrapper' + i + ' .label-is-selection').text();
+            let person = $(elt).html().split('>')[1].split('<')[0];
+
+            let data = {
+                question: question,
+                response: response,
+                response_text: resp_txt,
+                timestamp: Date.now()
+            }
+            save2firebase(data, person + ' - ' + i);
+        });
 
         // next question
-        if (!next_q_text) {
+        if (!next_q) {
             return true;
-        }
-        if (question.substr(0, 15) != next_q_text.substr(0, 15)) {
-            // changing question, changing slider labels
-            ++slider_config_i;
-            $('#slider').slider('destroy');
-            $('#slider').slider(slider_configs[q_type][slider_config_i]);
-            $("#slider").on('slideStop change', slider_onclick);
-            // rotate_labels(slider_configs[q_type][slider_config_i]['ticks'].length);
         }
         // reset slider value and color
         $('#slider').val(1);
@@ -420,8 +412,13 @@ jQuery(document).ready(function() {
         $('.label-is-selection').css('font-weight', '400');
         $('.slider-handle').css('background-image',
                                 'linear-gradient(to bottom,#ccc 0,#eee 100%)');
+        // reset clicks
         for (let i in slider_clicks) {
             slider_clicks[i] = false;
+        }
+        // put up new questions
+        for (let i in next_q) {
+            $('#q-text' + i).html(next_q[i]);
         }
         return true;
     }
@@ -632,7 +629,9 @@ jQuery(document).ready(function() {
 
             // next question
             ++question_i;
-            $('.question-text').html(question_texts[page_i][q_type][question_i]);
+            if (page_i != NAME_GEN_PAGE + 1) {
+                $('.question-text').html(question_texts[page_i][q_type][question_i]);
+            }
 
             // roster last question
             if (page_i == NAME_GEN_PAGE && question_i == question_texts[page_i][q_type].length - 1) {
@@ -652,7 +651,7 @@ jQuery(document).ready(function() {
             let named_people = new Set([]);
             if (page_i == NAME_GEN_PAGE) {
                 // get all named people
-                let num_q = 2;  // just the first two roster questions
+                let num_q = (q_type == 'past_q') ? 2 : 3;  // just the first 2 or 3 roster Qs
                 for (let q_i = 0; q_i < num_q; q_i++) {
                     let dorm_names = [];
                     let outside_names = [];
@@ -666,6 +665,7 @@ jQuery(document).ready(function() {
                                             ...outside_names,
                                             ...named_people])  // append to set
                 }
+                shuffle(named_people);
                 person_q_prepare(named_people);
                 friend_q_prepare(named_people);
             }
@@ -696,7 +696,9 @@ jQuery(document).ready(function() {
                     increase_completion_count(); // completed + 1
                 }
                 if (question_texts[page_i][q_type].length > 0) {
-                    $('.question-text').html(question_texts[page_i][q_type][question_i]);
+                    if (page_i != NAME_GEN_PAGE + 1) {
+                        $('.question-text').html(question_texts[page_i][q_type][question_i]);
+                    }
                     $('#p' + page_i).show();
                     if (page_i == NAME_GEN_PAGE + 1) {
                         $('.slide').slider('refresh');
@@ -726,4 +728,5 @@ jQuery(document).ready(function() {
     });
 
     // hookWindow = true;
+    // person_q_prepare(['wakaka ka', 'ahahah ha']);
 });
