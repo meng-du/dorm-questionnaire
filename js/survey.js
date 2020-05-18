@@ -10,10 +10,10 @@ jQuery(document).ready(function() {
     $('#btn-prev').hide();
     $('#no-prev').hide();
     $('#instr-public').hide();
-    var page_i = 2;
+    var page_i = 3;
     var question_i = 0;
     var pair_i = 0;
-    var q_type = 'past_q';  // 'past_q', 'current_q', 'questions'
+    var q_type = 'current_q';  // 'past_q', 'current_q', 'questions'
     var roster_data = {past_q: {}, current_q: {}};
     $('#p' + page_i).show();
 
@@ -295,24 +295,10 @@ jQuery(document).ready(function() {
         $('#' + parent + ' .slider-handle').css('background-image', '');
     }
 
-    function create_slider(elt, wrapper, config) {
-        $(elt).slider(config);
-        $(wrapper + ' .slider').css('height', config.max * 1.4 + 'rem');
-        $(elt).slider('refresh');
-
-        // initialize to unselected css
-        $('.label-is-selection').css('font-weight', '400');
-        $('.slider-handle').css('background-image',
-                                'linear-gradient(to bottom,#ccc 0,#eee 100%)');
-        // clicks
-        $(elt).on('slideStop change', slider_onclick);
-        slider_clicks.push(false);
-    }
-    // tick label rotation
-    function rotate_labels(num_labels) {
+    function rotate_labels(wrapper, num_labels) {  // tick label rotation
         // reset
-        $('.slider-tick-label').css('transform', '');
-        $('.slider-tick-label-container').css('transform', '');
+        $(wrapper + ' .slider-tick-label').css('transform', '');
+        $(wrapper + ' .slider-tick-label-container').css('transform', '');
         // calculate
         var body_width = $('body').width();
         var rotation = 0;
@@ -325,37 +311,64 @@ jQuery(document).ready(function() {
         }
         rotation = rotation > 45 ? 90 : rotation;
         // rotate
-        if (rotation >= 3) {
-            $('.slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
+        if (rotation >= 5) {
+            $(wrapper + ' .slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
             if (rotation > 30) {
                 let translate = rotation == 90 ? 18 : 10;
                 translate += num_labels < 5 ? 8 : 0;
-                $('.slider-tick-label-container').css('transform', 'translateY(' + translate + 'px)');
+                $(wrapper + ' .slider-tick-label-container').css('transform', 'translateY(' + translate + 'px)');
                 let add_margin = rotation == 90 ? 9 : 6;
-                $('#slider-wrapper0').css('margin-bottom', add_margin + 'rem');
+                $(wrapper).css('margin-bottom', add_margin + 'rem');
             }
         }
     }
-    // rotate_labels(slider_configs[q_type][slider_config_i]['ticks'].length);
+
+    function create_slider(elt, wrapper, config, orientation) {
+        $(elt).slider(config);
+        if (orientation == 'vertical') {
+            $(wrapper + ' .slider').css('height', config.max * 1.4 + 'rem');
+        } else {
+            rotate_labels(wrapper, config['ticks'].length);
+        }
+        $(elt).slider('refresh');
+
+        // initialize to unselected css
+        $('.label-is-selection').css('font-weight', '400');
+        $('.slider-handle').css('background-image',
+                                'linear-gradient(to bottom,#ccc 0,#eee 100%)');
+        // clicks
+        $(elt).on('slideStop change', slider_onclick);
+        slider_clicks.push(false);
+    }
 
     function append_slider_qs(questions, configs) {
+        let slider_orient = 'vertical';
+        let wrapper_class = 'slider-wrapper';
         for (let q_i in questions) {
             $('#p3-questions').append($('<div>', {
                 id: 'q-text' + q_i,
                 class: "question-text p3-q-text",
                 html: questions[q_i]
             }));
+            if ($.isEmptyObject(configs[q_i])) {
+                // subsequent sliders are horizontal
+                slider_orient = 'horizontal';
+                wrapper_class = 'h-slider-wrapper';
+                // add divider
+                $('#q-text' + q_i).addClass('top-divider');
+                continue;
+            }
             $('#p3-questions').append($('<div>', {
                 id: "slider-wrapper" + q_i,
-                class: "slider-wrapper"
+                class: wrapper_class
             }).append($('<input>', {
                 id: "slider" + q_i,
                 class: "slide",
                 type: "text",
                 'data-slider-value': 1,
-                'data-slider-orientation': "vertical"
+                'data-slider-orientation': slider_orient
             })));
-            create_slider('#slider' + q_i, '#slider-wrapper' + q_i, configs[q_i])
+            create_slider('#slider' + q_i, '#slider-wrapper' + q_i, configs[q_i], slider_orient)
         }
     }
 
@@ -570,11 +583,15 @@ jQuery(document).ready(function() {
         add_data();
 
         // first question
-        if (page_i == NAME_GEN_PAGE && question_i == 0) {
-            // remove the public figure wording
-            $('#instr-public').hide();
-            // remove prev button
-            $('#btn-prev').hide();
+        if (page_i == NAME_GEN_PAGE) {
+            if ((q_type == 'past_q' && question_i == 0) || (q_type == 'current_q' && question_i == 1)) {
+                // remove the public figure wording
+                $('#instr-public').hide();
+            }
+            if (question_i == 0) {
+                // remove prev button
+                $('#btn-prev').hide();
+            }
         }
         $('.invalid').hide();
         normal_next_btn();
@@ -618,11 +635,14 @@ jQuery(document).ready(function() {
         if (!result) {
             return;
         }
+        window.scrollTo(0, 0);
         // proceed
         if (question_i < question_texts[page_i][q_type].length - 1) {
             // add public figure instructions for non-first naming questions
-            if (page_i == NAME_GEN_PAGE && question_i == 0) {
-                $('#instr-public').show();
+            if (page_i == NAME_GEN_PAGE) {
+                if ((q_type == 'past_q' && question_i == 0) || (q_type == 'current_q' && question_i == 1)) {
+                    $('#instr-public').show();
+                }
             }
 
             // next question
@@ -675,6 +695,7 @@ jQuery(document).ready(function() {
                     if (q_type == 'past_q') {
                         page_i = 1;  // restart from name gen 1
                         q_type = 'current_q';  // change to current time
+                        $('#instr-public').hide();
                     } else if (q_type == 'current_q') {
                         q_type = 'questions'
                         ++page_i;
@@ -726,5 +747,5 @@ jQuery(document).ready(function() {
     });
 
     // hookWindow = true;
-    // person_q_prepare(['wakaka ka', 'ahahah ha']);
+    person_q_prepare(['wakaka ka', 'ahahah ha']);
 });
