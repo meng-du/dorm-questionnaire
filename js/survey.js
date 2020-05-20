@@ -284,6 +284,7 @@ jQuery(document).ready(function() {
 
     var slider_clicks = [];  // 0: required unselected, 1: required selected
                              // 10: optional unselected, 11: optional selected
+    var slider_times = [];
 
     function slider_onclick(ev) {  // slider on change/on click
         let parent = $(ev.target).parent().attr('id');
@@ -291,6 +292,7 @@ jQuery(document).ready(function() {
         if (slider_clicks[index] % 10 == 0) {
             slider_clicks[index] += 1;
         }
+        slider_times[index] = Date.now();
         if (slider_clicks.every((elt) => {return elt > 0;})) {  // 1/10/11
             $('#btn-next').removeClass('disabled');
         }
@@ -343,6 +345,7 @@ jQuery(document).ready(function() {
         // clicks
         $(elt).on('slideStop change', slider_onclick);
         slider_clicks.push(required ? 0 : 10);
+        slider_times.push(-1);
     }
 
     function append_slider_qs(questions, configs) {
@@ -354,7 +357,7 @@ jQuery(document).ready(function() {
                 // add text
                 $('#q-text' + q_i).addClass('');
                 $('#p3-questions').append($('<div>', {
-                    class: "question-text top-divider",
+                    class: "p3-q-text question-text top-divider",
                     html: questions[q_i]
                 }));
                 // subsequent sliders are horizontal
@@ -411,8 +414,14 @@ jQuery(document).ready(function() {
     function person_q_onfinish(next_q) {
         let invalid = false;
         // save data
-        $('.p3-q-text').each((i, elt) => {
+        $('.p3-q-text').each((q_i, elt) => {
             let question = $(elt).get(0).textContent;
+            let i = -1;
+            if ($(elt).attr('id')) {
+                i = $(elt).attr('id').substring(6);
+            } else { // not a slider question
+                return true;
+            }
             let response = $('#slider' + i).val();
             let resp_txt = $('#slider-wrapper' + i + ' .label-is-selection').text();
             let person = $(elt).html().split('>')[1].split('<')[0];
@@ -436,7 +445,7 @@ jQuery(document).ready(function() {
                 question: question,
                 response: response,
                 response_text: resp_txt,
-                timestamp: Date.now()
+                timestamp: slider_times[i]
             }
             if (specification.length > 0) {
                 data['specification'] = specification;
@@ -460,9 +469,9 @@ jQuery(document).ready(function() {
             slider_clicks[i] -= slider_clicks[i] % 10;
         }
         // put up new questions
-        for (let i in next_q) {
-            $('#q-text' + i).html(next_q[i]);
-        }
+        $('.p3-q-text').each((i, elt) => {
+            $(elt).html(next_q[i]);
+        });
         return true;
     }
 
