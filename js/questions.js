@@ -30,19 +30,22 @@ var person_questions = {past_q: [
     'How far away did you live to <strong>*</strong>?',
     'How long have you known <strong>*</strong>?'
 ], current_q: [
-    'How close did you feel to <strong>*</strong>?',
-    'How far away do you live to <strong>*</strong>?',
+    'How close do you feel to <strong>*</strong>?',
+    'How far away did you live from <strong>*</strong> <u>before</u> physical distancing?',
+    'How far away do you live from <strong>*</strong> now (during physical distancing)?',
     'How long have you known <strong>*</strong>?',
     'How often do you socially interact with <strong>*</strong> <strong>1-on-1</strong> through ...',
-    '1-on-1 video chat (Zoom, FaceTime, etc.) or phone call?',
-    '1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.)?',
-    '1-on-1 on social media (direct messages on Facebook, Instagram, TikTok, etc.)?',
-    'Other (specify) for example, video games, games over video chat?',
+    '... 1-on-1 video chat (Zoom, FaceTime, etc.) or phone call?<span hidden>*</span>',
+    '... 1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.)?<span hidden>*</span>',
+    '... 1-on-1 on social media (direct messages on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
+    '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt1" class="form-control" style="width:100%" ' +
+         'placeholder="For example, video games, games over video chat"/>',
     'How often do you socially interact with <strong>*</strong> <strong>in a group setting</strong> through ...',
-    'Group conference call or group video chat (Zoom, FaceTime, etc.)?',
-    'Group text or group messaging (iMessage, GroupMe, WhatsApp, etc.)?',
-    'Social media (group messages on Facebook, Instagram, TikTok, etc.)?',
-    'Other (specify) for example, video games, games over video chat?'
+    '... group conference call or group video chat (Zoom, FaceTime, etc.)?<span hidden>*</span>',
+    '... group text or group messaging (iMessage, GroupMe, WhatsApp, etc.)?<span hidden>*</span>',
+    '... social media (group messages on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
+    '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
+         'placeholder="For example, video games, games over video chat"/>'
 ]};
 var friend_questions = {past_q: [
     'Were these pairs of people connected with each other?<br><br>' +
@@ -100,6 +103,17 @@ var slider_configs = {past_q: [{
                    'Somewhat close',
                    'Very close',
                    'Extremely close'],
+}, {
+    step: 1, min: 1, max: 8, value: 0,
+    ticks: [1, 2, 3, 4, 5, 6, 7, 8],
+    ticks_labels: ['Roommate/same house',
+                   'Same building (but not roommates)',
+                   'Same neighborhood',
+                   'Same city',
+                   'Same state (different city)',
+                   'Same country (different state)',
+                   'Different country (same continent)',
+                   'Different continent'],
 }, {
     step: 1, min: 1, max: 8, value: 0,
     ticks: [1, 2, 3, 4, 5, 6, 7, 8],

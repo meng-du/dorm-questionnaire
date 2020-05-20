@@ -283,11 +283,12 @@ jQuery(document).ready(function() {
     // PERSON QUESTIONS
 
     var slider_clicks = [];
+    var slider_clicks_reset = [];  // beginning state of slider_clicks
 
     function slider_onclick(ev) {  // slider on change/on click
         let parent = $(ev.target).parent().attr('id');
-        slider_clicks[parent[14]] = true;  // last char of parent id
-        if (slider_clicks.every((elt) => {return elt})) {
+        slider_clicks[parent.substring(14)] = true;  // last chars of parent id
+        if (slider_clicks.every((elt) => {return elt})) { // all true
             $('#btn-next').removeClass('disabled');
         }
         // remove unselected css
@@ -317,13 +318,13 @@ jQuery(document).ready(function() {
                 let translate = rotation == 90 ? 18 : 10;
                 translate += num_labels < 5 ? 8 : 0;
                 $(wrapper + ' .slider-tick-label-container').css('transform', 'translateY(' + translate + 'px)');
-                let add_margin = rotation == 90 ? 9 : 6;
+                let add_margin = rotation == 90 ? 10 : 8;
                 $(wrapper).css('margin-bottom', add_margin + 'rem');
             }
         }
     }
 
-    function create_slider(elt, wrapper, config, orientation) {
+    function create_slider(elt, wrapper, config, orientation, required=true) {
         $(elt).slider(config);
         if (orientation == 'vertical') {
             $(wrapper + ' .slider').css('height', config.max * 1.4 + 'rem');
@@ -338,16 +339,17 @@ jQuery(document).ready(function() {
                                 'linear-gradient(to bottom,#ccc 0,#eee 100%)');
         // clicks
         $(elt).on('slideStop change', slider_onclick);
-        slider_clicks.push(false);
+        slider_clicks.push(!required);
     }
 
     function append_slider_qs(questions, configs) {
         let slider_orient = 'vertical';
         let wrapper_class = 'slider-wrapper';
+        let slider_i = -1;
         for (let q_i in questions) {
             $('#p3-questions').append($('<div>', {
                 id: 'q-text' + q_i,
-                class: "question-text p3-q-text",
+                class: $.isEmptyObject(configs[q_i]) ? "question-text" : "question-text p3-q-text",
                 html: questions[q_i]
             }));
             if ($.isEmptyObject(configs[q_i])) {
@@ -358,18 +360,25 @@ jQuery(document).ready(function() {
                 $('#q-text' + q_i).addClass('top-divider');
                 continue;
             }
+            slider_i++;
             $('#p3-questions').append($('<div>', {
-                id: "slider-wrapper" + q_i,
+                id: "slider-wrapper" + slider_i,
                 class: wrapper_class
             }).append($('<input>', {
-                id: "slider" + q_i,
+                id: "slider" + slider_i,
                 class: "slide",
                 type: "text",
                 'data-slider-value': 1,
                 'data-slider-orientation': slider_orient
             })));
-            create_slider('#slider' + q_i, '#slider-wrapper' + q_i, configs[q_i], slider_orient)
+            let other_q = questions[q_i].indexOf('id="other-txt') != -1;
+            create_slider('#slider' + slider_i, '#slider-wrapper' + slider_i,
+                          configs[q_i], slider_orient, !other_q)
+            if (other_q) {
+                //todo
+            }
         }
+        $.extend(slider_clicks_reset, slider_clicks);  // copy
     }
 
     // replace * in question with user input names
@@ -424,9 +433,7 @@ jQuery(document).ready(function() {
         $('.slider-handle').css('background-image',
                                 'linear-gradient(to bottom,#ccc 0,#eee 100%)');
         // reset clicks
-        for (let i in slider_clicks) {
-            slider_clicks[i] = false;
-        }
+        $.extend(slider_clicks, slider_clicks_reset);
         // put up new questions
         for (let i in next_q) {
             $('#q-text' + i).html(next_q[i]);
