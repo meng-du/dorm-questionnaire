@@ -6,14 +6,15 @@ jQuery(document).ready(function() {
     var FRIEND_PAIRS_PER_PAGE = 15;
     $('.page').hide();
     $('#end').hide();
+    $('#covid-residence').hide();
     $('.invalid').hide();
     $('#btn-prev').hide();
     $('#no-prev').hide();
     $('#instr-public').hide();
-    var page_i = 3;
+    var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
-    var q_type = 'current_q';  // 'past_q', 'current_q', 'questions'
+    var q_type = 'past_q';  // 'past_q', 'current_q', 'questions'
     var roster_data = {past_q: {}, current_q: {}};
     $('#p' + page_i).show();
 
@@ -75,7 +76,7 @@ jQuery(document).ready(function() {
     }
 
     // send data
-    function save2firebase(data, q_key=-1) {
+    function save2firebase(data, q_key=-1, end=false) {
         q_key = q_key == -1 ? question_i : q_key;
         let db_key = page_i + '.';
         if (page_i >= NAME_GEN_PAGE && q_type != 'questions') {
@@ -83,6 +84,13 @@ jQuery(document).ready(function() {
         }
         db_key += q_key;
         db.collection(DB_DATA_COLLECTION).doc(survey_id).update({ [db_key]: data })
+        .then(function() {
+            if (end) {
+                // show end page
+                hookWindow = false;
+                window.location.replace('progress.html?completed=' + survey_id.split('.')[0]);
+            }
+        })
         .catch(function(error) {
             // error
             alert('Failed to save your data. Please check your internet connection and try again.\nIf this message shows up multiple times, please contact the experimenters.\n' + error);
@@ -138,6 +146,29 @@ jQuery(document).ready(function() {
         save2firebase(data);
 
         return true;
+    }
+
+    // INSTRUCTIONS/COVID RESIDENCE QUESTIONS
+
+    function instr_onfinish() {
+        if (q_type != 'current_q') {
+            return true;
+        }
+        if ($($('.question-text').get(0)).text() == time_instr['current_q']) {
+            $('.question-text').text('');
+            $('#covid-residence').show();
+        } else {  // finished answering
+            if (! $('#covid-residence-form').get(0).reportValidity()) {
+                return false;
+            }
+            let data = {
+                'current_residence': $('input[name=residence]:checked').val(),
+                'currently_living': $('input[name=living-with]:checked').val(),
+                timestamp: Date.now()
+            }
+            save2firebase(data);
+            return true;
+        }
     }
 
     // NAMING QUESTIONS
@@ -214,12 +245,12 @@ jQuery(document).ready(function() {
         let name = $('#dorm-names').val();
         $('#dorm-names').tagsManager('pushTag', name);
         $('#dorm-names').val('');
-    })
+    });
     $('#btn-outsider-add').click(() => {
         let name = $('#outsider-names').val();
         $('#outsider-names').tagsManager('pushTag', name);
         $('#outsider-names').val('');
-    })
+    });
 
     // set up instructions to include wing
     $('#dorm-name-instr').text($('#dorm-name-instr').text() + '2' + dorm_wing[0].toUpperCase());
@@ -240,7 +271,7 @@ jQuery(document).ready(function() {
     $('input').change(() => {
         normal_next_btn();
         $('.invalid').hide();
-    })
+    });
 
     // check if entered text but didn't add
     function check_entered_text() {
@@ -348,7 +379,7 @@ jQuery(document).ready(function() {
         slider_times.push(-1);
     }
 
-    function append_slider_qs(questions, configs) {
+    function append_p3_slider_qs(questions, configs) {
         let slider_orient = 'vertical';
         let wrapper_class = 'slider-wrapper';
         let slider_i = -1;
@@ -357,7 +388,7 @@ jQuery(document).ready(function() {
                 // add text
                 $('#q-text' + q_i).addClass('');
                 $('#p3-questions').append($('<div>', {
-                    class: "p3-q-text question-text top-divider",
+                    class: "slider-q-text question-text top-divider",
                     html: questions[q_i]
                 }));
                 // subsequent sliders are horizontal
@@ -368,7 +399,7 @@ jQuery(document).ready(function() {
             slider_i++;
             $('#p3-questions').append($('<div>', {
                 id: 'q-text' + slider_i,
-                class: "question-text p3-q-text",
+                class: "question-text slider-q-text",
                 html: questions[q_i]
             }));
             $('#p3-questions').append($('<div>', {
@@ -404,17 +435,14 @@ jQuery(document).ready(function() {
         person_questions[q_type] = q_with_names;
 
         // append questions to DOM
-        if (q_type == 'current_q') {
-            $('#p3-questions').empty();
-        }
-        append_slider_qs(person_questions[q_type][0], slider_configs[q_type])
+        append_p3_slider_qs(person_questions[q_type][0], slider_configs[q_type])
     }
 
     // data & reset
     function person_q_onfinish(next_q) {
         let invalid = false;
         // save data
-        $('.p3-q-text').each((q_i, elt) => {
+        $('.slider-q-text').each((q_i, elt) => {
             let question = $(elt).get(0).textContent;
             let i = -1;
             if ($(elt).attr('id')) {
@@ -456,10 +484,13 @@ jQuery(document).ready(function() {
 
         // next question
         if (!next_q) {
+            $('#p3-questions').empty();
+            slider_clicks = [];
+            slider_times = [];
             return true;
         }
         // reset slider value and color
-        $('#slider').val(1);
+        $('.slide').val(1);
         $('.slide').slider('refresh');
         $('.label-is-selection').css('font-weight', '400');
         $('.slider-handle').css('background-image',
@@ -469,7 +500,7 @@ jQuery(document).ready(function() {
             slider_clicks[i] -= slider_clicks[i] % 10;
         }
         // put up new questions
-        $('.p3-q-text').each((i, elt) => {
+        $('.slider-q-text').each((i, elt) => {
             $(elt).html(next_q[i]);
         });
         return true;
@@ -580,6 +611,54 @@ jQuery(document).ready(function() {
         return true;
     }
 
+    // ATTITUDE QUESTION
+
+    function append_p5_slider_qs(i) {
+        $('.question-text').html(question_texts[page_i][q_type][i]);
+        for (let j in attitude_questions.slider_qs[i]) {
+            $('#p5-questions').append($('<div>', {
+                id: 'q-text' + j,
+                class: "question-text slider-q-text",
+                html: attitude_questions.slider_qs[i][j]
+            }));
+            $('#p5-questions').append($('<div>', {
+                id: "slider-wrapper" + j,
+                class: 'h-slider-wrapper'
+            }).append($('<input>', {
+                id: "slider" + j,
+                class: "slide",
+                type: "text",
+                'data-slider-value': 1,
+            })));
+            create_slider('#slider' + j, '#slider-wrapper' + j,
+                          attitude_questions.sliders[i], 'horizontal')
+        }
+    }
+
+    function attitude_q_onfinish() {
+        // save data
+        $('.slider-q-text').each((q_i, elt) => {
+            let question = $(elt).get(0).textContent;
+            let i = $(elt).attr('id').substring(6);
+            let response = $('#slider' + i).val();
+            let resp_txt = $('#slider-wrapper' + i + ' .label-is-selection').text();
+
+            let data = {
+                question: question,
+                response: response,
+                response_text: resp_txt,
+                timestamp: slider_times[i]
+            }
+            save2firebase(data, question_i + ' - ' + q_i);
+        });
+
+        $('#p5-questions').empty();
+        slider_clicks = [];
+        slider_times = [];
+
+        return true;
+    }
+
     // PAYMENT QUESTION
 
     $('input[type=radio][name=payment]').change(() => {
@@ -587,9 +666,12 @@ jQuery(document).ready(function() {
     });
 
     function payment_q_onfinish() {
+        if (! $('#payment-form').get(0).reportValidity()) {
+            return false;
+        }
         save2firebase({
-            payment: $('input[name=payment]:checked', '#p4').val()
-        });
+            payment: $('input[name=payment]:checked').val()
+        }, -1, true);
         return true;
     }
 
@@ -641,9 +723,9 @@ jQuery(document).ready(function() {
 
     // NEXT BUTTON
 
-    var q_onfinish_funcs = [demographic_onfinish, function(){return true;},
+    var q_onfinish_funcs = [demographic_onfinish, instr_onfinish,
                             roster_q_onfinish, person_q_onfinish,
-                            friend_q_onfinish, payment_q_onfinish];
+                            friend_q_onfinish, attitude_q_onfinish, payment_q_onfinish];
 
     function normal_next_btn() {
         $('#btn-next').text('Next');
@@ -688,7 +770,9 @@ jQuery(document).ready(function() {
 
             // next question
             ++question_i;
-            if (page_i != NAME_GEN_PAGE + 1) {
+            if (page_i == 5) {
+                append_p5_slider_qs(question_i);
+            } else if (page_i != NAME_GEN_PAGE + 1) {
                 $('.question-text').html(question_texts[page_i][q_type][question_i]);
             }
 
@@ -730,9 +814,8 @@ jQuery(document).ready(function() {
             }
             // next page
             question_i = 0;
-            let done = false;
             while (page_i < $('.page').length - 1) {
-                if (page_i == NAME_GEN_PAGE + 2) {
+                if (page_i == NAME_GEN_PAGE + 2) {  // last repetitive question
                     if (q_type == 'past_q') {
                         page_i = 1;  // restart from name gen 1
                         q_type = 'current_q';  // change to current time
@@ -746,31 +829,31 @@ jQuery(document).ready(function() {
                 }
                 if (page_i == NAME_GEN_PAGE - 1) {
                     $('#btn-next').removeClass('disabled');
+                    if (q_type == 'current_q' && $('.question-text').text().length > 0) {
+                        page_i = 1;  // stay on the page to show more questions
+                    }
                 }
                 if (page_i == NAME_GEN_PAGE + 1) {
                     $('#btn-prev').hide();
                     $('#no-prev').hide();
+                }
+                if (page_i == 5) {
+                    append_p5_slider_qs(0);
                 }
                 if (page_i == $('.page').length - 2) {
                     $('#btn-next').text('Confirm');
                     increase_completion_count(); // completed + 1
                 }
                 if (question_texts[page_i][q_type].length > 0) {
-                    if (page_i != NAME_GEN_PAGE + 1) {
+                    if (page_i != NAME_GEN_PAGE + 1 && page_i != 5) {
                         $('.question-text').html(question_texts[page_i][q_type][question_i]);
                     }
                     $('#p' + page_i).show();
-                    if (page_i == NAME_GEN_PAGE + 1) {
+                    if (page_i == NAME_GEN_PAGE + 1 || page_i == 5) {
                         $('.slide').slider('refresh');
                     }
-                    done = true;
                     break;
                 }
-            }
-            if ((!done) && page_i == $('.page').length - 1) {
-                // show end page
-                hookWindow = false;
-                window.location.replace('progress.html?completed=' + survey_id.split('.')[0]);
             }
         }
         // hide warning
@@ -788,5 +871,4 @@ jQuery(document).ready(function() {
     });
 
     // hookWindow = true;
-    person_q_prepare(['wakaka ka', 'ahahah ha']);
 });
