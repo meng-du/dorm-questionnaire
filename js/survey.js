@@ -16,6 +16,7 @@ jQuery(document).ready(function() {
     var pair_i = 0;
     var q_type = 'past_q';  // 'past_q', 'current_q', 'questions'
     var roster_data = {past_q: {}, current_q: {}};
+    var all_named_people = {past_q: new Set([]), current_q: new Set([])};
     $('#p' + page_i).show();
 
     // prevent closing window
@@ -791,7 +792,7 @@ jQuery(document).ready(function() {
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
             // prepare subsequent questions
-            let named_people = new Set([]);
+
             if (page_i == NAME_GEN_PAGE) {
                 // get all named people
                 let num_q = (q_type == 'past_q') ? 2 : 3;  // just the first 2 or 3 roster Qs
@@ -804,13 +805,13 @@ jQuery(document).ready(function() {
                     roster_data[q_type][q_i].names_outside.forEach(
                         (tag) => outside_names.push(tag + ' (non-2' + dorm_wing[0].toUpperCase() + ')')
                     );
-                    named_people = new Set([...dorm_names,
-                                            ...outside_names,
-                                            ...named_people])  // append to set
+                    all_named_people[q_type] = new Set([...dorm_names,
+                                                        ...outside_names,
+                                                        ...all_named_people[q_type]])  // append to set
                 }
-                shuffle(named_people);
-                person_q_prepare(named_people);
-                friend_q_prepare(named_people);
+                shuffle(all_named_people[q_type]);
+                person_q_prepare(all_named_people[q_type]);
+                friend_q_prepare(all_named_people[q_type]);
             }
             // next page
             question_i = 0;
