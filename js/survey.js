@@ -282,13 +282,16 @@ jQuery(document).ready(function() {
 
     // PERSON QUESTIONS
 
-    var slider_clicks = [];
-    var slider_clicks_reset = [];  // beginning state of slider_clicks
+    var slider_clicks = [];  // 0: required unselected, 1: required selected
+                             // 10: optional unselected, 11: optional selected
 
     function slider_onclick(ev) {  // slider on change/on click
         let parent = $(ev.target).parent().attr('id');
-        slider_clicks[parent.substring(14)] = true;  // last chars of parent id
-        if (slider_clicks.every((elt) => {return elt})) { // all true
+        let index = parent.substring(14);  // last chars of parent id
+        if (slider_clicks[index] % 10 == 0) {
+            slider_clicks[index] += 1;
+        }
+        if (slider_clicks.every((elt) => {return elt > 0;})) {  // 1/10/11
             $('#btn-next').removeClass('disabled');
         }
         // remove unselected css
@@ -339,7 +342,7 @@ jQuery(document).ready(function() {
                                 'linear-gradient(to bottom,#ccc 0,#eee 100%)');
         // clicks
         $(elt).on('slideStop change', slider_onclick);
-        slider_clicks.push(!required);
+        slider_clicks.push(required ? 0 : 10);
     }
 
     function append_slider_qs(questions, configs) {
@@ -347,20 +350,24 @@ jQuery(document).ready(function() {
         let wrapper_class = 'slider-wrapper';
         let slider_i = -1;
         for (let q_i in questions) {
-            $('#p3-questions').append($('<div>', {
-                id: 'q-text' + q_i,
-                class: $.isEmptyObject(configs[q_i]) ? "question-text" : "question-text p3-q-text",
-                html: questions[q_i]
-            }));
-            if ($.isEmptyObject(configs[q_i])) {
+            if ($.isEmptyObject(configs[q_i])) {  // just text, no slider
+                // add text
+                $('#q-text' + q_i).addClass('');
+                $('#p3-questions').append($('<div>', {
+                    class: "question-text top-divider",
+                    html: questions[q_i]
+                }));
                 // subsequent sliders are horizontal
                 slider_orient = 'horizontal';
                 wrapper_class = 'h-slider-wrapper';
-                // add divider
-                $('#q-text' + q_i).addClass('top-divider');
                 continue;
             }
             slider_i++;
+            $('#p3-questions').append($('<div>', {
+                id: 'q-text' + slider_i,
+                class: "question-text p3-q-text",
+                html: questions[q_i]
+            }));
             $('#p3-questions').append($('<div>', {
                 id: "slider-wrapper" + slider_i,
                 class: wrapper_class
@@ -374,11 +381,7 @@ jQuery(document).ready(function() {
             let other_q = questions[q_i].indexOf('id="other-txt') != -1;
             create_slider('#slider' + slider_i, '#slider-wrapper' + slider_i,
                           configs[q_i], slider_orient, !other_q)
-            if (other_q) {
-                //todo
-            }
         }
-        $.extend(slider_clicks_reset, slider_clicks);  // copy
     }
 
     // replace * in question with user input names
@@ -406,6 +409,7 @@ jQuery(document).ready(function() {
 
     // data & reset
     function person_q_onfinish(next_q) {
+        let invalid = false;
         // save data
         $('.p3-q-text').each((i, elt) => {
             let question = $(elt).get(0).textContent;
@@ -413,14 +417,33 @@ jQuery(document).ready(function() {
             let resp_txt = $('#slider-wrapper' + i + ' .label-is-selection').text();
             let person = $(elt).html().split('>')[1].split('<')[0];
 
+            // check other freq is answered
+            let input = $('#' + $(elt).attr('id') + ' input');
+            let specification = '';
+            if (input.length > 0 && input.val().length > 0) {  // check slider
+                let index = $(elt).attr('id').substring(6);
+                if (slider_clicks[index] % 10 == 0) {  // unselected slider
+                    input.get(0).setCustomValidity('Please select a freqency below');
+                    input.get(0).reportValidity();
+                    invalid = true;
+                    return false;
+                } else {
+                    specification = input.val();
+                }
+            }
+
             let data = {
                 question: question,
                 response: response,
                 response_text: resp_txt,
                 timestamp: Date.now()
             }
+            if (specification.length > 0) {
+                data['specification'] = specification;
+            }
             save2firebase(data, person + ' - ' + i);
         });
+        if (invalid) { return false; }
 
         // next question
         if (!next_q) {
@@ -433,7 +456,9 @@ jQuery(document).ready(function() {
         $('.slider-handle').css('background-image',
                                 'linear-gradient(to bottom,#ccc 0,#eee 100%)');
         // reset clicks
-        $.extend(slider_clicks, slider_clicks_reset);
+        for (let i in slider_clicks) {
+            slider_clicks[i] -= slider_clicks[i] % 10;
+        }
         // put up new questions
         for (let i in next_q) {
             $('#q-text' + i).html(next_q[i]);
