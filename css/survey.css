@@ -9,8 +9,12 @@
   margin: 1rem auto;
 }
 .question-text {
-  font-weight: 550;
+  font-weight: 500;
   margin-bottom: 1rem;
+}
+.slider-q-text {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
 }
 #btn-next {
   margin-bottom: 2rem;
@@ -65,11 +69,20 @@
 #duplicate {
   margin-bottom: 1.5rem !important;
 }
-#slider-wrapper {
-  text-align: center;
-  margin-top: 30px;
+.top-divider {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #ddd;
 }
-.slider {
+.slider-wrapper {
+  margin-left: 2rem;
+}
+.h-slider-wrapper {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.h-slider-wrapper .slider {
+  margin: auto;
   width: 75% !important;
 }
 .slider-selection.tick-slider-selection {
@@ -90,6 +103,10 @@
 } */
 .label-is-selection {
   font-weight: 650;
+}
+#other-txt1, #other-txt2 {
+  width: 95% !important;
+  margin: auto;
 }
 #pairs-container {
   width: 90%;

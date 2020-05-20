@@ -6,6 +6,7 @@ jQuery(document).ready(function() {
     var FRIEND_PAIRS_PER_PAGE = 15;
     $('.page').hide();
     $('#end').hide();
+    $('#covid-residence').hide();
     $('.invalid').hide();
     $('#btn-prev').hide();
     $('#no-prev').hide();
@@ -13,10 +14,9 @@ jQuery(document).ready(function() {
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
-    var data = {};
-    for (let i in question_texts) {
-        data[i] = {};  // initialize to empty
-    }
+    var q_type = 'past_q';  // 'past_q', 'current_q', 'questions'
+    var roster_data = {past_q: {}, current_q: {}};
+    var all_named_people = {past_q: new Set([]), current_q: new Set([])};
     $('#p' + page_i).show();
 
     // prevent closing window
@@ -77,10 +77,21 @@ jQuery(document).ready(function() {
     }
 
     // send data
-    function save2firebase(data, q_key=-1) {
+    function save2firebase(data, q_key=-1, end=false) {
         q_key = q_key == -1 ? question_i : q_key;
-        let db_key = page_i + '.' + q_key;
+        let db_key = page_i + '.';
+        if (page_i >= NAME_GEN_PAGE && q_type != 'questions') {
+            db_key += q_type + '.';
+        }
+        db_key += q_key;
         db.collection(DB_DATA_COLLECTION).doc(survey_id).update({ [db_key]: data })
+        .then(function() {
+            if (end) {
+                // show end page
+                hookWindow = false;
+                window.location.replace('progress.html?completed=' + survey_id.split('.')[0]);
+            }
+        })
         .catch(function(error) {
             // error
             alert('Failed to save your data. Please check your internet connection and try again.\nIf this message shows up multiple times, please contact the experimenters.\n' + error);
@@ -125,7 +136,7 @@ jQuery(document).ready(function() {
             return false;
         }
 
-        data[page_i] = {
+        let data = {
             'other_name': $('#other-name').val(),
             major: $('#major').val(),
             zipcode: $('#zipcode').val(),
@@ -133,9 +144,32 @@ jQuery(document).ready(function() {
             timestamp: Date.now()
         }
 
-        save2firebase(data[page_i]);
+        save2firebase(data);
 
         return true;
+    }
+
+    // INSTRUCTIONS/COVID RESIDENCE QUESTIONS
+
+    function instr_onfinish() {
+        if (q_type != 'current_q') {
+            return true;
+        }
+        if ($($('.question-text').get(0)).text() == time_instr['current_q']) {
+            $('.question-text').text('');
+            $('#covid-residence').show();
+        } else {  // finished answering
+            if (! $('#covid-residence-form').get(0).reportValidity()) {
+                return false;
+            }
+            let data = {
+                'current_residence': $('input[name=residence]:checked').val(),
+                'currently_living': $('input[name=living-with]:checked').val(),
+                timestamp: Date.now()
+            }
+            save2firebase(data);
+            return true;
+        }
     }
 
     // NAMING QUESTIONS
@@ -149,7 +183,7 @@ jQuery(document).ready(function() {
             if (tag == field.val().trim()) {
                 // test if using alphabets and spaces
                 if (! /^[a-zA-Z]+\s+[a-zA-Z\s]*[a-zA-Z]+$/.test(tag)) {
-                    field.get(0).setCustomValidity('Please enter one name at a time (first name last initial) with alphabets and spaces only');
+                    field.get(0).setCustomValidity('Please enter one name at a time (first name & last name) with alphabets and spaces only');
                     field.get(0).reportValidity();
                     valid = false;
                 } else {
@@ -159,7 +193,7 @@ jQuery(document).ready(function() {
                 // test if repeated
                 let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);
                 if (field.tagsManager('tags').includes(tag) || repeat_other_field > -1) {
-                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Daniel K artist, Daniel K newYorkCity, Daniel K chessClub, etc.).');
+                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim newYorkCity, Daniel Kim chessClub, etc.).');
                     field.get(0).reportValidity();
                     if (repeat_other_field > -1) {
                         field.val('');
@@ -186,7 +220,6 @@ jQuery(document).ready(function() {
     }
 
     // set up naming question
-    // var name_typeahead_source = [];
     $('#dorm-names').tagsManager({
         deleteTagsOnBackspace: false,
         tagsContainer: '#dorm-names-container',
@@ -213,12 +246,12 @@ jQuery(document).ready(function() {
         let name = $('#dorm-names').val();
         $('#dorm-names').tagsManager('pushTag', name);
         $('#dorm-names').val('');
-    })
+    });
     $('#btn-outsider-add').click(() => {
         let name = $('#outsider-names').val();
         $('#outsider-names').tagsManager('pushTag', name);
         $('#outsider-names').val('');
-    })
+    });
 
     // set up instructions to include wing
     $('#dorm-name-instr').text($('#dorm-name-instr').text() + '2' + dorm_wing[0].toUpperCase());
@@ -239,7 +272,7 @@ jQuery(document).ready(function() {
     $('input').change(() => {
         normal_next_btn();
         $('.invalid').hide();
-    })
+    });
 
     // check if entered text but didn't add
     function check_entered_text() {
@@ -265,31 +298,45 @@ jQuery(document).ready(function() {
         // name_typeahead_source.push(...dorm_names, ...outsider_names);
 
         // save to firebase
-        data[page_i][question_i] = {
-            question: $('.question-text').get(0).textContent,
+        roster_data[q_type][question_i] = {
+            question: $('#p' + NAME_GEN_PAGE + ' .question-text').get(0).textContent,
             names_in_dorm: Object.assign([], dorm_names),
             names_outside: Object.assign([], outsider_names),
             timestamp: Date.now()
         };
-        save2firebase(data[page_i][question_i]);
+        save2firebase(roster_data[q_type][question_i]);
 
         // next question
-        if (next_q_text) {
-            $('#dorm-names').tagsManager('empty');
-            $('#outsider-names').tagsManager('empty');
-        }
+        $('#dorm-names').tagsManager('empty');
+        $('#outsider-names').tagsManager('empty');
         return true;
     }
 
-    // TIE STRENGTH QUESTIONS
+    // PERSON QUESTIONS
 
-    // tick label rotation
-    var slider_config_i = 0;
-    $('#slider').slider(slider_configs[slider_config_i]);
-    function rotate_labels(num_labels) {
+    var slider_clicks = [];  // 0: required unselected, 1: required selected
+                             // 10: optional unselected, 11: optional selected
+    var slider_times = [];
+
+    function slider_onclick(ev) {  // slider on change/on click
+        let parent = $(ev.target).parent().attr('id');
+        let index = parent.substring(14);  // last chars of parent id
+        if (slider_clicks[index] % 10 == 0) {
+            slider_clicks[index] += 1;
+        }
+        slider_times[index] = Date.now();
+        if (slider_clicks.every((elt) => {return elt > 0;})) {  // 1/10/11
+            $('#btn-next').removeClass('disabled');
+        }
+        // remove unselected css
+        $('#' + parent + ' .label-is-selection').css('font-weight', '');
+        $('#' + parent + ' .slider-handle').css('background-image', '');
+    }
+
+    function rotate_labels(wrapper, num_labels) {  // tick label rotation
         // reset
-        $('.slider-tick-label').css('transform', '');
-        $('.slider-tick-label-container').css('transform', '');
+        $(wrapper + ' .slider-tick-label').css('transform', '');
+        $(wrapper + ' .slider-tick-label-container').css('transform', '');
         // calculate
         var body_width = $('body').width();
         var rotation = 0;
@@ -302,86 +349,161 @@ jQuery(document).ready(function() {
         }
         rotation = rotation > 45 ? 90 : rotation;
         // rotate
-        if (rotation >= 3) {
-            $('.slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
+        if (rotation >= 5) {
+            $(wrapper + ' .slider-tick-label').css('transform', 'rotate(' + rotation + 'deg)');
             if (rotation > 30) {
                 let translate = rotation == 90 ? 18 : 10;
                 translate += num_labels < 5 ? 8 : 0;
-                $('.slider-tick-label-container').css('transform', 'translateY(' + translate + 'px)');
-                let add_margin = rotation == 90 ? 9 : 6;
-                $('#slider-wrapper').css('margin-bottom', add_margin + 'rem');
+                $(wrapper + ' .slider-tick-label-container').css('transform', 'translateY(' + translate + 'px)');
+                let add_margin = rotation == 90 ? 10 : 8;
+                $(wrapper).css('margin-bottom', add_margin + 'rem');
             }
         }
     }
-    rotate_labels(slider_configs[slider_config_i]['ticks'].length);
 
-    // initialize to unselected css
-    $('.label-is-selection').css('font-weight', '400');
-    $('.slider-handle').css('background-image',
-                            'linear-gradient(to bottom,#ccc 0,#eee 100%)');
-    // slider on change/on click
-    function slider_onclick(ev) {
-        $('#btn-next').removeClass('disabled');
-        // remove unselected css
-        $('.label-is-selection').css('font-weight', '');
-        $('.slider-handle').css('background-image', '');
-    }
-    $("#slider").on('slideStop change', slider_onclick);
-
-    // replace * in question with user input names
-    function tie_q_prepare(named_people) {
-        if (named_people.size < 1) {
-            tie_questions.questions = [];
+    function create_slider(elt, wrapper, config, orientation, required=true) {
+        $(elt).slider(config);
+        if (orientation == 'vertical') {
+            $(wrapper + ' .slider').css('height', config.max * 1.4 + 'rem');
+        } else {
+            rotate_labels(wrapper, config['ticks'].length);
         }
-        var q_with_names = [];
-        for (let q of tie_questions.questions) {
-            let this_q_with_names = [];
-            for (let name of named_people) {
-                this_q_with_names.push(q.replace('*', name));
-            }
-            shuffle(this_q_with_names);
-            q_with_names.push(...this_q_with_names);
-        }
-        tie_questions.questions = q_with_names;
-    }
+        $(elt).slider('refresh');
 
-    // data & reset
-    function tie_q_onfinish(next_q_text) {
-        let response = $('#slider').val();
-        let question = $('.question-text').get(0).textContent;
-
-        // save data
-        let person = $('.question-text').html().split('>')[1].split('<')[0];
-        let q = $('.question-text').html().split(' ')[1]
-        let key = (q == 'close' ? 'close' : 'time') + ' - ' + person;
-
-        data[page_i][key] = {
-            question: question,
-            response: response,
-            response_text: $('.label-is-selection').text(),
-            timestamp: Date.now()
-        }
-        save2firebase(data[page_i][key], key);
-
-        // next question
-        if (!next_q_text) {
-            return true;
-        }
-        if (question.substr(0, 15) != next_q_text.substr(0, 15)) {
-            // changing question, changing slider labels
-            ++slider_config_i;
-            $('#slider').slider('destroy');
-            $('#slider').slider(slider_configs[slider_config_i]);
-            $("#slider").on('slideStop change', slider_onclick);
-            rotate_labels(slider_configs[slider_config_i]['ticks'].length);
-        }
-        // reset slider value and color
-        $('#slider').val(1);
-        $('#slider').slider('refresh');
+        // initialize to unselected css
         $('.label-is-selection').css('font-weight', '400');
         $('.slider-handle').css('background-image',
                                 'linear-gradient(to bottom,#ccc 0,#eee 100%)');
+        // clicks
+        $(elt).on('slideStop change', slider_onclick);
+        slider_clicks.push(required ? 0 : 10);
+        slider_times.push(-1);
+    }
 
+    function append_p3_slider_qs(questions, configs) {
+        let slider_orient = 'vertical';
+        let wrapper_class = 'slider-wrapper';
+        let slider_i = -1;
+        for (let q_i in questions) {
+            if ($.isEmptyObject(configs[q_i])) {  // just text, no slider
+                // add text
+                $('#q-text' + q_i).addClass('');
+                $('#p3-questions').append($('<div>', {
+                    class: "slider-q-text question-text top-divider",
+                    html: questions[q_i]
+                }));
+                // subsequent sliders are horizontal
+                slider_orient = 'horizontal';
+                wrapper_class = 'h-slider-wrapper';
+                continue;
+            }
+            slider_i++;
+            $('#p3-questions').append($('<div>', {
+                id: 'q-text' + slider_i,
+                class: "question-text slider-q-text",
+                html: questions[q_i]
+            }));
+            $('#p3-questions').append($('<div>', {
+                id: "slider-wrapper" + slider_i,
+                class: wrapper_class
+            }).append($('<input>', {
+                id: "slider" + slider_i,
+                class: "slide",
+                type: "text",
+                'data-slider-value': 1,
+                'data-slider-orientation': slider_orient
+            })));
+            let other_q = questions[q_i].indexOf('id="other-txt') != -1;
+            create_slider('#slider' + slider_i, '#slider-wrapper' + slider_i,
+                          configs[q_i], slider_orient, !other_q)
+        }
+    }
+
+    // replace * in question with user input names
+    function person_q_prepare(named_people) {
+        // generate questions given names
+        if (named_people.size < 1) {
+            person_questions[q_type] = [];
+        }
+        var q_with_names = [];
+        for (let name of named_people) {
+            let this_q_with_names = [];
+            for (let q of person_questions[q_type]) {
+                this_q_with_names.push(q.replace('*', name));
+            }
+            q_with_names.push(this_q_with_names);
+        }
+        person_questions[q_type] = q_with_names;
+
+        // append questions to DOM
+        append_p3_slider_qs(person_questions[q_type][0], slider_configs[q_type])
+    }
+
+    // data & reset
+    function person_q_onfinish(next_q) {
+        let invalid = false;
+        // save data
+        $('.slider-q-text').each((q_i, elt) => {
+            let question = $(elt).get(0).textContent;
+            let i = -1;
+            if ($(elt).attr('id')) {
+                i = $(elt).attr('id').substring(6);
+            } else { // not a slider question
+                return true;
+            }
+            let response = $('#slider' + i).val();
+            let resp_txt = $('#slider-wrapper' + i + ' .label-is-selection').text();
+            let person = $(elt).html().split('>')[1].split('<')[0];
+
+            // check other freq is answered
+            let input = $('#' + $(elt).attr('id') + ' input');
+            let specification = '';
+            if (input.length > 0 && input.val().length > 0) {  // check slider
+                let index = $(elt).attr('id').substring(6);
+                if (slider_clicks[index] % 10 == 0) {  // unselected slider
+                    input.get(0).setCustomValidity('Please select a freqency below');
+                    input.get(0).reportValidity();
+                    invalid = true;
+                    return false;
+                } else {
+                    specification = input.val();
+                }
+            }
+
+            let data = {
+                question: question,
+                response: response,
+                response_text: resp_txt,
+                timestamp: slider_times[i]
+            }
+            if (specification.length > 0) {
+                data['specification'] = specification;
+            }
+            save2firebase(data, person + ' - ' + i);
+        });
+        if (invalid) { return false; }
+
+        // next question
+        if (!next_q) {
+            $('#p3-questions').empty();
+            slider_clicks = [];
+            slider_times = [];
+            return true;
+        }
+        // reset slider value and color
+        $('.slide').val(1);
+        $('.slide').slider('refresh');
+        $('.label-is-selection').css('font-weight', '400');
+        $('.slider-handle').css('background-image',
+                                'linear-gradient(to bottom,#ccc 0,#eee 100%)');
+        // reset clicks
+        for (let i in slider_clicks) {
+            slider_clicks[i] -= slider_clicks[i] % 10;
+        }
+        // put up new questions
+        $('.slider-q-text').each((i, elt) => {
+            $(elt).html(next_q[i]);
+        });
         return true;
     }
 
@@ -411,7 +533,7 @@ jQuery(document).ready(function() {
     // get pairs from named people and initialize the first batch of questions
     function friend_q_prepare(named_people) {
         if (named_people.length < 2) {
-            friend_questions.questions = [];
+            friend_questions[q_type] = [];
         }
         // get pairs
         friend_questions.pairs = [];
@@ -426,10 +548,10 @@ jQuery(document).ready(function() {
         // duplicate questions
         let new_q = [];
         let num_repeat = Math.ceil(friend_questions.pairs.length / FRIEND_PAIRS_PER_PAGE);
-        for (let q of friend_questions.questions) {
+        for (let q of friend_questions[q_type]) {
             new_q.push(...Array.apply(null, Array(num_repeat)).map(_ => q));
         }
-        friend_questions.questions = new_q;
+        friend_questions[q_type] = new_q;
         // set up html rows of pairs
         let pair_i_end = pair_i + FRIEND_PAIRS_PER_PAGE;
         for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
@@ -469,13 +591,13 @@ jQuery(document).ready(function() {
             let pair = $(elm).children('.col-6-auto').html().split(' <strong>&amp;</strong> ');
 
             let key = [pair[0], pair[1]].sort().join('&');
-            data[page_i][key] = {
+            let data = {
                 '0': pair[0],
                 '1': pair[1],
                 response: $(elm).find('input').val() == '0' ? 'n' : 'y',
                 timestamp: Date.now()
             }
-            save2firebase(data[page_i][key], key);
+            save2firebase(data, key);
         });
 
         // next question
@@ -490,6 +612,54 @@ jQuery(document).ready(function() {
         return true;
     }
 
+    // ATTITUDE QUESTION
+
+    function append_p5_slider_qs(i) {
+        $('.question-text').html(question_texts[page_i][q_type][i]);
+        for (let j in attitude_questions.slider_qs[i]) {
+            $('#p5-questions').append($('<div>', {
+                id: 'q-text' + j,
+                class: "question-text slider-q-text",
+                html: attitude_questions.slider_qs[i][j]
+            }));
+            $('#p5-questions').append($('<div>', {
+                id: "slider-wrapper" + j,
+                class: 'h-slider-wrapper'
+            }).append($('<input>', {
+                id: "slider" + j,
+                class: "slide",
+                type: "text",
+                'data-slider-value': 1,
+            })));
+            create_slider('#slider' + j, '#slider-wrapper' + j,
+                          attitude_questions.sliders[i], 'horizontal')
+        }
+    }
+
+    function attitude_q_onfinish() {
+        // save data
+        $('.slider-q-text').each((q_i, elt) => {
+            let question = $(elt).get(0).textContent;
+            let i = $(elt).attr('id').substring(6);
+            let response = $('#slider' + i).val();
+            let resp_txt = $('#slider-wrapper' + i + ' .label-is-selection').text();
+
+            let data = {
+                question: question,
+                response: response,
+                response_text: resp_txt,
+                timestamp: slider_times[i]
+            }
+            save2firebase(data, question_i + ' - ' + q_i);
+        });
+
+        $('#p5-questions').empty();
+        slider_clicks = [];
+        slider_times = [];
+
+        return true;
+    }
+
     // PAYMENT QUESTION
 
     $('input[type=radio][name=payment]').change(() => {
@@ -497,9 +667,12 @@ jQuery(document).ready(function() {
     });
 
     function payment_q_onfinish() {
+        if (! $('#payment-form').get(0).reportValidity()) {
+            return false;
+        }
         save2firebase({
-            payment: $('input[name=payment]:checked', '#p4').val()
-        });
+            payment: $('input[name=payment]:checked').val()
+        }, -1, true);
         return true;
     }
 
@@ -507,13 +680,13 @@ jQuery(document).ready(function() {
 
     function add_data() {
         // show previous data
-        data[page_i][question_i].names_in_dorm.forEach(
+        roster_data[q_type][question_i].names_in_dorm.forEach(
             (tag) => $('#dorm-names').tagsManager('pushTag', tag)
         );
-        data[page_i][question_i].names_outside.forEach(
+        roster_data[q_type][question_i].names_outside.forEach(
             (tag) => $('#outsider-names').tagsManager('pushTag', tag)
         );
-        if (data[page_i][question_i].names_in_dorm.length + data[page_i][question_i].names_outside.length == 0) {
+        if (roster_data[q_type][question_i].names_in_dorm.length + roster_data[q_type][question_i].names_outside.length == 0) {
             $('#btn-next').addClass('disabled');
         }
     }
@@ -523,22 +696,26 @@ jQuery(document).ready(function() {
             return;
         }
         // save current data
-        let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i - 1]);
+        let result = q_onfinish_funcs[page_i](question_texts[page_i][q_type][question_i - 1]);
         if (!result) {
             return;
         }
 
         // go back to previous question
         --question_i;
-        $('.question-text').html(question_texts[page_i].questions[question_i]);
+        $('.question-text').html(question_texts[page_i][q_type][question_i]);
         add_data();
 
         // first question
-        if (page_i == 1 && question_i == 0) {
-            // remove the public figure wording
-            $('#instr-public').hide();
-            // remove prev button
-            $('#btn-prev').hide();
+        if (page_i == NAME_GEN_PAGE) {
+            if ((q_type == 'past_q' && question_i == 0) || (q_type == 'current_q' && question_i == 1)) {
+                // remove the public figure wording
+                $('#instr-public').hide();
+            }
+            if (question_i == 0) {
+                // remove prev button
+                $('#btn-prev').hide();
+            }
         }
         $('.invalid').hide();
         normal_next_btn();
@@ -547,8 +724,9 @@ jQuery(document).ready(function() {
 
     // NEXT BUTTON
 
-    var q_onfinish_funcs = [demographic_onfinish, roster_q_onfinish, tie_q_onfinish,
-                            friend_q_onfinish, payment_q_onfinish];
+    var q_onfinish_funcs = [demographic_onfinish, instr_onfinish,
+                            roster_q_onfinish, person_q_onfinish,
+                            friend_q_onfinish, attitude_q_onfinish, payment_q_onfinish];
 
     function normal_next_btn() {
         $('#btn-next').text('Next');
@@ -557,12 +735,12 @@ jQuery(document).ready(function() {
     }
 
     $('#btn-next').click((e) => {
-        if (page_i == 1 && !check_entered_text()) {
+        if (page_i == NAME_GEN_PAGE && !check_entered_text()) {
             return;  // entered text but didn't add for naming question
         }
         // no answer
         if ($('#btn-next').hasClass('disabled')) {
-            if (page_i == 1) {
+            if (page_i == NAME_GEN_PAGE) {
                 $('#invalid1').show();
                 $('#btn-next').text('Yes, I can\'t think of anyone that fits this question');
                 $('#btn-next').addClass('btn-warning');
@@ -577,28 +755,35 @@ jQuery(document).ready(function() {
             return;
         }
         // submit data
-        let result = q_onfinish_funcs[page_i](question_texts[page_i].questions[question_i + 1]);
+        let result = q_onfinish_funcs[page_i](question_texts[page_i][q_type][question_i + 1]);
         if (!result) {
             return;
         }
+        window.scrollTo(0, 0);
         // proceed
-        if (question_i < question_texts[page_i].questions.length - 1) {
+        if (question_i < question_texts[page_i][q_type].length - 1) {
             // add public figure instructions for non-first naming questions
-            if (page_i == 1 && question_i == 0) {
-                $('#instr-public').show();
+            if (page_i == NAME_GEN_PAGE) {
+                if ((q_type == 'past_q' && question_i == 0) || (q_type == 'current_q' && question_i == 1)) {
+                    $('#instr-public').show();
+                }
             }
 
             // next question
             ++question_i;
-            $('.question-text').html(question_texts[page_i].questions[question_i]);
+            if (page_i == 5) {
+                append_p5_slider_qs(question_i);
+            } else if (page_i != NAME_GEN_PAGE + 1) {
+                $('.question-text').html(question_texts[page_i][q_type][question_i]);
+            }
 
             // roster last question
-            if (page_i == 1 && question_i == question_texts[page_i].questions.length - 1) {
+            if (page_i == NAME_GEN_PAGE && question_i == question_texts[page_i][q_type].length - 1) {
                 $('#no-prev').show();
             }
 
             // add data if there is any
-            if (page_i == 1 && data[page_i].hasOwnProperty(question_i)) {
+            if (page_i == NAME_GEN_PAGE && roster_data[q_type].hasOwnProperty(question_i)) {
                 add_data();
             } else {
                 $('#btn-next').addClass('disabled');
@@ -607,67 +792,84 @@ jQuery(document).ready(function() {
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
             // prepare subsequent questions
-            if (page_i == 1) {
+
+            if (page_i == NAME_GEN_PAGE) {
                 // get all named people
-                var named_people = new Set([]);
-                for (let q_i in data[1]) {
+                let num_q = (q_type == 'past_q') ? 2 : 3;  // just the first 2 or 3 roster Qs
+                for (let q_i = 0; q_i < num_q; q_i++) {
                     let dorm_names = [];
                     let outside_names = [];
-                    data[1][q_i].names_in_dorm.forEach(
+                    roster_data[q_type][q_i].names_in_dorm.forEach(
                         (tag) => dorm_names.push(tag + ' (2' + dorm_wing[0].toUpperCase() + ')')
                     );
-                    data[1][q_i].names_outside.forEach(
+                    roster_data[q_type][q_i].names_outside.forEach(
                         (tag) => outside_names.push(tag + ' (non-2' + dorm_wing[0].toUpperCase() + ')')
                     );
-                    named_people = new Set([...dorm_names,
-                                            ...outside_names,
-                                            ...named_people])  // append to set
+                    all_named_people[q_type] = new Set([...dorm_names,
+                                                        ...outside_names,
+                                                        ...all_named_people[q_type]])  // append to set
                 }
-                tie_q_prepare(named_people);
-                friend_q_prepare(named_people);
+                shuffle(all_named_people[q_type]);
+                person_q_prepare(all_named_people[q_type]);
+                friend_q_prepare(all_named_people[q_type]);
             }
             // next page
             question_i = 0;
-            let done = false;
             while (page_i < $('.page').length - 1) {
-                ++page_i;
-                if (page_i == 2) {
+                if (page_i == NAME_GEN_PAGE + 2) {  // last repetitive question
+                    if (q_type == 'past_q') {
+                        page_i = 1;  // restart from name gen 1
+                        q_type = 'current_q';  // change to current time
+                        $('#instr-public').hide();
+                    } else if (q_type == 'current_q') {
+                        q_type = 'questions'
+                        ++page_i;
+                    }
+                } else {
+                    ++page_i;
+                }
+                if (page_i == NAME_GEN_PAGE - 1) {
+                    $('#btn-next').removeClass('disabled');
+                    if (q_type == 'current_q' && $('.question-text').text().length > 0) {
+                        page_i = 1;  // stay on the page to show more questions
+                    }
+                }
+                if (page_i == NAME_GEN_PAGE + 1) {
                     $('#btn-prev').hide();
                     $('#no-prev').hide();
                 }
-                if (page_i == 4) {
+                if (page_i == 5) {
+                    append_p5_slider_qs(0);
+                }
+                if (page_i == $('.page').length - 2) {
                     $('#btn-next').text('Confirm');
                     increase_completion_count(); // completed + 1
                 }
-                if (question_texts[page_i].questions.length > 0) {
-                    $('.question-text').html(question_texts[page_i].questions[question_i]);
-                    $('#p' + page_i).show();
-                    if (page_i == 2) {
-                        $('#slider').slider('refresh');
+                if (question_texts[page_i][q_type].length > 0) {
+                    if (page_i != NAME_GEN_PAGE + 1 && page_i != 5) {
+                        $('.question-text').html(question_texts[page_i][q_type][question_i]);
                     }
-                    done = true;
+                    $('#p' + page_i).show();
+                    if (page_i == NAME_GEN_PAGE + 1 || page_i == 5) {
+                        $('.slide').slider('refresh');
+                    }
                     break;
                 }
-            }
-            if ((!done) && page_i == $('.page').length - 1) {
-                // show end page
-                hookWindow = false;
-                window.location.replace('progress.html?completed=' + survey_id.split('.')[0]);
             }
         }
         // hide warning
         $('.invalid').hide();
         normal_next_btn();
         // show previous button
-        if (page_i == 1 && question_i > 0) {
+        if (page_i == NAME_GEN_PAGE && question_i > 0) {
             $('#btn-prev').show();
         }
         // last page last question, change button text
         if ((page_i == $('.page').length - 2) &&
-            (question_i == question_texts[page_i].questions.length - 1)) {
+            (question_i == question_texts[page_i][q_type].length - 1)) {
             $('#btn-next').text('Finish');
         }
     });
 
-    hookWindow = true;
+    // hookWindow = true;
 });

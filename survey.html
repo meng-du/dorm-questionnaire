@@ -49,10 +49,43 @@
         </div>
         <div id="p1" class="page central">
             <div class="question-text"></div>
+            <div id="covid-residence" class="central"> <!-- only for the current survey -->
+                <form id="covid-residence-form">
+                    <div class="form-group">
+                        <div class="demo-q">Since people started leaving campus/since in-person classes were suspended, where have you been residing for most of the time?</div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="residence" value="hedrick" required>
+                            <label class="form-check-label" for="residence1">Hedrick hall 2nd floor</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="residence" value="other on-campus">
+                            <label class="form-check-label" for="residence1">Other on-campus housing</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="residence" value="off-campus">
+                            <label class="form-check-label" for="residence1">Off-campus</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="demo-q">Do you currently live alone or with others?</div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="living-with" value="alone" required>
+                            <label class="form-check-label" for="residence1">Alone</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="living-with" value="with others">
+                            <label class="form-check-label" for="residence1">With others</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="p2" class="page central">
+            <div class="question-text"></div>
             <div class="form-group">
-                <small class="form-text text-muted">Please enter their first name and last initial (for example, Daniel K), and click "Add" or hit Enter after each person.</small>
+                <small class="form-text text-muted">Please enter their first name and last name (for example, Daniel Kim), and click "Add" or hit Enter after each person.</small>
                 <small id="duplicate" class="form-text text-muted">If you know different people with the same name, please add a descriptive term that's meaningful to yourself, 
-                    so that you can disambiguate them later (for example, Daniel K artist, Daniel K newYorkCity, Daniel K chessClub, etc.).</small>
+                    so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim newYorkCity, Daniel Kim chessClub, etc.).</small>
                 <p id="dorm-name-instr" class="sm-instr">i) Please name the people who fit the above criteria for you in <strong>Hedrick Hall</strong> </p>
                 <div class="row">
                     <div class="col">
@@ -79,28 +112,34 @@
             </div>
         </div>
 
-        <div id="p2" class="page central">
-            <div class="question-text"></div>
-            <small id="name-note" class="form-text text-muted">Note: <i>2</i> or <i>non-2</i> has been added to each name to indicate if someone lives on your wing of floor 2 or outside of it.</small>
-            <div id="slider-wrapper"><input id="slider" type="text" data-slider-value="3"/></div>
-        </div>
-
         <div id="p3" class="page central">
-            <div class="question-text"></div>
-            <ul id="pairs-container"></ul>
+            <small id="name-note" class="form-text text-muted">Note: <i>2</i> or <i>non-2</i> has been added to each name to indicate if someone lives on your wing of floor 2 or outside of it.</small>
+            <div id="p3-questions"></div>
         </div>
 
         <div id="p4" class="page central">
             <div class="question-text"></div>
+            <ul id="pairs-container"></ul>
+        </div>
+
+        <div id="p5" class="page central">
+            <div class="question-text"></div>
+            <div id="p5-questions"></div>
+        </div>
+
+        <div id="p6" class="page central">
+            <div class="question-text"></div>
             <div align="center">
-                <div class="form-check form-check-inline">
-                     <input class="form-check-input" type="radio" name="payment" id="bruincard" value="bruincard">
-                     <label class="form-check-label" for="bruincard">Bruincard</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="payment" id="pay-cash" value="cash">
-                    <label class="form-check-label" for="cash">Cash</label>
-                </div>
+                <form id="payment-form">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="payment" value="bruincard" required>
+                        <label class="form-check-label" for="payment">Bruincard</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="payment" value="cash">
+                        <label class="form-check-label" for="payment">Cash</label>
+                    </div>
+                </form>
             </div>
             <p class="sm-instr central">Payment distribution will occur following the completion of survey response collection.<br>- For cash payments, our lab manager will contact you through the email address you disclosed for payment retrieval times.<br>- BruinCard payments may take a few weeks to process and will be automatically added to your BruinCard account.</p>
         </div>
@@ -117,7 +156,7 @@
 
         <!-- JavaScript -->
         <script type="text/javascript" src="js/questions.js"></script>
-        <script type="text/javascript" src="js/user.js"></script>
+        <!-- <script type="text/javascript" src="js/user.js"></script> -->
         <script type="text/javascript" src="js/survey.js"></script>
     </body>
 </html>
