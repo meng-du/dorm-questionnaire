@@ -819,6 +819,7 @@ jQuery(document).ready(function() {
                 if (page_i == NAME_GEN_PAGE + 2) {  // last repetitive question
                     if (q_type == 'past_q') {
                         page_i = 1;  // restart from name gen 1
+                        pair_i = 0;
                         q_type = 'current_q';  // change to current time
                         $('#instr-public').hide();
                     } else if (q_type == 'current_q') {

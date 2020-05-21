@@ -22,7 +22,7 @@ var roster_questions = {past_q: [
     'Whose messages (such as texts, group messages) or social media posts do you see often?',
     'People often want to be more like other people because of their personality traits or characteristics, ' +
     'for example: sense of humor, interests, lifestyle, knowledge, being likable, kindness.<br><br>Who do <i>you</i> ' +
-    'want to be more like (in these or other ways), even if you were not friends with them?',
+    'want to be more like (in these or other ways), even if you are not friends with them?',
 ]};
 var person_questions = {past_q: [
     'How often did you interact with <strong>*</strong>, either in person or online?',
