@@ -8,6 +8,16 @@
   display: table;
   margin: 1rem auto;
 }
+.precovid {
+  color: #d41c2d;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.duringcovid {
+  color: #1b57e3;
+  font-weight: 600;
+  text-decoration: underline;
+}
 .question-text {
   font-weight: 500;
   margin-bottom: 1rem;

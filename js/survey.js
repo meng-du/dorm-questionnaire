@@ -155,7 +155,7 @@ jQuery(document).ready(function() {
         if (q_type != 'current_q') {
             return true;
         }
-        if ($($('.question-text').get(0)).text() == time_instr['current_q']) {
+        if ($($('.question-text').get(0)).html() == time_instr['current_q']) {
             $('.question-text').text('');
             $('#covid-residence').show();
         } else {  // finished answering
@@ -532,8 +532,9 @@ jQuery(document).ready(function() {
 
     // get pairs from named people and initialize the first batch of questions
     function friend_q_prepare(named_people) {
-        if (named_people.length < 2) {
+        if (named_people.length < 2 || q_type == 'current_q') {
             friend_questions[q_type] = [];
+            return;
         }
         // get pairs
         friend_questions.pairs = [];
@@ -795,8 +796,7 @@ jQuery(document).ready(function() {
 
             if (page_i == NAME_GEN_PAGE) {
                 // get all named people
-                let num_q = (q_type == 'past_q') ? 2 : 3;  // just the first 2 or 3 roster Qs
-                for (let q_i = 0; q_i < num_q; q_i++) {
+                for (let q_i = 0; q_i < roster_questions[q_type].length; q_i++) {
                     let dorm_names = [];
                     let outside_names = [];
                     roster_data[q_type][q_i].names_in_dorm.forEach(
