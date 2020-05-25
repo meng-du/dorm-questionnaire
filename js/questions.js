@@ -42,14 +42,14 @@ var person_questions = {past_q: [
     'How far away do you live to <strong>*</strong> now (<span class="duringcovid"><i>during-COVID</i></span>)?',
     'How long have you known <strong>*</strong>?',
 
-    'How often do you socially interact with <strong>*</strong> <u>1-on-1</u> through ...',
+    '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>1-on-1</u> through ...',
     '... 1-on-1 video chat (Zoom, FaceTime, etc.) or phone call?<span hidden>*</span>',
     '... 1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.) or 1-on-1 messages on social media ' +
     '(direct messages on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... 1-on-1 in-person (face-to-face)?<span hidden>*</span>',
     '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt1" class="form-control" style="width:100%" ' +
          'placeholder="For example, video games, games over video chat"/>',
-    'How often do you socially interact with <strong>*</strong> <u>in a group setting</u> through ...',
+    '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>in a group setting</u> through ...',
     '... group conference call or group video chat (Zoom, FaceTime, etc.)?<span hidden>*</span>',
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
@@ -57,14 +57,14 @@ var person_questions = {past_q: [
     '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
          'placeholder="For example, video games, games over video chat"/>'
 ], followup: [
-    'How often do you socially interact with <strong>*</strong> <u>1-on-1</u> through ...',
+    '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>1-on-1</u> through ...',
     '... 1-on-1 video chat (Zoom, FaceTime, etc.) or phone call?<span hidden>*</span>',
     '... 1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.) or 1-on-1 messages on social media ' +
     '(direct messages on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... 1-on-1 in-person (face-to-face)?<span hidden>*</span>',
     '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt1" class="form-control" style="width:100%" ' +
          'placeholder="For example, video games, games over video chat"/>',
-    'How often do you socially interact with <strong>*</strong> <u>in a group setting</u> through ...',
+    '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>in a group setting</u> through ...',
     '... group conference call or group video chat (Zoom, FaceTime, etc.)?<span hidden>*</span>',
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',

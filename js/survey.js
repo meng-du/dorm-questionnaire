@@ -10,7 +10,6 @@ jQuery(document).ready(function() {
     $('.invalid').hide();
     $('#btn-prev').hide();
     $('#no-prev').hide();
-    $('#instr-public').hide();
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
@@ -80,6 +79,10 @@ jQuery(document).ready(function() {
     function save2firebase(data, q_key=-1, end=false) {
         q_key = q_key == -1 ? question_i : q_key;
         let db_key = page_i + '.';
+        if (data.hasOwnProperty('question') &&
+                (data.question.startsWith('<span class="duringcovid">' || data.question.startsWith('...')))) {
+            db_key = (page_i - 2) + '.';
+        }
         if (page_i >= NAME_GEN_PAGE && q_type != 'questions') {
             db_key += q_type + '.';
         }
@@ -319,6 +322,7 @@ jQuery(document).ready(function() {
     var slider_times = [];
 
     function slider_onclick(ev) {  // slider on change/on click
+        console.log(slider_clicks);
         let parent = $(ev.target).parent().attr('id');
         let index = parent.substring(14);  // last chars of parent id
         if (slider_clicks[index] % 10 == 0) {
@@ -380,16 +384,18 @@ jQuery(document).ready(function() {
         slider_times.push(-1);
     }
 
-    function append_p3_slider_qs(questions, configs) {
+    function append_p3_slider_qs(questions, configs, p5=false) {
         let slider_orient = 'vertical';
         let wrapper_class = 'slider-wrapper';
         let slider_i = -1;
+        let div = p5 ? '#p5-questions' : '#p3-questions';
         for (let q_i in questions) {
             if ($.isEmptyObject(configs[q_i])) {  // just text, no slider
                 // add text
                 $('#q-text' + q_i).addClass('');
-                $('#p3-questions').append($('<div>', {
-                    class: "slider-q-text question-text top-divider",
+                let cls = "slider-q-text question-text";
+                $(div).append($('<div>', {
+                    class: (q_i == 0) ? cls : cls + " top-divider",
                     html: questions[q_i]
                 }));
                 // subsequent sliders are horizontal
@@ -398,12 +404,12 @@ jQuery(document).ready(function() {
                 continue;
             }
             slider_i++;
-            $('#p3-questions').append($('<div>', {
+            $(div).append($('<div>', {
                 id: 'q-text' + slider_i,
                 class: "question-text slider-q-text",
                 html: questions[q_i]
             }));
-            $('#p3-questions').append($('<div>', {
+            $(div).append($('<div>', {
                 id: "slider-wrapper" + slider_i,
                 class: wrapper_class
             }).append($('<input>', {
@@ -453,7 +459,7 @@ jQuery(document).ready(function() {
             }
             let response = $('#slider' + i).val();
             let resp_txt = $('#slider-wrapper' + i + ' .label-is-selection').text();
-            let person = $(elt).html().split('>')[1].split('<')[0];
+            let person = $(elt).html().match(/(""\>.+\<\/sp|ng\>.+\<\/st)/g)[0].split('>')[1].split('<')[0];
 
             // check other freq is answered
             let input = $('#' + $(elt).attr('id') + ' input');
@@ -617,6 +623,15 @@ jQuery(document).ready(function() {
 
     function append_p5_slider_qs(i) {
         $('.question-text').html(question_texts[page_i][q_type][i]);
+        if (question_texts[page_i][q_type][i].startsWith('<small id="name-note"')) {
+            append_p3_slider_qs(attitude_questions.slider_qs[i], attitude_questions.sliders[i], true);
+            return;
+        }
+        // reset
+        $('#p5-questions').empty();
+        slider_clicks = [];
+        slider_times = [];
+        // append
         for (let j in attitude_questions.slider_qs[i]) {
             $('#p5-questions').append($('<div>', {
                 id: 'q-text' + j,
@@ -637,7 +652,10 @@ jQuery(document).ready(function() {
         }
     }
 
-    function attitude_q_onfinish() {
+    function attitude_q_onfinish(next_q) {
+        if ($('.question-text').html().startsWith('<small id="name-note"')) {
+            return person_q_onfinish(next_q);
+        }
         // save data
         $('.slider-q-text').each((q_i, elt) => {
             let question = $(elt).get(0).textContent;
@@ -653,10 +671,6 @@ jQuery(document).ready(function() {
             }
             save2firebase(data, question_i + ' - ' + q_i);
         });
-
-        $('#p5-questions').empty();
-        slider_clicks = [];
-        slider_times = [];
 
         return true;
     }
@@ -708,15 +722,9 @@ jQuery(document).ready(function() {
         add_data();
 
         // first question
-        if (page_i == NAME_GEN_PAGE) {
-            if ((q_type == 'past_q' && question_i == 0) || (q_type == 'current_q' && question_i == 1)) {
-                // remove the public figure wording
-                $('#instr-public').hide();
-            }
-            if (question_i == 0) {
-                // remove prev button
-                $('#btn-prev').hide();
-            }
+        if (page_i == NAME_GEN_PAGE && question_i == 0) {
+            // remove prev button
+            $('#btn-prev').hide();
         }
         $('.invalid').hide();
         normal_next_btn();
@@ -793,7 +801,6 @@ jQuery(document).ready(function() {
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
             // prepare subsequent questions
-
             if (page_i == NAME_GEN_PAGE) {
                 // get all named people
                 for (let q_i = 0; q_i < roster_questions[q_type].length; q_i++) {
@@ -810,6 +817,31 @@ jQuery(document).ready(function() {
                                                         ...all_named_people[q_type]])  // append to set
                 }
                 shuffle(all_named_people[q_type]);
+                if (q_type == 'current_q') {
+                    // remove names that are also in the past
+                    let intersection = new Set([...all_named_people['current_q']]
+                                       .filter(x => all_named_people['past_q'].has(x)));
+                    all_named_people['current_q'] = new Set([...all_named_people['current_q']]
+                                                    .filter(x => !intersection.has(x)));
+                    // put intersection at the beginning of attitude questions
+                    let person_q_later = [];
+                    let person_slider_q_later = [];
+                    let person_slider_later = [];
+                    for (let name of intersection) {
+                        person_q_later.push('<small id="name-note" class="form-text text-muted">' +
+                                            $('#name-note').html() + '</small>');
+                        person_slider_later.push([{}, freq_slider2, freq_slider2, freq_slider2, freq_slider2,
+                                                  {}, freq_slider2, freq_slider2, freq_slider2, freq_slider2]);
+                        let person_slider_q = [];
+                        for (let q of person_questions.followup) {
+                            person_slider_q.push(q.replace('*', name));
+                        }
+                        person_slider_q_later.push(person_slider_q);
+                    }
+                    attitude_questions.questions = person_q_later.concat(attitude_questions.questions);
+                    attitude_questions.slider_qs = person_slider_q_later.concat(attitude_questions.slider_qs);
+                    attitude_questions.sliders = person_slider_later.concat(attitude_questions.sliders);
+                }
                 person_q_prepare(all_named_people[q_type]);
                 friend_q_prepare(all_named_people[q_type]);
             }
@@ -821,7 +853,6 @@ jQuery(document).ready(function() {
                         page_i = 1;  // restart from name gen 1
                         pair_i = 0;
                         q_type = 'current_q';  // change to current time
-                        $('#instr-public').hide();
                     } else if (q_type == 'current_q') {
                         q_type = 'questions'
                         ++page_i;
