@@ -207,7 +207,7 @@ var attitude_questions = {questions:[
                    'Agree',
                    'Strongly agree'],
 }]};
-var payment_question = {questions: ['Thank you for completing the survey! Would you like to be paid through Bruincard or cash?']};
+var payment_question = {questions: ['Thank you for completing the survey! How would you like to be paid?']};
 var question_texts = [{past_q: {}}, time_instr, roster_questions, person_questions, friend_questions, attitude_questions, payment_question];
 
 // constants
