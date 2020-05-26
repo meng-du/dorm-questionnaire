@@ -13,8 +13,8 @@ jQuery(document).ready(function() {
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
-    var q_type = 'past_q';  // 'past_q', 'current_q', 'questions'
-    var roster_data = {past_q: {}, current_q: {}};
+    var q_type = 'initial';  // 'initial', 'past_q', 'current_q', 'questions'
+    var roster_data = {initial: {}, past_q: {}, current_q: {}};
     var all_named_people = {past_q: new Set([]), current_q: new Set([])};
     $('#p' + page_i).show();
 
@@ -801,7 +801,7 @@ jQuery(document).ready(function() {
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
             // prepare subsequent questions
-            if (page_i == NAME_GEN_PAGE) {
+            if (page_i == NAME_GEN_PAGE && q_type != 'initial') {
                 // get all named people
                 for (let q_i = 0; q_i < roster_questions[q_type].length; q_i++) {
                     let dorm_names = [];
@@ -848,7 +848,15 @@ jQuery(document).ready(function() {
             // next page
             question_i = 0;
             while (page_i < $('.page').length - 1) {
-                if (page_i == NAME_GEN_PAGE + 2) {  // last repetitive question
+                if (page_i == 0 && q_type == 'initial') {
+                    page_i = NAME_GEN_PAGE;  // go to the NG page
+                } else if (page_i == NAME_GEN_PAGE && q_type == 'initial') {
+                    page_i = NAME_GEN_PAGE - 1;
+                    q_type = 'past_q';
+                    $('#instr-public').hide();
+                    $('#btn-prev').hide();
+                    $('#no-prev').hide();
+                } else if (page_i == NAME_GEN_PAGE + 2) {  // last repetitive question
                     if (q_type == 'past_q') {
                         page_i = 1;  // restart from name gen 1
                         pair_i = 0;
