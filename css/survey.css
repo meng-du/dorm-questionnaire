@@ -22,6 +22,12 @@
   font-weight: 500;
   margin-bottom: 1rem;
 }
+.time-instr {
+  text-align: center;
+  max-width: 35rem;
+  margin: auto;
+  display: table;
+}
 .slider-q-text {
   margin-top: 2rem;
   margin-bottom: 1.5rem;

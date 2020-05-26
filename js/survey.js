@@ -10,6 +10,7 @@ jQuery(document).ready(function() {
     $('.invalid').hide();
     $('#btn-prev').hide();
     $('#no-prev').hide();
+    $('.precovid-in-q').hide();
     var page_i = 0;
     var question_i = 0;
     var pair_i = 0;
@@ -79,9 +80,8 @@ jQuery(document).ready(function() {
     function save2firebase(data, q_key=-1, end=false) {
         q_key = q_key == -1 ? question_i : q_key;
         let db_key = page_i + '.';
-        if (data.hasOwnProperty('question') &&
-                (data.question.startsWith('<span class="duringcovid">' || data.question.startsWith('...')))) {
-            db_key = (page_i - 2) + '.';
+        if (page_i == 5 && data.hasOwnProperty('question') && data.question.startsWith('...')) {
+            db_key = '3.current_q.';
         }
         if (page_i >= NAME_GEN_PAGE && q_type != 'questions') {
             db_key += q_type + '.';
@@ -257,7 +257,7 @@ jQuery(document).ready(function() {
     });
 
     // set up instructions to include wing
-    $('#dorm-name-instr').text($('#dorm-name-instr').text() + '2' + dorm_wing[0].toUpperCase());
+    $('#dorm-name-instr').html($('#dorm-name-instr').html().replace('Hall</strong>', 'Hall</strong> 2' + dorm_wing[0].toUpperCase()));
     $('#name-note').html($('#name-note').html().replace(/2</g, '2' + dorm_wing[0].toUpperCase() + '<'));
 
     // enable/disable next button
@@ -322,7 +322,6 @@ jQuery(document).ready(function() {
     var slider_times = [];
 
     function slider_onclick(ev) {  // slider on change/on click
-        console.log(slider_clicks);
         let parent = $(ev.target).parent().attr('id');
         let index = parent.substring(14);  // last chars of parent id
         if (slider_clicks[index] % 10 == 0) {
@@ -389,6 +388,9 @@ jQuery(document).ready(function() {
         let wrapper_class = 'slider-wrapper';
         let slider_i = -1;
         let div = p5 ? '#p5-questions' : '#p3-questions';
+        $(div).empty();
+        slider_clicks = [];
+        slider_times = [];
         for (let q_i in questions) {
             if ($.isEmptyObject(configs[q_i])) {  // just text, no slider
                 // add text
@@ -853,6 +855,7 @@ jQuery(document).ready(function() {
                 } else if (page_i == NAME_GEN_PAGE && q_type == 'initial') {
                     page_i = NAME_GEN_PAGE - 1;
                     q_type = 'past_q';
+                    $('.precovid-in-q').show();
                     $('#instr-public').hide();
                     $('#btn-prev').hide();
                     $('#no-prev').hide();
@@ -861,6 +864,7 @@ jQuery(document).ready(function() {
                         page_i = 1;  // restart from name gen 1
                         pair_i = 0;
                         q_type = 'current_q';  // change to current time
+                        $('.precovid-in-q').hide();
                     } else if (q_type == 'current_q') {
                         q_type = 'questions'
                         ++page_i;

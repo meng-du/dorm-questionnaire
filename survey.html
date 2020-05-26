@@ -49,7 +49,7 @@
         </div>
 
         <div id="p1" class="page central">
-            <div class="question-text"></div>
+            <div class="question-text time-instr"></div>
             <div id="covid-residence" class="central"> <!-- only for the current survey -->
                 <form id="covid-residence-form">
                     <div class="form-group">
@@ -88,7 +88,10 @@
                 <small class="form-text text-muted">Please enter their first name and last name (for example, Daniel Kim), and click "Add" or hit Enter after each person.</small>
                 <small id="duplicate" class="form-text text-muted">If you know different people with the same name, please add a descriptive term that's meaningful to yourself, 
                     so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim newYorkCity, Daniel Kim chessClub, etc.).</small>
-                <p id="dorm-name-instr" class="sm-instr">i) Please name the people who fit the above criteria for you from <strong>Hedrick Hall</strong> </p>
+                <p id="dorm-name-instr" class="sm-instr">
+                    i) Please name the people who fit the above criteria for you from <strong>Hedrick Hall</strong> 
+                    <span class="precovid precovid-in-q">pre-COVID</span>
+                </p>
                 <div class="row">
                     <div class="col">
                         <input type="text" id="dorm-names" class="tm-input form-control" placeholder="Enter one name at a time"/>
@@ -100,7 +103,10 @@
                 <div id="dorm-names-container"></div>
             </div>
             <div class="form-group">
-                <p id="outsider-name-instr" class="sm-instr">ii) Please add anyone else (including other people at UCLA or people outside of UCLA) who fits the above criteria for you</p>
+                <p id="outsider-name-instr" class="sm-instr">
+                    ii) Please add anyone else (including other people at UCLA or people outside of UCLA) who fits the above criteria for you 
+                    <span class="precovid precovid-in-q">pre-COVID</span>
+                </p>
                 <small id="instr-public" class="text-muted">Public figures don't count</small>
                 <div class="row">
                     <div class="col">
@@ -134,15 +140,15 @@
             <div align="center">
                 <form id="payment-form">
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="payment" value="bruincard" required>
+                        <input class="form-check-input" type="radio" name="payment" value="amazon" required>
                         <label class="form-check-label" for="payment">Amazon gift card</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="payment" value="cash">
+                        <input class="form-check-input" type="radio" name="payment" value="target">
                         <label class="form-check-label" for="payment">Target gift card</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="payment" value="cash">
+                        <input class="form-check-input" type="radio" name="payment" value="bruincard">
                         <label class="form-check-label" for="payment">Bruincard deposit</label>
                     </div>
                 </form>
