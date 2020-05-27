@@ -40,7 +40,7 @@ jQuery(document).ready(function() {
             let count = doc.data().count;
             let percent = Math.floor(count/194 * 100);
             $('#bar').css('width', percent + '%').attr('aria-valuenow', percent);
-            $('#bar').text(percent + '% have completed');
+            $('#bar').text(percent + '% of your floor have completed');
         })
         .catch(function(error) {
             // error

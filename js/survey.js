@@ -858,35 +858,41 @@ jQuery(document).ready(function() {
                 person_q_prepare(all_named_people[q_type]);
                 friend_q_prepare(all_named_people[q_type]);
             }
-            // next page
-            if (page_i > 2) {
-                let percent = page_i == 4 ? 0.1 : 0.2;
-                prog_bar.animate(prog_bar.value() + percent / question_texts[page_i][q_type].length,
-                                { duration: 1000 });
-                console.log(prog_bar.value());
-            } else if (page_i == 1 && q_type == 'current_q') {
-                prog_bar.animate(prog_bar.value() + 0.05, { duration: 1000 });
+            // progress bar
+            let percent;
+            switch (page_i) {
+                case 0: percent = q_type == 'initial'? 0.05 : prog_bar.value(); break;
+                case 1: percent = q_type == 'current_q'? 0.55 : prog_bar.value(); break;
+                case 2: percent = q_type == 'initial'? 0.15 : prog_bar.value(); break;
+                case 3: percent = q_type == 'past_q' ? 0.4 : 0.8; break;
+                case 4: percent = 0.5; break;
+                case 5: percent = 1; break;
+                default: percent = prog_bar.value(); break;
+            }
+            if (percent > prog_bar.value()) {
+                prog_bar.animate(percent, { duration: 1000 });
                 console.log(prog_bar.value());
             }
+            // next page
             question_i = 0;
             while (page_i < $('.page').length - 1) {
                 if (page_i == 0 && q_type == 'initial') {
-                    prog_bar.animate(0.05, { duration: 1000 });
                     page_i = NAME_GEN_PAGE;  // go to the NG page
                 } else if (page_i == NAME_GEN_PAGE && q_type == 'initial') {
                     page_i = NAME_GEN_PAGE - 1;
                     q_type = 'past_q';
                     $('.precovid-in-q').show();
+                    $('#duringcovid-in-q').hide();
                     $('#instr-public').hide();
                     $('#btn-prev').hide();
                     $('#no-prev').hide();
-                    prog_bar.animate(0.15, { duration: 1000 });
                 } else if (page_i == NAME_GEN_PAGE + 2) {  // last repetitive question
                     if (q_type == 'past_q') {
                         page_i = 1;  // restart from name gen 1
                         pair_i = 0;
                         q_type = 'current_q';  // change to current time
                         $('.precovid-in-q').hide();
+                        $('#duringcovid-in-q').show();
                     } else if (q_type == 'current_q') {
                         q_type = 'questions'
                         ++page_i;
@@ -937,5 +943,5 @@ jQuery(document).ready(function() {
         }
     });
 
-    // hookWindow = true;
+    hookWindow = true;
 });

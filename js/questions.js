@@ -3,7 +3,8 @@ var time_instr = {past_q:
     'mid-March ("<span class="precovid">pre-COVID</span>").'],
     current_q:
     ['For the following questions, please consider the time <u>since</u> the "safer at home" policy was implemented in ' +
-    'mid-March ("<span class="duringcovid">during-COVID</span>")']};
+    'mid-March ("<span class="duringcovid">during-COVID</span>").<br><br>Please consider all people that you interact ' +
+    'with <span class="duringcovid">during-COVID</span>, even if you have already listed them earlier in the survey.']};
 var roster_questions = {initial: [
     'Whose messages (such as texts, group messages) or social media posts do you see often?',
     'People often want to be more like other people because of their personality traits or characteristics, ' +
@@ -16,10 +17,12 @@ var roster_questions = {initial: [
 ], current_q: [
     'Consider the people you like to spend your free time with. <span class="duringcovid"><i>During-COVID</i></span>, ' +
     'who are the people you\'ve socialized with <strong>in person</strong> most often? (Examples: eat meals with, ' +
-    'hang out with, study with, spent time with.)',
+    'hang out with, study with, spent time with.)<br><br>Please include all people that you socialize with now, even if ' +
+    'you have already listed them earlier in the survey.',
     'Consider the people you like to spend your free time with. <span class="duringcovid"><i>During-COVID</i></span>, ' +
-    'who are the people you\'ve <strong>virtually</strong> socialized with most often? (Examples: spend time with, ' +
-    'hang out with, study with).'
+    'who are the people you\'ve <strong>virtually</strong> socialized with most often? (Examples: virtually spend time ' +
+    'with, hang out with, study with).<br><br>Please include all people that you socialize with now, even if you have ' +
+    'already listed them earlier in the survey.'
 ]};
 var person_questions = {past_q: [
     '<span class="precovid"><i>Pre-COVID</i></span>, how often did you interact with <strong>*</strong>, ' +
@@ -53,7 +56,7 @@ var person_questions = {past_q: [
     '... group conference call or group video chat (Zoom, FaceTime, etc.)?<span hidden>*</span>',
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
-    '... in-person (face-to-face)?<span hidden>*</span>',
+    '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
     '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
          'placeholder="For example, video games, games over video chat"/>'
 ], followup: [
@@ -68,7 +71,7 @@ var person_questions = {past_q: [
     '... group conference call or group video chat (Zoom, FaceTime, etc.)?<span hidden>*</span>',
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
-    '... in-person (face-to-face)?<span hidden>*</span>',
+    '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
     '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
          'placeholder="For example, video games, games over video chat"/>'
 ]};
