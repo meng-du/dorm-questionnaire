@@ -807,7 +807,6 @@ jQuery(document).ready(function() {
                 let percent = page_i == 4 ? 0.1 : 0.2;
                 prog_bar.animate(prog_bar.value() + percent / question_texts[page_i][q_type].length,
                                 { duration: 1000 });
-                console.log(prog_bar.value());
             }
         } else {
             $('#btn-next').addClass('disabled');
