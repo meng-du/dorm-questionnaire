@@ -57,7 +57,7 @@ var person_questions = {past_q: [
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
-    '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
+    '... other ways in a group setting (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
          'placeholder="For example, video games, games over video chat"/>'
 ], followup: [
     '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>1-on-1</u> through ...',
@@ -72,7 +72,7 @@ var person_questions = {past_q: [
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
-    '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
+    '... other ways in a group setting (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
          'placeholder="For example, video games, games over video chat"/>'
 ]};
 var freq_slider1 = {
