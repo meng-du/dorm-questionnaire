@@ -292,13 +292,25 @@ jQuery(document).ready(function() {
         return true;
     }
 
+    function to_title_case(str_list) {
+        let new_list = [];
+        for (let s of str_list) {
+            let str = s.toLowerCase().split(' ');
+            for (var i = 0; i < str.length; i++) {
+                str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+            }
+            new_list.push(str.join(' '));
+        }
+        return new_list;
+    }
+
     // data & reset
     function roster_q_onfinish(next_q_text) {
         if (!check_entered_text()) {
             return false;
         }
-        let dorm_names = $('#dorm-names').tagsManager('tags');
-        let outsider_names = $('#outsider-names').tagsManager('tags');
+        let dorm_names = to_title_case($('#dorm-names').tagsManager('tags'));
+        let outsider_names = to_title_case($('#outsider-names').tagsManager('tags'));
         $('#dorm-names').val('');
         $('#outsider-names').val('');
         // name_typeahead_source.push(...dorm_names, ...outsider_names);
@@ -870,7 +882,6 @@ jQuery(document).ready(function() {
             }
             if (percent > prog_bar.value()) {
                 prog_bar.animate(percent, { duration: 1000 });
-                console.log(prog_bar.value());
             }
             // next page
             question_i = 0;

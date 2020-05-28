@@ -16,19 +16,19 @@ var roster_questions = {initial: [
     'spent time with.)'
 ], current_q: [
     'Consider the people you like to spend your free time with. <span class="duringcovid"><i>During-COVID</i></span>, ' +
-    'who are the people you\'ve socialized with <strong>in person</strong> most often? (Examples: eat meals with, ' +
+    'who are the people you\'ve socialized with <strong><u>in person</u></strong> most often? (Examples: eat meals with, ' +
     'hang out with, study with, spent time with.)<br><br>Please include all people that you socialize with now, even if ' +
     'you have already listed them earlier in the survey.',
     'Consider the people you like to spend your free time with. <span class="duringcovid"><i>During-COVID</i></span>, ' +
-    'who are the people you\'ve <strong>virtually</strong> socialized with most often? (Examples: virtually spend time ' +
-    'with, hang out with, study with).<br><br>Please include all people that you socialize with now, even if you have ' +
-    'already listed them earlier in the survey.'
+    'who are the people you\'ve <strong><u>virtually</u></strong> socialized with most often? (Examples: <u>virtually</u> ' +
+    'spend time with, hang out with, study with).<br><br>Please include all people that you socialize with now, even if ' +
+    'you have already listed them earlier in the survey.'
 ]};
 var person_questions = {past_q: [
     '<span class="precovid"><i>Pre-COVID</i></span>, how often did you interact with <strong>*</strong>, ' +
-    'either in person or online?',
+    'either <u>in person or online</u>?',
     '<span class="duringcovid"><i>During-COVID (since the "safer at home" policy was implemented)</i></span>, ' +
-    'how often do you interact with <strong>*</strong>, either in person or online?',
+    'how often do you interact with <strong>*</strong>, either <u>in person or online</u>?',
     '<span class="precovid"><i>Pre-COVID</i></span>, how close did you feel to <strong>*</strong>?',
     '<span class="duringcovid"><i>During-COVID</i></span>, how close do you feel to <strong>*</strong>?',
     'How far away did you live to <strong>*</strong> <span class="precovid"><i>pre-COVID</i></span>?',
@@ -36,9 +36,9 @@ var person_questions = {past_q: [
     'How long have you known <strong>*</strong>?',
 ], current_q: [
     '<span class="precovid"><i>Pre-COVID</i></span>, how often did you interact with <strong>*</strong>, ' +
-    'either in person or online?',
+    'either <u>in person or online</u>?',
     '<span class="duringcovid"><i>During-COVID</i></span>, how often do you interact with <strong>*</strong>, ' +
-    'either in person or online?',
+    'either <u>in person or online</u>?',
     '<span class="precovid"><i>Pre-COVID</i></span>, how close did you feel to <strong>*</strong>?',
     '<span class="duringcovid"><i>During-COVID</i></span>, how close do you feel to <strong>*</strong>?',
     'How far away did you live to <strong>*</strong> <span class="precovid"><i>pre-COVID</i></span>?',
@@ -57,7 +57,7 @@ var person_questions = {past_q: [
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
-    '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
+    '... other ways in a group setting (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
          'placeholder="For example, video games, games over video chat"/>'
 ], followup: [
     '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>1-on-1</u> through ...',
@@ -72,7 +72,7 @@ var person_questions = {past_q: [
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
-    '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
+    '... other ways in a group setting (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
          'placeholder="For example, video games, games over video chat"/>'
 ]};
 var freq_slider1 = {

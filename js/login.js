@@ -4,7 +4,7 @@
     var DB_INFO_COLLECTION = 'test_info';
     var DB_DATA_COLLECTION = 'test_data';
     var firstname, lastname, uid, dorm, dorm_wing, email, timestamp;
-    var survey_id = 'test' + (Date.now() + Math.random()).toString();
+    var survey_id = (Date.now() + Math.random()).toString();
     $('#no-record').hide();
     $('#instr').hide();
     $('#confirmation').hide();
