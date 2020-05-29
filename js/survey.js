@@ -248,12 +248,12 @@ jQuery(document).ready(function() {
     });
 
     // "add" buttons
-    $('#btn-dorm-add').click(() => {
+    $('#btn-dorm-add').on('click', () => {
         let name = $('#dorm-names').val();
         $('#dorm-names').tagsManager('pushTag', name);
         $('#dorm-names').val('');
     });
-    $('#btn-outsider-add').click(() => {
+    $('#btn-outsider-add').on('click', () => {
         let name = $('#outsider-names').val();
         $('#outsider-names').tagsManager('pushTag', name);
         $('#outsider-names').val('');
@@ -351,6 +351,19 @@ jQuery(document).ready(function() {
         $('#' + parent + ' .slider-handle').css('background-image', '');
     }
 
+    function btn_clear_onclick(ev) {
+        let parent = $(ev.target).parent().parent().parent().attr('id');
+        let index = parent.substring(6);  // last chars of parent id
+        slider_clicks[index] = 10;
+        slider_times[index] = -1;
+        $('#' + parent + ' .other-txt').val('');
+        $('#slider-wrapper' + index + ' .slide').val(1);
+        $('#slider-wrapper' + index + ' .slide').slider('refresh');
+        $('#slider-wrapper' + index + ' .slider-handle').css('background-image',
+            'linear-gradient(to bottom,#ccc 0,#eee 100%)');
+        $('#slider-wrapper' + index + ' .label-is-selection').css('font-weight', '400');
+    }
+
     function rotate_labels(wrapper, num_labels) {  // tick label rotation
         // reset
         $(wrapper + ' .slider-tick-label').css('transform', '');
@@ -436,10 +449,11 @@ jQuery(document).ready(function() {
                 'data-slider-value': 1,
                 'data-slider-orientation': slider_orient
             })));
-            let other_q = questions[q_i].indexOf('id="other-txt') != -1;
+            let other_q = questions[q_i].indexOf('class="other-txt') != -1;
             create_slider('#slider' + slider_i, '#slider-wrapper' + slider_i,
                           configs[q_i], slider_orient, !other_q)
         }
+        $('.btn-clear').on('click', btn_clear_onclick);
     }
 
     // replace * in question with user input names
@@ -480,9 +494,9 @@ jQuery(document).ready(function() {
 
             // check other freq is answered
             let input = $('#' + $(elt).attr('id') + ' input');
+            let index = $(elt).attr('id').substring(6);
             let specification = '';
             if (input.length > 0 && input.val().length > 0) {  // check slider
-                let index = $(elt).attr('id').substring(6);
                 if (slider_clicks[index] % 10 == 0) {  // unselected slider
                     input.get(0).setCustomValidity('Please select a freqency below');
                     input.get(0).reportValidity();
@@ -491,6 +505,11 @@ jQuery(document).ready(function() {
                 } else {
                     specification = input.val();
                 }
+            } else if (input.length > 0 && slider_clicks[index] % 10 != 0) {  // selected slider
+                input.get(0).setCustomValidity('Please either specify or clear your selection');
+                input.get(0).reportValidity();
+                invalid = true;
+                return false;
             }
 
             let data = {
@@ -723,7 +742,7 @@ jQuery(document).ready(function() {
         }
     }
 
-    $('#btn-prev').click((e) => {
+    $('#btn-prev').on('click', (e) => {
         if ($('#btn-prev').hasClass('disabled')) {
             return;
         }
@@ -760,7 +779,7 @@ jQuery(document).ready(function() {
         $('#btn-next').removeClass('btn-sm');
     }
 
-    $('#btn-next').click((e) => {
+    $('#btn-next').on('click', (e) => {
         if (page_i == NAME_GEN_PAGE && !check_entered_text()) {
             return;  // entered text but didn't add for naming question
         }

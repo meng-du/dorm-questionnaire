@@ -24,6 +24,9 @@ var roster_questions = {initial: [
     'spend time with, hang out with, study with).<br><br>Please include all people that you socialize with now, even if ' +
     'you have already listed them earlier in the survey.'
 ]};
+var person_q_other_postfix = '<span hidden>*</span><div class="row"><div class="col">' +
+                             '<input type="text" class="other-txt form-control" placeholder="For example, video games"/></div>' +
+                             '<div class="col-auto"><button class="btn btn-secondary btn-clear">Clear</button></div></div>';
 var person_questions = {past_q: [
     '<span class="precovid"><i>Pre-COVID</i></span>, how often did you interact with <strong>*</strong>, ' +
     'either <u>in person or online</u>?',
@@ -50,30 +53,26 @@ var person_questions = {past_q: [
     '... 1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.) or 1-on-1 messages on social media ' +
     '(direct messages on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... 1-on-1 in-person (face-to-face)?<span hidden>*</span>',
-    '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt1" class="form-control" style="width:100%" ' +
-         'placeholder="For example, video games, games over video chat"/>',
+    '... other ways (specify)?' + person_q_other_postfix,
     '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>in a group setting</u> through ...',
     '... group conference call or group video chat (Zoom, FaceTime, etc.)?<span hidden>*</span>',
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
-    '... other ways in a group setting (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
-         'placeholder="For example, video games, games over video chat"/>'
+    '... other ways in a group setting (specify)?' + person_q_other_postfix
 ], followup: [
     '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>1-on-1</u> through ...',
     '... 1-on-1 video chat (Zoom, FaceTime, etc.) or phone call?<span hidden>*</span>',
     '... 1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.) or 1-on-1 messages on social media ' +
     '(direct messages on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... 1-on-1 in-person (face-to-face)?<span hidden>*</span>',
-    '... other ways (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt1" class="form-control" style="width:100%" ' +
-         'placeholder="For example, video games, games over video chat"/>',
+    '... other ways (specify)?' + person_q_other_postfix,
     '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>in a group setting</u> through ...',
     '... group conference call or group video chat (Zoom, FaceTime, etc.)?<span hidden>*</span>',
     '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
     '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
     '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
-    '... other ways in a group setting (specify)?<span hidden>*</span> ' +'<input type="text" id="other-txt2" class="form-control" style="width:100%" ' +
-         'placeholder="For example, video games, games over video chat"/>'
+    '... other ways in a group setting (specify)?' + person_q_other_postfix
 ]};
 var freq_slider1 = {
     step: 1, min: 1, max: 5, value: 0,
