@@ -24,9 +24,8 @@ var roster_questions = {initial: [
     'spend time with, hang out with, study with).<br><br>Please include all people that you socialize with now, even if ' +
     'you have already listed them earlier in the survey.'
 ]};
-var person_q_other_postfix = '<span hidden>*</span><div class="row"><div class="col">' +
-                             '<input type="text" class="other-txt form-control" placeholder="For example, video games"/></div>' +
-                             '<div class="col-auto"><button class="btn btn-secondary btn-clear">Clear</button></div></div>';
+var person_q_other_postfix = '<span hidden>*</span>' +
+                             '<input type="text" class="other-txt form-control" placeholder="For example, video games"/>';
 var person_questions = {past_q: [
     '<span class="precovid"><i>Pre-COVID</i></span>, how often did you interact with <strong>*</strong>, ' +
     'either <u>in person or online</u>?',
@@ -75,9 +74,10 @@ var person_questions = {past_q: [
     '... other ways in a group setting (specify)?' + person_q_other_postfix
 ]};
 var freq_slider1 = {
-    step: 1, min: 1, max: 5, value: 0,
-    ticks: [1, 2, 3, 4, 5],
-    ticks_labels: ['Less than once a week',
+    step: 1, min: 1, max: 6, value: 0,
+    ticks: [1, 2, 3, 4, 5, 6],
+    ticks_labels: ['Never',
+                   'Less than once a week',
                    'About once a week',
                    '2-3 times a week',
                    '4-5 times a week',
@@ -113,9 +113,10 @@ var time_slider = {
                    'More than 5 years'],
 };
 var freq_slider2 = {
-    step: 1, min: 1, max: 5, value: 0,
-    ticks: [1, 2, 3, 4, 5],
-    ticks_labels: ['Once a month or less',
+    step: 1, min: 1, max: 6, value: 0,
+    ticks: [1, 2, 3, 4, 5, 6],
+    ticks_labels: ['Never',
+                   'Once a month or less',
                    'A few times a month',
                    'Once a week',
                    'Multiple times a week',
