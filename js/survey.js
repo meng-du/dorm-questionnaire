@@ -17,7 +17,6 @@ jQuery(document).ready(function() {
     var q_type = 'initial';  // 'initial', 'past_q', 'current_q', 'questions'
     var roster_data = {initial: {}, past_q: {}, current_q: {}};
     var all_named_people = {past_q: new Set([]), current_q: new Set([])};
-    $('#p' + page_i).show();
 
     // prevent closing window
     window.onbeforeunload = function() {
@@ -45,6 +44,10 @@ jQuery(document).ready(function() {
     if (!survey_id || !dorm_wing) {
         alert('This URL is invalid. Please contact the experimenters.');
         return;
+    }
+    var progress = '0';
+    if (parameters.length > 5) {
+        progress = parameters[5];
     }
 
     // PROGRESS BAR
@@ -106,6 +109,123 @@ jQuery(document).ready(function() {
         });
     }
 
+
+    // LOAD PREVIOUS PROGRESS
+
+    function setup_curr_names(exclude=[]) {
+        console.log(all_named_people['past_q'], all_named_people['current_q']);
+        // remove names that are also in the past
+        let intersection = new Set([...all_named_people['current_q']]
+                           .filter(x => all_named_people['past_q'].has(x)));
+        all_named_people['current_q'] = new Set([...all_named_people['current_q']]
+                                        .filter(x => !intersection.has(x)));
+        // exclude
+        if (exclude.length > 0) {
+            intersection = new Set([...intersection].filter(x => !intersection.has(x)));
+        }
+        // put intersection at the beginning of attitude questions
+        let person_q_later = [];
+        let person_slider_q_later = [];
+        let person_slider_later = [];
+        for (let name of intersection) {
+            person_q_later.push('<small id="name-note" class="form-text text-muted">' +
+                                $('#name-note').html() + '</small>');
+            person_slider_later.push([{}, freq_slider2, freq_slider2, freq_slider2, freq_slider2,
+                                      {}, freq_slider2, freq_slider2, freq_slider2, freq_slider2]);
+            let person_slider_q = [];
+            for (let q of person_questions.followup) {
+                person_slider_q.push(q.replace('*', name));
+            }
+            person_slider_q_later.push(person_slider_q);
+        }
+        attitude_questions.questions = person_q_later.concat(attitude_questions.questions);
+        attitude_questions.slider_qs = person_slider_q_later.concat(attitude_questions.slider_qs);
+        attitude_questions.sliders = person_slider_later.concat(attitude_questions.sliders);
+    }
+
+    function push2roster(names_in_dorm, names_outside, q_t) {
+        let dorm_names = [];
+        let outside_names = [];
+        names_in_dorm.forEach(
+            (tag) => dorm_names.push(tag + ' (2' + dorm_wing[0].toUpperCase() + ')')
+        );
+        names_outside.forEach(
+            (tag) => outside_names.push(tag + ' (non-2' + dorm_wing[0].toUpperCase() + ')')
+        );
+        all_named_people[q_t] = new Set([...dorm_names,
+                                            ...outside_names,
+                                            ...all_named_people[q_type]])  // append to set
+    }
+
+    // check prev progress
+    console.log(progress);
+    var show_covid_residency = true;
+    if (progress == '2.current_q') {
+        show_covid_residency = false;
+        progress = '1.current_q';
+    }
+    if (progress != '0') {
+        let prog = progress.split('.');
+        page_i = parseInt(prog[0]);
+        if (page_i != NAME_GEN_PAGE - 1) {
+            $('#btn-next').addClass('disabled');
+        }
+        if (prog[1]) {
+            if (prog[1].length > 1) {
+                q_type = prog[1];
+                if (page_i > 0 && page_i < 5) {
+                    db.collection(DB_DATA_COLLECTION).doc(survey_id).get().then((doc) => {
+                        if (!('2' in doc.data())) {
+                            return;
+                        }
+                        for (let t in doc.data()['2']) {
+                            for (let q_i in doc.data()['2'][t]) {
+                                if (t != 'initial') {
+                                    //todo past data was not pushed
+                                    push2roster(doc.data()['2'][t][q_i]['names_in_dorm'],
+                                                doc.data()['2'][t][q_i]['names_outside'], t);
+                                }
+                            }
+                        }
+                        console.log(all_named_people);
+                        if (page_i == 3) {
+                            let names = [];
+                            let exclude = [];
+                            if ('3' in doc.data() && q_type in doc.data()['3']) {
+                                exclude = new Set([]);
+                                Object.keys(doc.data()['3'][q_type]).forEach(item => exclude.add(item.split(' - ')[0]));
+                                names = new Set([...all_named_people[q_type]].filter(x => !exclude.has(x)));
+                            } else {
+                                names = all_named_people[q_type];
+                            }
+                            person_q_prepare(names);
+                            friend_q_prepare(all_named_people[q_type]);
+                            if (q_type == 'current_q') {
+                                setup_curr_names(exclude); //todo
+                            }
+                        } else if (page_i == 4) {
+                            friend_q_prepare(all_named_people[q_type]);
+                        }
+                    });
+                }
+            } else if (prog[0] == '5') {
+                question_i = parseInt(prog[1]);
+                q_type = 'questions';
+                if (!question_i || question_i < 0 || question_i > 2) {
+                    console.log('Progress Error: ' + progress);
+                }
+                append_p5_slider_qs(question_i);
+            } else {
+                console.log('Progress Error: ' + progress);
+            }
+        } else if (prog[0] != '6') {
+            console.log('Progress Error: ' + progress);
+        }
+        $('.question-text').html(question_texts[page_i][q_type][question_i]);
+    }
+    $('#p' + page_i).show();
+
+
     // DEMOGRAPHIC QUESTIONS
 
     $('#country').hide();
@@ -162,8 +282,12 @@ jQuery(document).ready(function() {
             return true;
         }
         if ($($('.question-text').get(0)).html() == time_instr['current_q']) {
-            $('.question-text').text('');
-            $('#covid-residence').show();
+            if (show_covid_residency) {
+                $('.question-text').text('');
+                $('#covid-residence').show();
+            } else {
+                return true;
+            }
         } else {  // finished answering
             if (! $('#covid-residence-form').get(0).reportValidity()) {
                 return false;
@@ -833,43 +957,12 @@ jQuery(document).ready(function() {
                 prog_bar.animate(prog_bar.value() + 0.05, { duration: 1000 });
                 // get all named people
                 for (let q_i = 0; q_i < roster_questions[q_type].length; q_i++) {
-                    let dorm_names = [];
-                    let outside_names = [];
-                    roster_data[q_type][q_i].names_in_dorm.forEach(
-                        (tag) => dorm_names.push(tag + ' (2' + dorm_wing[0].toUpperCase() + ')')
-                    );
-                    roster_data[q_type][q_i].names_outside.forEach(
-                        (tag) => outside_names.push(tag + ' (non-2' + dorm_wing[0].toUpperCase() + ')')
-                    );
-                    all_named_people[q_type] = new Set([...dorm_names,
-                                                        ...outside_names,
-                                                        ...all_named_people[q_type]])  // append to set
+                    push2roster(roster_data[q_type][q_i].names_in_dorm,
+                                roster_data[q_type][q_i].names_outside, q_type);
                 }
                 shuffle(all_named_people[q_type]);
                 if (q_type == 'current_q') {
-                    // remove names that are also in the past
-                    let intersection = new Set([...all_named_people['current_q']]
-                                       .filter(x => all_named_people['past_q'].has(x)));
-                    all_named_people['current_q'] = new Set([...all_named_people['current_q']]
-                                                    .filter(x => !intersection.has(x)));
-                    // put intersection at the beginning of attitude questions
-                    let person_q_later = [];
-                    let person_slider_q_later = [];
-                    let person_slider_later = [];
-                    for (let name of intersection) {
-                        person_q_later.push('<small id="name-note" class="form-text text-muted">' +
-                                            $('#name-note').html() + '</small>');
-                        person_slider_later.push([{}, freq_slider2, freq_slider2, freq_slider2, freq_slider2,
-                                                  {}, freq_slider2, freq_slider2, freq_slider2, freq_slider2]);
-                        let person_slider_q = [];
-                        for (let q of person_questions.followup) {
-                            person_slider_q.push(q.replace('*', name));
-                        }
-                        person_slider_q_later.push(person_slider_q);
-                    }
-                    attitude_questions.questions = person_q_later.concat(attitude_questions.questions);
-                    attitude_questions.slider_qs = person_slider_q_later.concat(attitude_questions.slider_qs);
-                    attitude_questions.sliders = person_slider_later.concat(attitude_questions.sliders);
+                    setup_curr_names();
                 }
                 person_q_prepare(all_named_people[q_type]);
                 friend_q_prepare(all_named_people[q_type]);
@@ -917,7 +1010,7 @@ jQuery(document).ready(function() {
                 }
                 if (page_i == NAME_GEN_PAGE - 1) {
                     $('#btn-next').removeClass('disabled');
-                    if (q_type == 'current_q' && $('.question-text').text().length > 0) {
+                    if (q_type == 'current_q' && $('.question-text').text().length > 0 && show_covid_residency) {
                         page_i = 1;  // stay on the page to show more questions
                     }
                 }

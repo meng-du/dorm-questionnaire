@@ -49,7 +49,9 @@ jQuery(document).ready(function() {
         db.collection(DB_DATA_COLLECTION).doc(fid).get().then((doc) => {
             // find progress from last time
             let progress = 0;
-            if ('6' in doc.data()) {
+            if (!doc.data()) {
+                progress = '0';
+            } else if ('6' in doc.data()) {
                 $('#surveydone').show();
             } else if ('5' in doc.data()) {
                 let length = Object.keys(doc.data()['5']).length;
@@ -74,37 +76,38 @@ jQuery(document).ready(function() {
                         if (names0.length + names1.length == names2.length) {
                             progress = '5.0';
                         } else {
-                            progress = '3.curr';
+                            progress = '3.current_q';
                         }
                     } else {  // nothing in 3.current_q
-                        progress = (Object.keys(doc.data()['2']['current_q']).length == 2) ? '3.curr' : '2.curr';
+                        progress = (Object.keys(doc.data()['2']['current_q']).length == 2) ? '3.current_q' : '2.current_q';
                     }
                 } else if ('1' in doc.data()) {
-                    progress = '2.curr';
+                    progress = '2.current_q';
                 } else if ('past_q' in doc.data()['2']) {
                     let length0 = doc.data()['2']['past_q'][0]['names_in_dorm'].length;
                     let length1 = doc.data()['2']['past_q'][0]['names_outside'].length;
                     if ('4' in doc.data()) {
                         let length2 = Object.keys(doc.data()['2']['past_q']).length;
+                        console.log(length0, length1, length2);
                         if ((length0 + length1) * (length0 + length1 - 1) / 2 == length2) {
-                            progress = '1.curr';
+                            progress = '1.current_q';
                         } else {
-                            progress = '4.past';
+                            progress = '4.past_q';
                         }
                     } else if ('3' in doc.data() && 'past_q' in doc.data()['3']) {
                         let names = new Set();
-                        doc.data()['3']['past_q'][0].forEach(item => names.add(item.split(' (')[0]));
-                        if (length0 + length1 == names.length) {
-                            progress = '4.past';
+                        Object.keys(doc.data()['3']['past_q']).forEach(item => names.add(item.split(' - ')[0]));
+                        if (length0 + length1 == names.size) {
+                            progress = '4.past_q';
                         } else {
-                            progress = '3.past';
+                            progress = '3.past_q';
                         }
                     } else {
-                        progress = '3.past';
+                        progress = '3.past_q';
                     }
                 } else if ('initial' in doc.data()['2']) {
                     if (Object.keys(doc.data()['2']['initial']).length == 2) {
-                        progress = '1.past';
+                        progress = '1.past_q';
                     }
                 }
             } else if ('0' in doc.data()) {
@@ -113,7 +116,7 @@ jQuery(document).ready(function() {
                 progress = '0';
             }
             console.log(progress);
-            // window.location.replace('survey.html?survey_id=' + fid + '&wing=' + dorm_wing + '&progress=' + progress);
+            window.location.replace('survey.html?survey_id=' + fid + '&wing=' + dorm_wing + '&progress=' + progress);
         });
     });
 
