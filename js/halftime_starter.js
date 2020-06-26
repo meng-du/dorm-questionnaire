@@ -72,8 +72,8 @@ jQuery(document).ready(function() {
                         doc.data()['2']['current_q'][0]['names_outside'].forEach(item => names1.add(item));
                         doc.data()['2']['current_q'][1]['names_outside'].forEach(item => names1.add(item));
                         let names2 = new Set();
-                        doc.data()['3']['current_q'][0].forEach(item => names2.add(item.split(' (')[0]));
-                        if (names0.length + names1.length == names2.length) {
+                        Object.keys(doc.data()['3']['current_q']).forEach(item => names2.add(item.split(' - ')[0]));
+                        if (names0.size + names1.size == names2.size) {
                             progress = '5.0';
                         } else {
                             progress = '3.current_q';

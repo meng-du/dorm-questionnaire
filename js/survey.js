@@ -113,7 +113,6 @@ jQuery(document).ready(function() {
     // LOAD PREVIOUS PROGRESS
 
     function setup_curr_names(exclude=[]) {
-        console.log(all_named_people['past_q'], all_named_people['current_q']);
         // remove names that are also in the past
         let intersection = new Set([...all_named_people['current_q']]
                            .filter(x => all_named_people['past_q'].has(x)));
@@ -153,8 +152,8 @@ jQuery(document).ready(function() {
             (tag) => outside_names.push(tag + ' (non-2' + dorm_wing[0].toUpperCase() + ')')
         );
         all_named_people[q_t] = new Set([...dorm_names,
-                                            ...outside_names,
-                                            ...all_named_people[q_type]])  // append to set
+                                         ...outside_names,
+                                         ...all_named_people[q_t]])  // append to set
     }
 
     // check prev progress
@@ -181,13 +180,11 @@ jQuery(document).ready(function() {
                         for (let t in doc.data()['2']) {
                             for (let q_i in doc.data()['2'][t]) {
                                 if (t != 'initial') {
-                                    //todo past data was not pushed
                                     push2roster(doc.data()['2'][t][q_i]['names_in_dorm'],
                                                 doc.data()['2'][t][q_i]['names_outside'], t);
                                 }
                             }
                         }
-                        console.log(all_named_people);
                         if (page_i == 3) {
                             let names = [];
                             let exclude = [];
@@ -198,11 +195,12 @@ jQuery(document).ready(function() {
                             } else {
                                 names = all_named_people[q_type];
                             }
+                            if (q_type == 'current_q') {
+                                setup_curr_names(exclude);
+                                names = all_named_people[q_type];
+                            }
                             person_q_prepare(names);
                             friend_q_prepare(all_named_people[q_type]);
-                            if (q_type == 'current_q') {
-                                setup_curr_names(exclude); //todo
-                            }
                         } else if (page_i == 4) {
                             friend_q_prepare(all_named_people[q_type]);
                         }
@@ -211,19 +209,24 @@ jQuery(document).ready(function() {
             } else if (prog[0] == '5') {
                 question_i = parseInt(prog[1]);
                 q_type = 'questions';
-                if (!question_i || question_i < 0 || question_i > 2) {
+                if (isNaN(question_i) || question_i < 0 || question_i > 2) {
                     console.log('Progress Error: ' + progress);
                 }
                 append_p5_slider_qs(question_i);
             } else {
                 console.log('Progress Error: ' + progress);
             }
-        } else if (prog[0] != '6') {
+        } else if (prog[0] == '6') {
+            q_type = 'questions';
+        } else {
             console.log('Progress Error: ' + progress);
         }
-        $('.question-text').html(question_texts[page_i][q_type][question_i]);
+        if (page_i != 5) {
+            $('.question-text').html(question_texts[page_i][q_type][question_i]);
+        }
     }
     $('#p' + page_i).show();
+    $('.slide').slider('refresh');
 
 
     // DEMOGRAPHIC QUESTIONS
