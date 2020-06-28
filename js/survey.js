@@ -173,6 +173,13 @@ jQuery(document).ready(function() {
             if (prog[1].length > 1) {
                 q_type = prog[1];
                 if (page_i > 0 && page_i < 5) {
+                    if (page_i <= NAME_GEN_PAGE && q_type == 'past_q') {
+                        $('.precovid-in-q').show();
+                        $('#duringcovid-in-q').hide();
+                    }
+                    if (q_type != 'initial') {
+                        $('#instr-public').hide();
+                    }
                     db.collection(DB_DATA_COLLECTION).doc(survey_id).get().then((doc) => {
                         if (!('2' in doc.data())) {
                             return;
@@ -939,13 +946,6 @@ jQuery(document).ready(function() {
         window.scrollTo(0, 0);
         // proceed
         if (question_i < question_texts[page_i][q_type].length - 1) {
-            // add public figure instructions for non-first naming questions
-            if (page_i == NAME_GEN_PAGE) {
-                if ((q_type == 'past_q' && question_i == 0) || (q_type == 'current_q' && question_i == 1)) {
-                    $('#instr-public').show();
-                }
-            }
-
             // next question
             ++question_i;
             if (page_i == 5) {
