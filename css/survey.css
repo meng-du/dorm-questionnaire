@@ -22,6 +22,9 @@
   font-weight: 500;
   margin-bottom: 1rem;
 }
+#p3-reminder {
+  font-weight: 500;
+}
 .time-instr {
   text-align: center;
   max-width: 35rem;

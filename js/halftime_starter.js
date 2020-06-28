@@ -163,7 +163,6 @@ jQuery(document).ready(function() {
     .catch(function(error) {
         // error
         alert('Failed to access database. Please check your internet connection and try again.\n' + error);
-        window.location.replace('progress.html');  // refresh page
         console.log(error);
     });
     var timestamp = new Date();

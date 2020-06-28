@@ -119,8 +119,8 @@ jQuery(document).ready(function() {
         all_named_people['current_q'] = new Set([...all_named_people['current_q']]
                                         .filter(x => !intersection.has(x)));
         // exclude
-        if (exclude.length > 0) {
-            intersection = new Set([...intersection].filter(x => !intersection.has(x)));
+        if (exclude.size && exclude.size > 0) {
+            intersection = new Set([...intersection].filter(x => !exclude.has(x)));
         }
         // put intersection at the beginning of attitude questions
         let person_q_later = [];
@@ -186,21 +186,40 @@ jQuery(document).ready(function() {
                             }
                         }
                         if (page_i == 3) {
+                            $('#p3-reminder').html('For questions of the <span class="precovid">pre-COVID</span> ' +
+                                'period, please think back to <u>before</u> the "safer at home" policy was ' +
+                                'implemented in mid-March.');
+                            if (q_type == 'current_q') {
+                                $('#p3-reminder').html($('#p3-reminder').html() + '<br>For questions of the ' +
+                                '<span class="duringcovid">during-COVID</span> period, please consider the ' +
+                                'time <u>since</u> the "safer at home" policy was implemented in mid-March.');
+                            }
                             let names = [];
                             let exclude = [];
                             if ('3' in doc.data() && q_type in doc.data()['3']) {
                                 exclude = new Set([]);
                                 Object.keys(doc.data()['3'][q_type]).forEach(item => exclude.add(item.split(' - ')[0]));
+                                if (q_type == 'current_q') {
+                                    setup_curr_names(exclude);
+                                }
                                 names = new Set([...all_named_people[q_type]].filter(x => !exclude.has(x)));
                             } else {
+                                if (q_type == 'current_q') {
+                                    setup_curr_names(exclude);
+                                }
                                 names = all_named_people[q_type];
                             }
-                            if (q_type == 'current_q') {
-                                setup_curr_names(exclude);
-                                names = all_named_people[q_type];
+                            if (names.size == 0) {
+                                page_i = 5;
+                                q_type = 'questions';
+                                append_p5_slider_qs(question_i);
+                                $('#p3').hide();
+                                $('#p5').show();
+                                $('.slide').slider('refresh');
+                            } else {
+                                person_q_prepare(names);
+                                friend_q_prepare(all_named_people[q_type]);
                             }
-                            person_q_prepare(names);
-                            friend_q_prepare(all_named_people[q_type]);
                         } else if (page_i == 4) {
                             friend_q_prepare(all_named_people[q_type]);
                         }
@@ -687,7 +706,7 @@ jQuery(document).ready(function() {
 
     // get pairs from named people and initialize the first batch of questions
     function friend_q_prepare(named_people) {
-        if (named_people.length < 2 || q_type == 'current_q') {
+        if (named_people.size < 2 || q_type == 'current_q') {
             friend_questions[q_type] = [];
             return;
         }
@@ -1022,6 +1041,7 @@ jQuery(document).ready(function() {
                     $('#no-prev').hide();
                 }
                 if (page_i == 5) {
+                    $('#p3-reminder').hide();
                     append_p5_slider_qs(0);
                 }
                 if (page_i == $('.page').length - 2) {

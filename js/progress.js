@@ -2,13 +2,7 @@
 
 jQuery(document).ready(function() {
     $('#copied').hide();
-    if (window.location.search.substring(1).length > 0) {
-        let completed = window.location.search.substring(1).split(/[&=]/)[1];
-        console.log(completed);
-        if ((Date.now() - parseInt(completed)) / 60000 > 120) {  // more than 2 hrs
-            $('#end-survey').hide();
-        }
-    } else {
+    if (window.location.search.substring(1).length == 0) {
         $('#end-survey').hide();
     }
 

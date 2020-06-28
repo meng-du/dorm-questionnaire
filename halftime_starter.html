@@ -18,7 +18,7 @@
     <body>
         <div id="info-form" class="central" data-toggle="validator" role="form">
             <div id="wronguid" class="alert alert-danger">
-                Your UID does not match the one in our database. Please double check your web address or contact the experimenter.
+                Your UID does not match our record. Please double check UID and the web address, or contact the experimenter.
             </div>
             <div id="surveydone" class="alert alert-primary">
                 You have already complete the survey - thank you! Payments will be disbursed shortly after the survey response collection is completed. Stay tuned!
@@ -39,13 +39,43 @@
         <div id="confirmation" class="central">
             <p>Please double check your information:</p>
             <div id="info-check"></div>
-            <p class="blue">Make sure everything is correct. We will need these to pay you and everyone else after you complete the survey.</p>
-            <button id="refresh-btn" class="btn btn-warning">Something is wrong, go back</button>
+            <p class="blue">
+                Make sure everything is correct. We will need these to pay you and everyone else after you complete the survey. 
+                If you need to change your information, please contact the experimenter (Karina Lopez karinalopez@ucla.edu).
+            </p>
+            <button id="refresh-btn" class="btn btn-warning">This is not me, go back</button>
             <button id="confirm-btn" class="btn btn-info">This is correct</button>
         </div>
 
         <!-- JavaScript -->
         <!-- <script type="text/javascript" src="js/user.js"></script> -->
         <script type="text/javascript" src="js/halftime_starter.js"></script>
+        <script>
+            function copy_data() {
+                var ids = [];
+                var firebaseConfig = {
+                    apiKey: "AIzaSyBvPWLV2yjapJKblBLcfkVbpZC3cXtM0PU",
+                    authDomain: "dorm-network.firebaseapp.com",
+                    databaseURL: "https://dorm-network.firebaseio.com",
+                    projectId: "dorm-network",
+                    storageBucket: "dorm-network.appspot.com",
+                    messagingSenderId: "804230274072",
+                    appId: "1:804230274072:web:dd26c12bba4f85e64df76d"
+                };
+                firebase.initializeApp(firebaseConfig);
+                var db = firebase.firestore();
+                firebase.auth().signInWithEmailAndPassword(user.email, user.pw).then(function () {
+                    for (fid of ids) {
+                        db.collection('2020may_data').doc(fid).get().then((doc) => {
+                            db.collection('test_data').doc(doc.id).set(doc.data());
+                        });
+                        db.collection('2020may_personal_info').doc(fid).get().then((doc) => {
+                            db.collection('test_info').doc(doc.id).set(doc.data());
+                        });
+                    }
+                });
+            }
+            // copy_data();
+        </script>
     </body>
 </html>
