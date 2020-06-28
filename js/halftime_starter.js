@@ -108,6 +108,8 @@ jQuery(document).ready(function() {
                 } else if ('initial' in doc.data()['2']) {
                     if (Object.keys(doc.data()['2']['initial']).length == 2) {
                         progress = '1.past_q';
+                    } else {
+                        progress = '2.initial';
                     }
                 }
             } else if ('0' in doc.data()) {
