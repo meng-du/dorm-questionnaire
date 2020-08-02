@@ -1,3 +1,6 @@
 .*
 js/user.js
 data/*.csv
+data/*.json
+*.pyc
+

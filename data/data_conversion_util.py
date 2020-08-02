@@ -98,9 +98,6 @@ def flatten(obj, obj_id=None):
     def _flatten(x, name=''):  # recursion
         if type(x) is dict:
             for k in x:
-                # if len(k) == 13 and k[:2] == '14':  # is a time stamp, skip TODO this is only for trust game
-                #     _flatten(x[k], name)
-                # else:
                 _flatten(x[k], name + k + '.')
         elif type(x) is list:
             for i, a in enumerate(x):
@@ -111,6 +108,8 @@ def flatten(obj, obj_id=None):
                 values.append(x)
 
     _flatten(obj)
+    names, values = zip(*sorted(zip(names, values)))
+    names, values = list(names), list(values)
     return names, values
 
 
@@ -119,27 +118,14 @@ def fill_missing_keys(data_list):
     Given a list of data with another list of column names to each row,
     find the union of column names, and make every row of data have an equal length
     by inserting empty strings at the missing columns.
-    Assuming column names are unique.
-    :param data_list: a list of tuples (column_name_list, value_list) 
+    Assuming column names are unique and sorted.
+    :param data_list: a list of tuples (column_name_list, value_list)
     :return a list of complete column names, and a 2-dimensional list of values
     """
     name_lists, data = zip(*data_list)
 
-    # get a complete list of column names
-    all_names = list(name_lists[0])
-    for row in range(1, len(name_lists)):
-        name_list = name_lists[row]  # current name list
-        all_col, cur_col = 0, 0  # all_names column, current name list column
-        while cur_col < len(name_list):
-            if all_col == len(all_names):
-                all_names += name_list[cur_col:]
-            if name_list[cur_col] != all_names[all_col]:
-                if name_list[cur_col] not in all_names:  # slow?
-                    all_names.insert(all_col, name_list[cur_col])
-                else:
-                    cur_col -= 1
-            cur_col += 1
-            all_col += 1
+    # get a complete list of unique column names
+    all_names = sorted(list(set(sum(name_lists, []))))
 
     # fill empty strings
     for row in range(len(name_lists)):
@@ -165,7 +151,7 @@ def longest_common_substring(s1, s2):
         for y in range(1, 1 + len(s2)):
             if s1[x - 1] == s2[y - 1]:
                 m[x][y] = m[x - 1][y - 1] + 1
-                if m[x][y] > longest:
+                if m[x][y] > longest or (m[x][y] > 3 and x > x_longest):
                     longest = m[x][y]
                     x_longest = x
             else:
@@ -207,16 +193,11 @@ def cut_and_stack(wide_cols, wide_data, cut_start, cut_length, cut_number, skip_
         skip_cols.sort()
     # get cut_end and a list of skipped columns within the cut range
     cut_end = cut_start + cut_length * cut_number  # if no column skipped in the cut range
-    i, j = cut_start, 0
-    skip_cols_in_cut = []  # TODO unnecessary variable
-    while j < len(skip_cols) and skip_cols[j] < cut_start:  # find first element in skip_col that is > cut_start
-        j += 1
-    while i < cut_end and j < len(skip_cols):
-        if i == skip_cols[j]:
-            skip_cols_in_cut.append(i)
+    skip_cols_in_cut = []
+    for col in skip_cols:
+        if cut_start <= col < cut_end:
+            skip_cols_in_cut.append(col)
             cut_end += 1
-            j += 1
-        i += 1
     # columns before cut
     _simple_stack(wide_cols, wide_data, cols, data, 0, cut_start, skip_cols, cut_number)
     # cut starts
@@ -232,7 +213,8 @@ def cut_and_stack(wide_cols, wide_data, cut_start, cut_length, cut_number, skip_
                     col += 1
                 if cut == 1 and i == 0:
                     second_cut_start = col
-                data[data_row].append(row[col])
+                if col < len(row):
+                    data[data_row].append(row[col])
     # cut ends
     # get column names in cut range
     i, j, col_counter, skip_i, skip_j = cut_start, second_cut_start, 0, 0, 0
