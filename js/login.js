@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-    var DB_INFO_COLLECTION = 'personal_info';
+    var DB_INFO_COLLECTION = 'test_info';
     var DB_DATA_COLLECTION = 'test_data';
     var firstname, lastname, uid, dorm, dorm_wing, email, timestamp;
     var survey_id = 'test' + (Date.now() + Math.random()).toString();
@@ -23,7 +23,8 @@
     firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
     // sign in
-    firebase.auth().signInWithEmailAndPassword(user.email, user.pw).catch(function(error) {
+    // firebase.auth().signInWithEmailAndPassword(user.email, user.pw).catch(function(error) {
+    firebase.auth().signInAnonymously().catch(function(error) {
         // error
         alert('Failed to access database. Please check your internet connection and try again.\nIf it doesn\'t work, please contact the experimenters.\n' + error);
         location.reload();  // refresh page
