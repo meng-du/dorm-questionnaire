@@ -336,13 +336,13 @@ jQuery(document).ready(function() {
     // validator
     function validate_name(tag) {
         let valid = true;
-        let fields = ['#dorm-names', '#outsider-names'];
+        let fields = ['#dorm-names', '#outsider-names'];  // TODO use an aggregated list rather than just the list from the current page
         for (let i in fields) {
             let field = $(fields[i]);
             if (tag == field.val().trim()) {
                 // test if using alphabets and spaces
-                if (! /^[a-zA-Z]+\s+[a-zA-Z\s]*[a-zA-Z]+$/.test(tag)) {
-                    field.get(0).setCustomValidity('Please enter one name at a time (first name & last name) with alphabets and spaces only');
+                if (! /^[a-zA-Z-]+\s+[a-zA-Z-\s]*[a-zA-Z-]+$/.test(tag)) {
+                    field.get(0).setCustomValidity('Please enter one name at a time (first & last name) with alphabets, spaces and hyphens only');
                     field.get(0).reportValidity();
                     valid = false;
                 } else {
@@ -352,7 +352,7 @@ jQuery(document).ready(function() {
                 // test if repeated
                 let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);
                 if (field.tagsManager('tags').includes(tag) || repeat_other_field > -1) {
-                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim newYorkCity, Daniel Kim chessClub, etc.).');
+                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
                     field.get(0).reportValidity();
                     if (repeat_other_field > -1) {
                         field.val('');
@@ -366,9 +366,20 @@ jQuery(document).ready(function() {
                             .animate({ backgroundColor: '#d90000' }, 100)
                             .animate({ backgroundColor: '#ffc107' }, 100);
                     }
-                } else if (valid) {
-                    field.get(0).setCustomValidity('');
-                    field.get(0).reportValidity();
+                } else {
+                    // test if similar to other names
+                    for (let x of TODO???) {
+                        if (levenshtein(tag, x)) {
+                            field.get(0).setCustomValidity('You have entered "' +  + '" which is similar to this one. If you are entering different people with similar names, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
+                            field.get(0).reportValidity();
+                            valid = false;
+                            // TODO
+                        }
+                    }
+                    if (valid) {
+                        field.get(0).setCustomValidity('');
+                        field.get(0).reportValidity();
+                    }
                 }
             }
         }
