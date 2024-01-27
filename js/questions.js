@@ -1,79 +1,25 @@
-var time_instr = {past_q:
-    ['For the following question, please think back to <u>before</u> the "safer at home" policy was implemented in ' +
-    'mid-March ("<span class="precovid">pre-COVID</span>").'],
-    current_q:
-    ['For the following questions, please consider the time <u>since</u> the "safer at home" policy was implemented in ' +
-    'mid-March ("<span class="duringcovid">during-COVID</span>").<br><br>Please consider all people that you interact ' +
-    'with <span class="duringcovid">during-COVID</span>, even if you have already listed them earlier in the survey.']};
-var roster_questions = {initial: [
-    'Whose messages (such as texts, group messages) or social media posts do you see often?',
-    'People often want to be more like other people because of their personality traits or characteristics, ' +
-    'for example: sense of humor, interests, lifestyle, knowledge, being likable, kindness.<br><br>Who do <i>you</i> ' +
-    'want to be more like (in these or other ways), even if you are not friends with them?'
-], past_q: [
-    'Consider the people you liked to spend your free time with. <span class="precovid"><i>Pre-COVID</i></span>, ' +
-    'who were the people you socialized with most often? (Examples: ate meals with, hung out with, studied with, ' +
-    'spent time with.)'
-], current_q: [
-    'Consider the people you like to spend your free time with. <span class="duringcovid"><i>During-COVID</i></span>, ' +
-    'who are the people you\'ve socialized with <strong><u>in person</u></strong> most often? (Examples: eat meals with, ' +
-    'hang out with, study with, spent time with.)<br><br>Please include all people that you socialize with now, even if ' +
-    'you have already listed them earlier in the survey.',
-    'Consider the people you like to spend your free time with. <span class="duringcovid"><i>During-COVID</i></span>, ' +
-    'who are the people you\'ve <strong><u>virtually</u></strong> socialized with most often? (Examples: <u>virtually</u> ' +
-    'spend time with, hang out with, study with).<br><br>Please include all people that you socialize with now, even if ' +
-    'you have already listed them earlier in the survey.'
-]};
-var person_q_other_postfix = '<span hidden>*</span>' +
-                             '<input type="text" class="other-txt form-control" placeholder="For example, video games"/>';
-var person_questions = {past_q: [
-    '<span class="precovid"><i>Pre-COVID</i></span>, how often did you interact with <strong>*</strong>, ' +
-    'either <u>in person or online</u>?',
-    '<span class="duringcovid"><i>During-COVID (since the "safer at home" policy was implemented)</i></span>, ' +
-    'how often do you interact with <strong>*</strong>, either <u>in person or online</u>?',
-    '<span class="precovid"><i>Pre-COVID</i></span>, how close did you feel to <strong>*</strong>?',
-    '<span class="duringcovid"><i>During-COVID</i></span>, how close do you feel to <strong>*</strong>?',
-    'How far away did you live to <strong>*</strong> <span class="precovid"><i>pre-COVID</i></span>?',
-    'How far away do you live to <strong>*</strong> now (<span class="duringcovid"><i>during-COVID</i></span>)?',
-    'How long have you known <strong>*</strong>?',
-], current_q: [
-    '<span class="precovid"><i>Pre-COVID</i></span>, how often did you interact with <strong>*</strong>, ' +
-    'either <u>in person or online</u>?',
-    '<span class="duringcovid"><i>During-COVID</i></span>, how often do you interact with <strong>*</strong>, ' +
-    'either <u>in person or online</u>?',
-    '<span class="precovid"><i>Pre-COVID</i></span>, how close did you feel to <strong>*</strong>?',
-    '<span class="duringcovid"><i>During-COVID</i></span>, how close do you feel to <strong>*</strong>?',
-    'How far away did you live to <strong>*</strong> <span class="precovid"><i>pre-COVID</i></span>?',
-    'How far away do you live to <strong>*</strong> now (<span class="duringcovid"><i>during-COVID</i></span>)?',
-    'How long have you known <strong>*</strong>?',
+var roster_questions = [  // page 1
+    'Consider the people you like to spend your free time with. Who are the people you\'ve socialized with most often? ' +
+    '(Examples: eat meals with, hang out with, study with, spent time with.)',
 
-    '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>1-on-1</u> through ...',
-    '... 1-on-1 video chat (Zoom, FaceTime, etc.) or phone call?<span hidden>*</span>',
-    '... 1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.) or 1-on-1 messages on social media ' +
-    '(direct messages on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
-    '... 1-on-1 in-person (face-to-face)?<span hidden>*</span>',
-    '... other ways (specify)?' + person_q_other_postfix,
-    '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>in a group setting</u> through ...',
-    '... group conference call or group video chat (Zoom, FaceTime, etc.)?<span hidden>*</span>',
-    '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
-    '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
-    '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
-    '... other ways in a group setting (specify)?' + person_q_other_postfix
-], followup: [
-    '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>1-on-1</u> through ...',
-    '... 1-on-1 video chat (Zoom, FaceTime, etc.) or phone call?<span hidden>*</span>',
-    '... 1-on-1 text messaging (iMessage, private message on GroupMe, WhatsApp, etc.) or 1-on-1 messages on social media ' +
-    '(direct messages on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
-    '... 1-on-1 in-person (face-to-face)?<span hidden>*</span>',
-    '... other ways (specify)?' + person_q_other_postfix,
-    '<span class="duringcovid"><i>During-COVID</i></span>, how often do you socially interact with <strong>*</strong> <u>in a group setting</u> through ...',
-    '... group conference call or group video chat (Zoom, FaceTime, etc.)?<span hidden>*</span>',
-    '... group text messaging (iMessage, group message on Groupme, WhatsApp, etc.) or group messages on social media ' +
-    '(group on Facebook, Instagram, TikTok, etc.)?<span hidden>*</span>',
-    '... in-person (face-to-face) in a group setting?<span hidden>*</span>',
-    '... other ways in a group setting (specify)?' + person_q_other_postfix
-]};
-var freq_slider1 = {
+    'Who do you work with most often or go to for academic support? ' +
+    '(Examples: go to class with, work on homework sets together, study for tests together, do projects together).',
+
+    'Whom do you share good news with?',
+
+    'Who would you talk to if something bad or upsetting happened to you?',
+
+    'Who makes you feel supported and cared for?',
+
+    'Who usually makes you feel positive (e.g., happy, enthusiastic)?',
+
+    'Whose social media posts or messages (such as texts, group messages) or social media posts do you see most often?'
+];
+var tie_strength_questions = [  // page 2
+    'How close do you feel to <strong>*</strong>?',
+    'How often do you interact with <strong>*</strong>, either <u>in person or online</u>?'
+];
+var freq_slider = {
     step: 1, min: 1, max: 6, value: 0,
     ticks: [1, 2, 3, 4, 5, 6],
     ticks_labels: ['Never',
@@ -91,49 +37,9 @@ var close_slider = {
                    'Very close',
                    'Extremely close'],
 }
-var dist_slider = {
-    step: 1, min: 1, max: 8, value: 0,
-    ticks: [1, 2, 3, 4, 5, 6, 7, 8],
-    ticks_labels: ['Roommate/same house',
-                   'Same building (but not roommates)',
-                   'Same neighborhood',
-                   'Same city',
-                   'Same state (different city)',
-                   'Same country (different state)',
-                   'Different country (same continent)',
-                   'Different continent'],
-};
-var time_slider = {
-    step: 1, min: 1, max: 5, value: 0,
-    ticks: [1, 2, 3, 4, 5],
-    ticks_labels: ['Less than 1 month',
-                   'Since the start of the school year (fall 2019)',
-                   'About 1 year',
-                   'A few years',
-                   'More than 5 years'],
-};
-var freq_slider2 = {
-    step: 1, min: 1, max: 6, value: 0,
-    ticks: [1, 2, 3, 4, 5, 6],
-    ticks_labels: ['Never',
-                   'Once a month or less',
-                   'A few times a month',
-                   'Once a week',
-                   'Multiple times a week',
-                   'At least once a day'],
-}
-var slider_configs = {past_q: [freq_slider1, freq_slider1, close_slider, close_slider,
-                               dist_slider, dist_slider, time_slider],
-                      current_q: [freq_slider1, freq_slider1, close_slider, close_slider,
-                                  dist_slider, dist_slider, time_slider,
-                                  {}, freq_slider2, freq_slider2, freq_slider2, freq_slider2,
-                                  {}, freq_slider2, freq_slider2, freq_slider2, freq_slider2]};
+var slider_configs = [freq_slider, close_slider];
 
-var friend_questions = {past_q: [
-    'Were these pairs of people connected with each other <span class="precovid"><i>pre-COVID</i></span>?<br><br>' +
-    'Please choose "connected" if they have socialized with each other regularly, or "not connected" otherwise.'],
-    current_q: []};
-var attitude_questions = {questions:[
+var likert_questions = {questions:[  // page 3
     'We are now interested in your thoughts and attitudes toward current events. Please indicate how much you agree or ' +
     'disagree with the following statements.',
     'Indicate how often each of the statements below is descriptive of you.',
@@ -211,7 +117,7 @@ var attitude_questions = {questions:[
                    'Strongly agree'],
 }]};
 var payment_question = {questions: ['Thank you for completing the survey! How would you like to be paid?']};
-var question_texts = [{initial: {}}, time_instr, roster_questions, person_questions, friend_questions, attitude_questions, payment_question];
+var question_texts = [roster_questions, tie_strength_questions, likert_questions, payment_question];
 
 // constants
-var NAME_GEN_PAGE = 2;
+var ROSTER_PAGE = 0;

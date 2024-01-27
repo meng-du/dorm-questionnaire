@@ -1,22 +1,23 @@
 'use strict';
 var hookWindow = false;
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+// import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-analytics.js";
+import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js'
+import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js'
+
+
 jQuery(document).ready(function() {
-    var DB_DATA_COLLECTION = 'test_data';
-    var FRIEND_PAIRS_PER_PAGE = 15;
+    var DB_TYPE = 'test_';  // 'test_' or 'prod_'
     $('.page').hide();
     $('#end').hide();
-    $('#covid-residence').hide();
     $('.invalid').hide();
     $('#btn-prev').hide();
     $('#no-prev').hide();
-    $('.precovid-in-q').hide();
     var page_i = 0;
     var question_i = 0;
-    var pair_i = 0;
-    var q_type = 'initial';  // 'initial', 'past_q', 'current_q', 'questions'
-    var roster_data = {initial: {}, past_q: {}, current_q: {}};
-    var all_named_people = {past_q: new Set([]), current_q: new Set([])};
+    var roster_data = {};
+    var all_names = {in_dorm: new Set(['abcd enm', 'ajsb eokm', 'as mc']), outside: new Set([])};
 
     // prevent closing window
     window.onbeforeunload = function() {
@@ -36,6 +37,19 @@ jQuery(document).ready(function() {
         }
     }
 
+    function check_duplicate(name) {
+        for (let t of ['in_dorm', 'outside']) {
+            all_names[t].forEach((n) => {
+                dist = levenshtein(name, n);
+                if (dist <= 1 || dist / name.length < 0.3) {
+                    return n;
+                }
+            });
+        }
+        return false;
+    }
+
+
     // PARSE PARAMETERS
 
     var parameters = window.location.search.substring(1).split(/[&=]/);
@@ -54,46 +68,46 @@ jQuery(document).ready(function() {
     var prog_bar = new ProgressBar.Line('#prog-bar', { color: '#ffc107' });
 
     // FIREBASE
-
     // initialize Firebase
-    var firebaseConfig = {
-        apiKey: 'AIzaSyBvPWLV2yjapJKblBLcfkVbpZC3cXtM0PU',
-        authDomain: 'dorm-network.firebaseapp.com',
-        databaseURL: 'https://dorm-network.firebaseio.com',
-        projectId: 'dorm-network',
-        storageBucket: '',
-        messagingSenderId: '804230274072',
-        appId: '1:804230274072:web:dd26c12bba4f85e64df76d'
+    const firebaseConfig = {
+        apiKey: "AIzaSyAmOb9FOQh-gSwgNknNBIU9kCbtMDlFyEM",
+        authDomain: "dorm---questionnaire.firebaseapp.com",
+        projectId: "dorm---questionnaire",
+        storageBucket: "dorm---questionnaire.appspot.com",
+        messagingSenderId: "7204112419",
+        appId: "1:7204112419:web:ebe91abba04302ee490996",
+        measurementId: "G-X1SQS73M77"
     };
-    firebase.initializeApp(firebaseConfig);
-    var db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
     // sign in
     // firebase.auth().signInWithEmailAndPassword(user.email, user.pw).catch(function(error) {
-    firebase.auth().signInAnonymously().catch(function(error) {
-        // error
-        alert('Failed to access database. Please check your internet connection and try again.\nIf it doesn\'t work, please contact the experimenters.\n' + error);
+    signInAnonymously(auth).catch(function(error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+
+        alert('Failed to access database. Please check your internet connection and try again.\nIf it doesn\'t work, please contact the experimenters.\n' + 
+              'Error: ' + errorCode + '\n' + errorMessage);
         window.location.replace('login.html');  // refresh page
         console.log(error);
     });
+  
 
     // +1 to # of completions
-    function increase_completion_count() {
-        db.collection('count').doc('count').update('count', firebase.firestore.FieldValue.increment(1));
+    async function increase_completion_count() {
+        await db.collection(DB_TYPE + 'count').doc('count').update({
+            count: FieldValue.increment(1)
+        });
     }
 
     // send data
     function save2firebase(data, q_key=-1, end=false) {
         q_key = q_key == -1 ? question_i : q_key;
-        let db_key = page_i + '.';
-        if (page_i == 5 && data.hasOwnProperty('question') && data.question.startsWith('...')) {
-            db_key = '3.current_q.';
-        }
-        if (page_i >= NAME_GEN_PAGE && q_type != 'questions') {
-            db_key += q_type + '.';
-        }
+        let db_key = page_i + '.' + q_key;
         db_key += q_key;
-        db.collection(DB_DATA_COLLECTION).doc(survey_id).update({ [db_key]: data })
+        db.collection(DB_TYPE + 'data').doc(survey_id).update({ [db_key]: data })
         .then(function() {
             if (end) {
                 // show end page
@@ -109,10 +123,11 @@ jQuery(document).ready(function() {
         });
     }
 
+    // ----- TODO below -----
 
     // LOAD PREVIOUS PROGRESS
 
-    function setup_curr_names(exclude=[]) {
+    function setup_curr_names(exclude=[]) {  // TODO
         // remove names that are also in the past
         let intersection = new Set([...all_named_people['current_q']]
                            .filter(x => all_named_people['past_q'].has(x)));
@@ -142,7 +157,7 @@ jQuery(document).ready(function() {
         attitude_questions.sliders = person_slider_later.concat(attitude_questions.sliders);
     }
 
-    function push2roster(names_in_dorm, names_outside, q_t) {
+    function push_names(names_in_dorm, names_outside) {
         let dorm_names = [];
         let outside_names = [];
         names_in_dorm.forEach(
@@ -151,18 +166,18 @@ jQuery(document).ready(function() {
         names_outside.forEach(
             (tag) => outside_names.push(tag + ' (non-2' + dorm_wing[0].toUpperCase() + ')')
         );
-        all_named_people[q_t] = new Set([...dorm_names,
-                                         ...outside_names,
-                                         ...all_named_people[q_t]])  // append to set
+        all_names[q_t] = new Set([...dorm_names,
+                                  ...outside_names,
+                                  ...all_names])  // append to set
     }
 
     // check prev progress
     console.log(progress);
-    var show_covid_residency = true;
-    if (progress == '2.current_q') {
-        show_covid_residency = false;
-        progress = '1.current_q';
-    }
+    // var show_covid_residency = true;
+    // if (progress == '2.current_q') {
+    //     show_covid_residency = false;
+    //     progress = '1.current_q';
+    // }
     if (progress != '0') {
         let prog = progress.split('.');
         page_i = parseInt(prog[0]);
@@ -187,8 +202,8 @@ jQuery(document).ready(function() {
                         for (let t in doc.data()['2']) {
                             for (let q_i in doc.data()['2'][t]) {
                                 if (t != 'initial') {
-                                    push2roster(doc.data()['2'][t][q_i]['names_in_dorm'],
-                                                doc.data()['2'][t][q_i]['names_outside'], t);
+                                    push_names(doc.data()['2'][t][q_i]['names_in_dorm'],
+                                               doc.data()['2'][t][q_i]['names_outside'], t);
                                 }
                             }
                         }
@@ -209,12 +224,12 @@ jQuery(document).ready(function() {
                                 if (q_type == 'current_q') {
                                     setup_curr_names(exclude);
                                 }
-                                names = new Set([...all_named_people[q_type]].filter(x => !exclude.has(x)));
+                                names = new Set([...all_names[q_type]].filter(x => !exclude.has(x)));
                             } else {
                                 if (q_type == 'current_q') {
                                     setup_curr_names(exclude);
                                 }
-                                names = all_named_people[q_type];
+                                names = all_names[q_type];
                             }
                             if (names.size == 0) {
                                 page_i = 5;
@@ -225,10 +240,10 @@ jQuery(document).ready(function() {
                                 $('.slide').slider('refresh');
                             } else {
                                 person_q_prepare(names);
-                                friend_q_prepare(all_named_people[q_type]);
+                                friend_q_prepare(all_names[q_type]);
                             }
                         } else if (page_i == 4) {
-                            friend_q_prepare(all_named_people[q_type]);
+                            friend_q_prepare(all_names[q_type]);
                         }
                     });
                 }
@@ -253,6 +268,8 @@ jQuery(document).ready(function() {
     }
     $('#p' + page_i).show();
     $('.slide').slider('refresh');
+
+    // ----- TODO above -----
 
 
     // DEMOGRAPHIC QUESTIONS
@@ -286,16 +303,16 @@ jQuery(document).ready(function() {
         }
     });
 
-    function demographic_onfinish() {
+    function nickname_onfinish() {
         if (! $('#demographic').get(0).reportValidity()) {
             return false;
         }
 
         let data = {
             'other_name': $('#other-name').val(),
-            major: $('#major').val(),
-            zipcode: $('#zipcode').val(),
-            country: $('#international-check').is(':checked') ? $('#country').val() : 'US',
+            // major: $('#major').val(),
+            // zipcode: $('#zipcode').val(),
+            // country: $('#international-check').is(':checked') ? $('#country').val() : 'US',
             timestamp: Date.now()
         }
 
@@ -306,32 +323,32 @@ jQuery(document).ready(function() {
 
     // INSTRUCTIONS/COVID RESIDENCE QUESTIONS
 
-    function instr_onfinish() {
-        if (q_type != 'current_q') {
-            return true;
-        }
-        if ($($('.question-text').get(0)).html() == time_instr['current_q']) {
-            if (show_covid_residency) {
-                $('.question-text').text('');
-                $('#covid-residence').show();
-            } else {
-                return true;
-            }
-        } else {  // finished answering
-            if (! $('#covid-residence-form').get(0).reportValidity()) {
-                return false;
-            }
-            let data = {
-                'current_residence': $('input[name=residence]:checked').val(),
-                'currently_living': $('input[name=living-with]:checked').val(),
-                timestamp: Date.now()
-            }
-            save2firebase(data);
-            return true;
-        }
-    }
+    // function instr_onfinish() {
+    //     if (q_type != 'current_q') {
+    //         return true;
+    //     }
+    //     if ($($('.question-text').get(0)).html() == time_instr['current_q']) {
+    //         if (show_covid_residency) {
+    //             $('.question-text').text('');
+    //             $('#covid-residence').show();
+    //         } else {
+    //             return true;
+    //         }
+    //     } else {  // finished answering
+    //         if (! $('#covid-residence-form').get(0).reportValidity()) {
+    //             return false;
+    //         }
+    //         let data = {
+    //             'current_residence': $('input[name=residence]:checked').val(),
+    //             'currently_living': $('input[name=living-with]:checked').val(),
+    //             timestamp: Date.now()
+    //         }
+    //         save2firebase(data);
+    //         return true;
+    //     }
+    // }
 
-    // NAMING QUESTIONS
+    // ROSTER QUESTIONS
 
     // validator
     function validate_name(tag) {
@@ -350,7 +367,7 @@ jQuery(document).ready(function() {
                     field.get(0).reportValidity();
                 }
                 // test if repeated
-                let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);
+                let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);  // TODO use an aggregated list
                 if (field.tagsManager('tags').includes(tag) || repeat_other_field > -1) {
                     field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
                     field.get(0).reportValidity();
@@ -367,14 +384,13 @@ jQuery(document).ready(function() {
                             .animate({ backgroundColor: '#ffc107' }, 100);
                     }
                 } else {
-                    // test if similar to other names
-                    for (let x of TODO???) {
-                        if (levenshtein(tag, x)) {
-                            field.get(0).setCustomValidity('You have entered "' +  + '" which is similar to this one. If you are entering different people with similar names, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
-                            field.get(0).reportValidity();
-                            valid = false;
-                            // TODO
-                        }
+                    // test if similar
+                    var duplicate = check_duplicate(tag);
+                    if (duplicate) {
+                        field.get(0).setCustomValidity('You have entered "' + duplicate + '" which is similar to this one. If you are entering different people with similar names, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
+                        field.get(0).reportValidity();
+                        valid = false;
+                        // TODO
                     }
                     if (valid) {
                         field.get(0).setCustomValidity('');
@@ -469,7 +485,7 @@ jQuery(document).ready(function() {
     }
 
     // data & reset
-    function roster_q_onfinish(next_q_text) {
+    function roster_onfinish() {
         if (!check_entered_text()) {
             return false;
         }
@@ -480,13 +496,13 @@ jQuery(document).ready(function() {
         // name_typeahead_source.push(...dorm_names, ...outsider_names);
 
         // save to firebase
-        roster_data[q_type][question_i] = {
-            question: $('#p' + NAME_GEN_PAGE + ' .question-text').get(0).textContent,
+        roster_data[question_i] = {
+            question: $('#p' + ROSTER_PAGE + ' .question-text').get(0).textContent,
             names_in_dorm: Object.assign([], dorm_names),
             names_outside: Object.assign([], outsider_names),
             timestamp: Date.now()
         };
-        save2firebase(roster_data[q_type][question_i]);
+        save2firebase(roster_data[question_i]);
 
         // next question
         $('#dorm-names').tagsManager('empty');
@@ -494,7 +510,7 @@ jQuery(document).ready(function() {
         return true;
     }
 
-    // PERSON QUESTIONS
+    // TIE STRENGTH QUESTIONS
 
     var slider_clicks = [];  // 0: required unselected, 1: required selected
                              // 10: optional unselected, 11: optional selected
@@ -612,7 +628,7 @@ jQuery(document).ready(function() {
     }
 
     // replace * in question with user input names
-    function person_q_prepare(named_people) {
+    function tie_strength_prepare(named_people) {
         // generate questions given names
         if (named_people.size < 1) {
             person_questions[q_type] = [];
@@ -632,7 +648,7 @@ jQuery(document).ready(function() {
     }
 
     // data & reset
-    function person_q_onfinish(next_q) {
+    function tie_strength_onfinish(next_q) {
         let invalid = false;
         // save data
         $('.slider-q-text').each((q_i, elt) => {
@@ -699,113 +715,86 @@ jQuery(document).ready(function() {
         return true;
     }
 
-    // FRIENDSHIP QUESTIONS
+    // // FRIENDSHIP QUESTIONS
 
-    // add a row to to pair container
-    function append_pair_html(pair) {
-        let row = $('<li>', { class: 'row justify-content-end' });
-        row.append($('<div>', {
-            class: 'col-6-auto',
-            html: pair
-        }));
-        row.append($('<div>', { class: 'col-3 switch-label' }));
-        let switch_warpper = $('<div>', { class: 'switch-wrapper' });
-        switch_warpper.append($('<input>', {
-            type: 'checkbox',
-            class: 'multi-switch',
-            'initial-value': 2,
-            'unchecked-value': 0,
-            'checked-value': 1,
-            value: 2
-        }));
-        row.append(switch_warpper);
-        $('#pairs-container').append(row);
-    }
+    // // add a row to to pair container
+    // function append_pair_html(pair) {
+    //     let row = $('<li>', { class: 'row justify-content-end' });
+    //     row.append($('<div>', {
+    //         class: 'col-6-auto',
+    //         html: pair
+    //     }));
+    //     row.append($('<div>', { class: 'col-3 switch-label' }));
+    //     let switch_warpper = $('<div>', { class: 'switch-wrapper' });
+    //     switch_warpper.append($('<input>', {
+    //         type: 'checkbox',
+    //         class: 'multi-switch',
+    //         'initial-value': 2,
+    //         'unchecked-value': 0,
+    //         'checked-value': 1,
+    //         value: 2
+    //     }));
+    //     row.append(switch_warpper);
+    //     $('#pairs-container').append(row);
+    // }
 
-    // get pairs from named people and initialize the first batch of questions
-    function friend_q_prepare(named_people) {
-        if (named_people.size < 2 || q_type == 'current_q') {
-            friend_questions[q_type] = [];
-            return;
-        }
-        // get pairs
-        friend_questions.pairs = [];
-        named_people = Array.from(named_people);
-        shuffle(named_people);
-        for (let i = 0; i < named_people.length - 1; ++i) {
-            for (let j = i + 1; j < named_people.length; ++j) {
-                let pair = named_people[i] + ' <strong>&</strong> ' + named_people[j];
-                friend_questions.pairs.push(pair);
-            }
-        }
-        // duplicate questions
-        let new_q = [];
-        let num_repeat = Math.ceil(friend_questions.pairs.length / FRIEND_PAIRS_PER_PAGE);
-        for (let q of friend_questions[q_type]) {
-            new_q.push(...Array.apply(null, Array(num_repeat)).map(_ => q));
-        }
-        friend_questions[q_type] = new_q;
-        // set up html rows of pairs
-        let pair_i_end = pair_i + FRIEND_PAIRS_PER_PAGE;
-        for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
-            append_pair_html(friend_questions.pairs[pair_i]);
-        }
-        switch_setup();
-    }
+    // // get pairs from named people and initialize the first batch of questions
+    // function friend_q_prepare(named_people) {
+    //     if (named_people.size < 2 || q_type == 'current_q') {
+    //         friend_questions[q_type] = [];
+    //         return;
+    //     }
+    //     // get pairs
+    //     friend_questions.pairs = [];
+    //     named_people = Array.from(named_people);
+    //     shuffle(named_people);
+    //     for (let i = 0; i < named_people.length - 1; ++i) {
+    //         for (let j = i + 1; j < named_people.length; ++j) {
+    //             let pair = named_people[i] + ' <strong>&</strong> ' + named_people[j];
+    //             friend_questions.pairs.push(pair);
+    //         }
+    //     }
+    //     // duplicate questions
+    //     let new_q = [];
+    //     let num_repeat = Math.ceil(friend_questions.pairs.length / FRIEND_PAIRS_PER_PAGE);
+    //     for (let q of friend_questions[q_type]) {
+    //         new_q.push(...Array.apply(null, Array(num_repeat)).map(_ => q));
+    //     }
+    //     friend_questions[q_type] = new_q;
+    //     // set up html rows of pairs
+    //     let pair_i_end = pair_i + FRIEND_PAIRS_PER_PAGE;
+    //     for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
+    //         append_pair_html(friend_questions.pairs[pair_i]);
+    //     }
+    //     switch_setup();
+    // }
 
-    // set up switches
-    function switch_setup() {
-        $('.multi-switch').multiSwitch({
-            functionOnChange: (elt) => {
-                let label = elt.parentsUntil('#pairs-container', '.row').find('.switch-label');
-                if (elt.val() == 0) {
-                    label.text('Not connected');
-                    label.css('color', '#d1513f');
-                } else {
-                    label.text('Connected');
-                    label.css('color', '#46a35e');
-                }
-                // check if all answered
-                var unanswered = 0;
-                $('input.multi-switch').each((i, elt) => {
-                    unanswered += $(elt).val() == 2 ? 1 : 0;
-                });
-                if (unanswered == 0) {
-                    $('#btn-next').removeClass('disabled');
-                }
-            }
-        });
-    }
+    // // set up switches
+    // function switch_setup() {
+    //     $('.multi-switch').multiSwitch({
+    //         functionOnChange: (elt) => {
+    //             let label = elt.parentsUntil('#pairs-container', '.row').find('.switch-label');
+    //             if (elt.val() == 0) {
+    //                 label.text('Not connected');
+    //                 label.css('color', '#d1513f');
+    //             } else {
+    //                 label.text('Connected');
+    //                 label.css('color', '#46a35e');
+    //             }
+    //             // check if all answered
+    //             var unanswered = 0;
+    //             $('input.multi-switch').each((i, elt) => {
+    //                 unanswered += $(elt).val() == 2 ? 1 : 0;
+    //             });
+    //             if (unanswered == 0) {
+    //                 $('#btn-next').removeClass('disabled');
+    //             }
+    //         }
+    //     });
+    // }
 
-    // data & reset
-    function friend_q_onfinish() {
-        // save data
-        $('#pairs-container .row').each((i, elm) => {
-            let pair = $(elm).children('.col-6-auto').html().split(' <strong>&amp;</strong> ');
 
-            let key = [pair[0], pair[1]].sort().join('&');
-            let data = {
-                '0': pair[0],
-                '1': pair[1],
-                response: $(elm).find('input').val() == '0' ? 'n' : 'y',
-                timestamp: Date.now()
-            }
-            save2firebase(data, key);
-        });
-
-        // next question
-        $('#pairs-container').html('');
-        let pair_i_end = pair_i + FRIEND_PAIRS_PER_PAGE;
-        for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
-            append_pair_html(friend_questions.pairs[pair_i]);
-        }
-
-        switch_setup();
-
-        return true;
-    }
-
-    // ATTITUDE QUESTION
+    // LIKERT QUESTION
 
     function append_p5_slider_qs(i) {
         $('.question-text').html(question_texts[page_i][q_type][i]);
@@ -867,7 +856,7 @@ jQuery(document).ready(function() {
         $('#btn-next').removeClass('disabled');
     });
 
-    function payment_q_onfinish() {
+    function payment_onfinish() {
         if (! $('#payment-form').get(0).reportValidity()) {
             return false;
         }
@@ -878,6 +867,8 @@ jQuery(document).ready(function() {
     }
 
     // PREVIOUS BUTTON
+    var onfinish_funcs = [nickname_onfinish, roster_onfinish, tie_strength_onfinish,
+                          likert_onfinish, demographic_onfinish, payment_onfinish];
 
     function add_data() {
         // show previous data
@@ -897,7 +888,7 @@ jQuery(document).ready(function() {
             return;
         }
         // save current data
-        let result = q_onfinish_funcs[page_i](question_texts[page_i][q_type][question_i - 1]);
+        let result = onfinish_funcs[page_i](question_texts[page_i][q_type][question_i - 1]);
         if (!result) {
             return;
         }
@@ -918,10 +909,6 @@ jQuery(document).ready(function() {
     });
 
     // NEXT BUTTON
-
-    var q_onfinish_funcs = [demographic_onfinish, instr_onfinish,
-                            roster_q_onfinish, person_q_onfinish,
-                            friend_q_onfinish, attitude_q_onfinish, payment_q_onfinish];
 
     function normal_next_btn() {
         $('#btn-next').text('Next');
@@ -950,13 +937,14 @@ jQuery(document).ready(function() {
             return;
         }
         // submit data
-        let result = q_onfinish_funcs[page_i](question_texts[page_i][q_type][question_i + 1]);
+        let result = onfinish_funcs[page_i](question_texts[page_i][question_i + 1]);
+        console.log(page_i, question_texts[page_i][question_i + 1], result)
         if (!result) {
             return;
         }
         window.scrollTo(0, 0);
         // proceed
-        if (question_i < question_texts[page_i][q_type].length - 1) {
+        if (question_i < question_texts[page_i].length - 1) {
             // next question
             ++question_i;
             if (page_i == 5) {
@@ -986,19 +974,19 @@ jQuery(document).ready(function() {
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
             // prepare subsequent questions
-            if (page_i == NAME_GEN_PAGE && q_type != 'initial') {
+            if (page_i == NAME_GEN_PAGE) {
                 prog_bar.animate(prog_bar.value() + 0.05, { duration: 1000 });
                 // get all named people
                 for (let q_i = 0; q_i < roster_questions[q_type].length; q_i++) {
-                    push2roster(roster_data[q_type][q_i].names_in_dorm,
-                                roster_data[q_type][q_i].names_outside, q_type);
+                    push_names(roster_data[q_type][q_i].names_in_dorm,
+                               roster_data[q_type][q_i].names_outside);
                 }
-                shuffle(all_named_people[q_type]);
+                shuffle(all_names);
                 if (q_type == 'current_q') {
                     setup_curr_names();
                 }
-                person_q_prepare(all_named_people[q_type]);
-                friend_q_prepare(all_named_people[q_type]);
+                person_q_prepare(all_names);
+                friend_q_prepare(all_names);
             }
             // progress bar
             let percent;
@@ -1075,12 +1063,12 @@ jQuery(document).ready(function() {
         $('.invalid').hide();
         normal_next_btn();
         // show previous button
-        if (page_i == NAME_GEN_PAGE && question_i > 0) {
+        if (page_i == ROSTER_PAGE && question_i > 0) {
             $('#btn-prev').show();
         }
         // last page last question, change button text
         if ((page_i == $('.page').length - 2) &&
-            (question_i == question_texts[page_i][q_type].length - 1)) {
+            (question_i == question_texts[page_i].length - 1)) {
             $('#btn-next').text('Finish');
         }
     });

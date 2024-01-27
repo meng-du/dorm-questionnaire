@@ -27,16 +27,16 @@
     <body>
         <div id="prog-bar"></div>
         <div id="p0" class="page central">
-            <form id="demographic">
+            <form id="nickname">
                 <div class="form-group">
                     <label class="demo-q" for="other-name">If you have name(s) other than your legal name (like a nickname) that people call you by, please write them here.</label>
                     <input id="other-name" class="form-control" placeholder="Enter name(s)">
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label class="demo-q" for="major">What is (or will likely be) your major?</label>
                     <input id="major" class="form-control" placeholder="Enter major" required>
-                </div>
-                <div class="form-group">
+                </div> -->
+                <!-- <div class="form-group">
                     <label class="demo-q" for="zipcode">What was your home zipcode before moving to UCLA? If it's outside the US, please also indicate the country you moved here from.</label>
                     <div id="international-zip" class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input" id="international-check">
@@ -46,53 +46,18 @@
                         <div class="col-6"><input id="zipcode" class="form-control" placeholder="Zipcode/postal code" required></div>
                         <div class="col-6"><input id="country" class="form-control" placeholder="Your country"></div>
                     </div>
-                </div>
+                </div> -->
             </form>
         </div>
 
         <div id="p1" class="page central">
-            <div class="question-text time-instr"></div>
-            <div id="covid-residence" class="central"> <!-- only for the current survey -->
-                <form id="covid-residence-form">
-                    <div class="form-group">
-                        <div class="demo-q"><span class="duringcovid">During-COVID</span>, where have you been residing for most of the time?</div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="residence" value="hedrick" required>
-                            <label class="form-check-label" for="residence1">Hedrick hall 2nd floor</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="residence" value="other on-campus">
-                            <label class="form-check-label" for="residence1">Other on-campus housing</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="residence" value="off-campus">
-                            <label class="form-check-label" for="residence1">Off-campus</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="demo-q"><span class="duringcovid">During-COVID</span>, do you live alone or with others?</div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="living-with" value="alone" required>
-                            <label class="form-check-label" for="residence1">Alone</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="living-with" value="with others">
-                            <label class="form-check-label" for="residence1">With others</label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div id="p2" class="page central">
             <div class="question-text"></div>
             <div class="form-group">
-                <small class="form-text text-muted">Please enter their first name and last name (for example, Daniel Kim), and click "Add" or hit Enter after each person.</small>
+                <small class="form-text text-muted">For the following questions, please enter people's first name and last name (for example, Daniel Kim), and click "Add" or hit Enter after each person.</small>
                 <small id="duplicate" class="form-text text-muted">If you know different people with the same name, please add a descriptive term that's meaningful to yourself, 
                     so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim newYorkCity, Daniel Kim chessClub, etc.).</small>
                 <p id="dorm-name-instr" class="sm-instr">
-                    i) Please name the people who fit the above criteria for you from <strong>Hedrick Hall</strong> 
-                    <span class="precovid precovid-in-q">pre-COVID</span>
+                    i) Please name the people who fit the above criteria for you from <strong>Hedrick Hall</strong>
                 </p>
                 <div class="row">
                     <div class="col">
@@ -106,8 +71,7 @@
             </div>
             <div class="form-group">
                 <p id="outsider-name-instr" class="sm-instr">
-                    ii) Please add anyone else (including other people at UCLA or people outside of UCLA) who fit<span id="duringcovid-in-q">s</span> the above criteria for you 
-                    <span class="precovid precovid-in-q">pre-COVID</span>
+                    ii) Please add anyone else (including other people at UCLA or people outside of UCLA) who fits the above criteria for you
                 </p>
                 <small id="instr-public" class="text-muted">Public figures don't count</small>
                 <div class="row">
@@ -122,23 +86,18 @@
             </div>
         </div>
 
-        <div id="p3" class="page central">
-            <div id="p3-reminder"></div>
+        <div id="p2" class="page central">
+            <div id="p2-reminder"></div>
             <small id="name-note" class="form-text text-muted">Note: <i>2</i> or <i>non-2</i> has been added to each name to indicate if someone lives on your wing of floor 2 or outside of it.</small>
-            <div id="p3-questions"></div>
+            <div id="p2-questions"></div>
         </div>
 
-        <div id="p4" class="page central">
-            <div class="question-text"></div>
-            <ul id="pairs-container"></ul>
-        </div>
-
-        <div id="p5" class="page central">
+        <div id="p3" class="page central">
             <div class="question-text"></div>
             <div id="p5-questions"></div>
         </div>
 
-        <div id="p6" class="page central">
+        <div id="p4" class="page central">
             <div class="question-text"></div>
             <div align="center">
                 <form id="payment-form">
@@ -172,9 +131,9 @@
         <div id="invalid2" class="invalid">Please answer the questions before proceeding</div>
 
         <!-- JavaScript -->
-        <script type="text/javascript" src="js/questions.js"></script>
-        <!-- <script type="text/javascript" src="js/user.js"></script> -->
-        <script type="text/javascript" src="js/levenshtein.js"></script>
-        <script type="text/javascript" src="js/survey.js"></script>
+        <script type="module" src="js/questions.js"></script>
+        <!-- <script type="module" src="js/user.js"></script> -->
+        <script type="module" src="js/levenshtein.js"></script>
+        <script type="module" src="js/survey.js"></script>
     </body>
 </html>
