@@ -1,3 +1,5 @@
+'use strict';
+
 var roster_questions = [  // page 1
     'Consider the people you like to spend your free time with. Who are the people you\'ve socialized with most often? ' +
     '(Examples: eat meals with, hang out with, study with, spent time with.)',
@@ -117,7 +119,7 @@ var likert_questions = {questions:[  // page 3
                    'Strongly agree'],
 }]};
 var payment_question = {questions: ['Thank you for completing the survey! How would you like to be paid?']};
-var question_texts = [roster_questions, tie_strength_questions, likert_questions, payment_question];
+var question_texts = [roster_questions, tie_strength_questions, likert_questions, {}, payment_question];
 
 // constants
 var ROSTER_PAGE = 0;

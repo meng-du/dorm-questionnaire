@@ -1,14 +1,7 @@
 'use strict';
-var hookWindow = false;
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
-// import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-analytics.js";
-import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js'
-import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js'
-
+window.hookWindow = false;
 
 jQuery(document).ready(function() {
-    var DB_TYPE = 'test_';  // 'test_' or 'prod_'
     $('.page').hide();
     $('#end').hide();
     $('.invalid').hide();
@@ -21,8 +14,8 @@ jQuery(document).ready(function() {
 
     // prevent closing window
     window.onbeforeunload = function() {
-        if (hookWindow) {
-            return 'Do you want to leave this page? Your progress will not be saved.';
+        if (window.hookWindow) {
+            return 'Do you want to leave this page? You may lose your progress.';
         }
     }
 
@@ -49,16 +42,10 @@ jQuery(document).ready(function() {
         return false;
     }
 
-
     // PARSE PARAMETERS
-
     var parameters = window.location.search.substring(1).split(/[&=]/);
-    var survey_id = parameters[1];
     var dorm_wing = parameters[3];
-    if (!survey_id || !dorm_wing) {
-        alert('This URL is invalid. Please contact the experimenters.');
-        return;
-    }
+
     var progress = '0';
     if (parameters.length > 5) {
         progress = parameters[5];
@@ -67,67 +54,11 @@ jQuery(document).ready(function() {
     // PROGRESS BAR
     var prog_bar = new ProgressBar.Line('#prog-bar', { color: '#ffc107' });
 
-    // FIREBASE
-    // initialize Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyAmOb9FOQh-gSwgNknNBIU9kCbtMDlFyEM",
-        authDomain: "dorm---questionnaire.firebaseapp.com",
-        projectId: "dorm---questionnaire",
-        storageBucket: "dorm---questionnaire.appspot.com",
-        messagingSenderId: "7204112419",
-        appId: "1:7204112419:web:ebe91abba04302ee490996",
-        measurementId: "G-X1SQS73M77"
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // sign in
-    // firebase.auth().signInWithEmailAndPassword(user.email, user.pw).catch(function(error) {
-    signInAnonymously(auth).catch(function(error) {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-
-        alert('Failed to access database. Please check your internet connection and try again.\nIf it doesn\'t work, please contact the experimenters.\n' + 
-              'Error: ' + errorCode + '\n' + errorMessage);
-        window.location.replace('login.html');  // refresh page
-        console.log(error);
-    });
-  
-
-    // +1 to # of completions
-    async function increase_completion_count() {
-        await db.collection(DB_TYPE + 'count').doc('count').update({
-            count: FieldValue.increment(1)
-        });
-    }
-
-    // send data
-    function save2firebase(data, q_key=-1, end=false) {
-        q_key = q_key == -1 ? question_i : q_key;
-        let db_key = page_i + '.' + q_key;
-        db_key += q_key;
-        db.collection(DB_TYPE + 'data').doc(survey_id).update({ [db_key]: data })
-        .then(function() {
-            if (end) {
-                // show end page
-                hookWindow = false;
-                window.location.replace('progress.html?completed=' + survey_id.split('.')[0]);
-            }
-        })
-        .catch(function(error) {
-            // error
-            alert('Failed to save your data. Please check your internet connection and try again.\nIf this message shows up multiple times, please contact the experimenters.\n' + error);
-            location.reload();  // refresh page
-            console.log(error);
-        });
-    }
-
     // ----- TODO below -----
 
     // LOAD PREVIOUS PROGRESS
 
-    function setup_curr_names(exclude=[]) {  // TODO
+    function setup_curr_names(exclude=[]) {
         // remove names that are also in the past
         let intersection = new Set([...all_named_people['current_q']]
                            .filter(x => all_named_people['past_q'].has(x)));
@@ -272,87 +203,27 @@ jQuery(document).ready(function() {
     // ----- TODO above -----
 
 
-    // DEMOGRAPHIC QUESTIONS
-
-    $('#country').hide();
-
-    // set up checkbox for international zipcode
-    $('#international-check').change((e) => {
-        if ($(e.target).prop('checked')) {
-            $('#country').show();
-            $('#country').prop('required', true);
-            $('#zipcode').get(0).setCustomValidity('');
-        } else {
-            $('#country').hide();
-            $('#country').prop('required', false);
-            if (! /^([0-9]{5})$/.test($('#zipcode').val())) {
-                $('#zipcode').get(0).setCustomValidity('Please enter a 5-digit zipcode');
-            } else {
-                $('#zipcode').get(0).setCustomValidity('');
-            }
-        }
-    });
-
-    $('#zipcode').change(() => {
-        if ($('#international-check').is(':checked')) {
-            $('#zipcode').get(0).setCustomValidity('');
-        } else if (! /^([0-9]{5})$/.test($('#zipcode').val())) {
-            $('#zipcode').get(0).setCustomValidity('Please enter a 5-digit zipcode');
-        } else {
-            $('#zipcode').get(0).setCustomValidity('');
-        }
-    });
+    // ----- NICKNAME -----
 
     function nickname_onfinish() {
-        if (! $('#demographic').get(0).reportValidity()) {
+        if (! $('#nickname').get(0).reportValidity()) {
             return false;
         }
-
-        let data = {
+        window.save2firebase({
             'other_name': $('#other-name').val(),
-            // major: $('#major').val(),
-            // zipcode: $('#zipcode').val(),
-            // country: $('#international-check').is(':checked') ? $('#country').val() : 'US',
             timestamp: Date.now()
-        }
-
-        save2firebase(data);
+        }, page_i, question_i);
 
         return true;
     }
 
-    // INSTRUCTIONS/COVID RESIDENCE QUESTIONS
 
-    // function instr_onfinish() {
-    //     if (q_type != 'current_q') {
-    //         return true;
-    //     }
-    //     if ($($('.question-text').get(0)).html() == time_instr['current_q']) {
-    //         if (show_covid_residency) {
-    //             $('.question-text').text('');
-    //             $('#covid-residence').show();
-    //         } else {
-    //             return true;
-    //         }
-    //     } else {  // finished answering
-    //         if (! $('#covid-residence-form').get(0).reportValidity()) {
-    //             return false;
-    //         }
-    //         let data = {
-    //             'current_residence': $('input[name=residence]:checked').val(),
-    //             'currently_living': $('input[name=living-with]:checked').val(),
-    //             timestamp: Date.now()
-    //         }
-    //         save2firebase(data);
-    //         return true;
-    //     }
-    // }
-
-    // ROSTER QUESTIONS
+    // ----- ROSTER QUESTIONS -----
 
     // validator
     function validate_name(tag) {
         let valid = true;
+        all_names
         let fields = ['#dorm-names', '#outsider-names'];  // TODO use an aggregated list rather than just the list from the current page
         for (let i in fields) {
             let field = $(fields[i]);
@@ -369,7 +240,9 @@ jQuery(document).ready(function() {
                 // test if repeated
                 let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);  // TODO use an aggregated list
                 if (field.tagsManager('tags').includes(tag) || repeat_other_field > -1) {
-                    field.get(0).setCustomValidity('You have already entered this name. If you are entering different people with the same name, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
+                    field.get(0).setCustomValidity('You have already entered this name. ' + 
+                        'If you are entering different people with the same name, please add a descriptive term ' +
+                        'so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
                     field.get(0).reportValidity();
                     if (repeat_other_field > -1) {
                         field.val('');
@@ -383,11 +256,13 @@ jQuery(document).ready(function() {
                             .animate({ backgroundColor: '#d90000' }, 100)
                             .animate({ backgroundColor: '#ffc107' }, 100);
                     }
-                } else {
+                } else {    
                     // test if similar
                     var duplicate = check_duplicate(tag);
                     if (duplicate) {
-                        field.get(0).setCustomValidity('You have entered "' + duplicate + '" which is similar to this one. If you are entering different people with similar names, please add a descriptive term so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
+                        field.get(0).setCustomValidity('You have entered "' + duplicate + '" which is similar to this one. ' +
+                            'If you are entering different people with similar names, please add a descriptive term ' +
+                            'so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
                         field.get(0).reportValidity();
                         valid = false;
                         // TODO
@@ -502,7 +377,7 @@ jQuery(document).ready(function() {
             names_outside: Object.assign([], outsider_names),
             timestamp: Date.now()
         };
-        save2firebase(roster_data[question_i]);
+        // save2firebase(roster_data[question_i]);
 
         // next question
         $('#dorm-names').tagsManager('empty');
@@ -510,7 +385,7 @@ jQuery(document).ready(function() {
         return true;
     }
 
-    // TIE STRENGTH QUESTIONS
+    // ----- TIE STRENGTH QUESTIONS -----
 
     var slider_clicks = [];  // 0: required unselected, 1: required selected
                              // 10: optional unselected, 11: optional selected
@@ -687,7 +562,7 @@ jQuery(document).ready(function() {
             if (specification.length > 0) {
                 data['specification'] = specification;
             }
-            save2firebase(data, person + ' - ' + i);
+            // save2firebase(data, person + ' - ' + i);
         });
         if (invalid) { return false; }
 
@@ -715,86 +590,8 @@ jQuery(document).ready(function() {
         return true;
     }
 
-    // // FRIENDSHIP QUESTIONS
 
-    // // add a row to to pair container
-    // function append_pair_html(pair) {
-    //     let row = $('<li>', { class: 'row justify-content-end' });
-    //     row.append($('<div>', {
-    //         class: 'col-6-auto',
-    //         html: pair
-    //     }));
-    //     row.append($('<div>', { class: 'col-3 switch-label' }));
-    //     let switch_warpper = $('<div>', { class: 'switch-wrapper' });
-    //     switch_warpper.append($('<input>', {
-    //         type: 'checkbox',
-    //         class: 'multi-switch',
-    //         'initial-value': 2,
-    //         'unchecked-value': 0,
-    //         'checked-value': 1,
-    //         value: 2
-    //     }));
-    //     row.append(switch_warpper);
-    //     $('#pairs-container').append(row);
-    // }
-
-    // // get pairs from named people and initialize the first batch of questions
-    // function friend_q_prepare(named_people) {
-    //     if (named_people.size < 2 || q_type == 'current_q') {
-    //         friend_questions[q_type] = [];
-    //         return;
-    //     }
-    //     // get pairs
-    //     friend_questions.pairs = [];
-    //     named_people = Array.from(named_people);
-    //     shuffle(named_people);
-    //     for (let i = 0; i < named_people.length - 1; ++i) {
-    //         for (let j = i + 1; j < named_people.length; ++j) {
-    //             let pair = named_people[i] + ' <strong>&</strong> ' + named_people[j];
-    //             friend_questions.pairs.push(pair);
-    //         }
-    //     }
-    //     // duplicate questions
-    //     let new_q = [];
-    //     let num_repeat = Math.ceil(friend_questions.pairs.length / FRIEND_PAIRS_PER_PAGE);
-    //     for (let q of friend_questions[q_type]) {
-    //         new_q.push(...Array.apply(null, Array(num_repeat)).map(_ => q));
-    //     }
-    //     friend_questions[q_type] = new_q;
-    //     // set up html rows of pairs
-    //     let pair_i_end = pair_i + FRIEND_PAIRS_PER_PAGE;
-    //     for (; (pair_i < friend_questions.pairs.length) && (pair_i < pair_i_end); ++pair_i) {
-    //         append_pair_html(friend_questions.pairs[pair_i]);
-    //     }
-    //     switch_setup();
-    // }
-
-    // // set up switches
-    // function switch_setup() {
-    //     $('.multi-switch').multiSwitch({
-    //         functionOnChange: (elt) => {
-    //             let label = elt.parentsUntil('#pairs-container', '.row').find('.switch-label');
-    //             if (elt.val() == 0) {
-    //                 label.text('Not connected');
-    //                 label.css('color', '#d1513f');
-    //             } else {
-    //                 label.text('Connected');
-    //                 label.css('color', '#46a35e');
-    //             }
-    //             // check if all answered
-    //             var unanswered = 0;
-    //             $('input.multi-switch').each((i, elt) => {
-    //                 unanswered += $(elt).val() == 2 ? 1 : 0;
-    //             });
-    //             if (unanswered == 0) {
-    //                 $('#btn-next').removeClass('disabled');
-    //             }
-    //         }
-    //     });
-    // }
-
-
-    // LIKERT QUESTION
+    // ----- LIKERT QUESTIONS -----
 
     function append_p5_slider_qs(i) {
         $('.question-text').html(question_texts[page_i][q_type][i]);
@@ -827,7 +624,7 @@ jQuery(document).ready(function() {
         }
     }
 
-    function attitude_q_onfinish(next_q) {
+    function likert_onfinish(next_q) {
         if ($('.question-text').html().startsWith('<small id="name-note"')) {
             return person_q_onfinish(next_q);
         }
@@ -844,11 +641,61 @@ jQuery(document).ready(function() {
                 response_text: resp_txt,
                 timestamp: slider_times[i]
             }
-            save2firebase(data, question_i + ' - ' + q_i);
+            // save2firebase(data, question_i + ' - ' + q_i);
         });
 
         return true;
     }
+
+
+    // ----- DEMOGRAPHIC QUESTIONS -----
+    // TODO
+    $('#country').hide();
+
+    // set up checkbox for international zipcode
+    $('#international-check').change((e) => {
+        if ($(e.target).prop('checked')) {
+            $('#country').show();
+            $('#country').prop('required', true);
+            $('#zipcode').get(0).setCustomValidity('');
+        } else {
+            $('#country').hide();
+            $('#country').prop('required', false);
+            if (! /^([0-9]{5})$/.test($('#zipcode').val())) {
+                $('#zipcode').get(0).setCustomValidity('Please enter a 5-digit zipcode');
+            } else {
+                $('#zipcode').get(0).setCustomValidity('');
+            }
+        }
+    });
+
+    $('#zipcode').change(() => {
+        if ($('#international-check').is(':checked')) {
+            $('#zipcode').get(0).setCustomValidity('');
+        } else if (! /^([0-9]{5})$/.test($('#zipcode').val())) {
+            $('#zipcode').get(0).setCustomValidity('Please enter a 5-digit zipcode');
+        } else {
+            $('#zipcode').get(0).setCustomValidity('');
+        }
+    });
+
+    function demographic_onfinish() {
+        if (! $('#demographic').get(0).reportValidity()) {
+            return false;
+        }
+
+        let data = {
+            major: $('#major').val(),
+            zipcode: $('#zipcode').val(),
+            country: $('#international-check').is(':checked') ? $('#country').val() : 'US',
+            timestamp: Date.now()
+        }
+
+        // save2firebase(data);
+
+        return true;
+    }
+
 
     // PAYMENT QUESTION
 
@@ -860,9 +707,9 @@ jQuery(document).ready(function() {
         if (! $('#payment-form').get(0).reportValidity()) {
             return false;
         }
-        save2firebase({
-            payment: $('input[name=payment]:checked').val()
-        }, -1, true);
+        // save2firebase({
+        //     payment: $('input[name=payment]:checked').val()
+        // }, -1, true);
         return true;
     }
 
@@ -870,15 +717,15 @@ jQuery(document).ready(function() {
     var onfinish_funcs = [nickname_onfinish, roster_onfinish, tie_strength_onfinish,
                           likert_onfinish, demographic_onfinish, payment_onfinish];
 
-    function add_data() {
+    function add_data() {  // TODO TEST
         // show previous data
-        roster_data[q_type][question_i].names_in_dorm.forEach(
+        roster_data[question_i].names_in_dorm.forEach(
             (tag) => $('#dorm-names').tagsManager('pushTag', tag)
         );
-        roster_data[q_type][question_i].names_outside.forEach(
+        roster_data[question_i].names_outside.forEach(
             (tag) => $('#outsider-names').tagsManager('pushTag', tag)
         );
-        if (roster_data[q_type][question_i].names_in_dorm.length + roster_data[q_type][question_i].names_outside.length == 0) {
+        if (roster_data[question_i].names_in_dorm.length + roster_data[question_i].names_outside.length == 0) {
             $('#btn-next').addClass('disabled');
         }
     }
@@ -888,18 +735,18 @@ jQuery(document).ready(function() {
             return;
         }
         // save current data
-        let result = onfinish_funcs[page_i](question_texts[page_i][q_type][question_i - 1]);
+        let result = onfinish_funcs[page_i](question_texts[page_i][question_i - 1]);
         if (!result) {
             return;
         }
 
         // go back to previous question
         --question_i;
-        $('.question-text').html(question_texts[page_i][q_type][question_i]);
+        $('.question-text').html(question_texts[page_i][question_i]);
         add_data();
 
         // first question
-        if (page_i == NAME_GEN_PAGE && question_i == 0) {
+        if (page_i == ROSTER_PAGE && question_i == 0) {
             // remove prev button
             $('#btn-prev').hide();
         }
@@ -917,12 +764,12 @@ jQuery(document).ready(function() {
     }
 
     $('#btn-next').on('click', (e) => {
-        if (page_i == NAME_GEN_PAGE && !check_entered_text()) {
+        if (page_i == ROSTER_PAGE && !check_entered_text()) {
             return;  // entered text but didn't add for naming question
         }
         // no answer
         if ($('#btn-next').hasClass('disabled')) {
-            if (page_i == NAME_GEN_PAGE) {
+            if (page_i == ROSTER_PAGE) {
                 $('#invalid1').show();
                 $('#btn-next').text('Yes, I can\'t think of anyone that fits this question');
                 $('#btn-next').addClass('btn-warning');
@@ -945,29 +792,29 @@ jQuery(document).ready(function() {
         window.scrollTo(0, 0);
         // proceed
         if (question_i < question_texts[page_i].length - 1) {
-            // next question
+            // next question of the same type
             ++question_i;
-            if (page_i == 5) {
+            if (page_i == 5) {  // TODO?
                 append_p5_slider_qs(question_i);
-            } else if (page_i != NAME_GEN_PAGE + 1) {
-                $('.question-text').html(question_texts[page_i][q_type][question_i]);
+            } else if (page_i != NAME_GEN_PAGE + 1) {  // TODO?
+                $('.question-text').html(question_texts[page_i][question_i]);
             }
 
             // roster last question
-            if (page_i == NAME_GEN_PAGE && question_i == question_texts[page_i][q_type].length - 1) {
+            if (page_i == ROSTER_PAGE && question_i == question_texts[ROSTER_PAGE].length - 1) {
                 $('#no-prev').show();
             }
 
             // add data if there is any
-            if (page_i == NAME_GEN_PAGE && roster_data[q_type].hasOwnProperty(question_i)) {
+            if (page_i == ROSTER_PAGE && roster_data.hasOwnProperty(question_i)) {
                 add_data();
             } else {
                 $('#btn-next').addClass('disabled');
             }
 
             if (page_i > 2) {
-                let percent = page_i == 4 ? 0.1 : 0.2;
-                prog_bar.animate(prog_bar.value() + percent / question_texts[page_i][q_type].length,
+                let percent = page_i == 4 ? 0.1 : 0.2;  // TODO ??
+                prog_bar.animate(prog_bar.value() + percent / question_texts[page_i].length,
                                 { duration: 1000 });
             }
         } else {
@@ -1073,5 +920,5 @@ jQuery(document).ready(function() {
         }
     });
 
-    hookWindow = true;
+    window.hookWindow = true;
 });

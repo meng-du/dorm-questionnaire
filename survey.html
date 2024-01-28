@@ -4,15 +4,12 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <title>Survey</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-        <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js" integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
         <script>$.fn.slider = null</script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-app.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-firestore.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-auth.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tagmanager/3.0.2/tagmanager.min.js" integrity="sha256-01/49ElxlWe2RC+C+QOxBu1OzIUM5BV7/ONHZ8MR5Aw=" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tagmanager/3.0.2/tagmanager.min.css" integrity="sha256-bOEaK4HVga5gZsjsEWTe2m8GUDvK+mHcoj4N9W56uBo=" crossorigin="anonymous" />
         <script src="js/multi-switch.js"></script>
@@ -26,36 +23,23 @@
 
     <body>
         <div id="prog-bar"></div>
+
         <div id="p0" class="page central">
             <form id="nickname">
                 <div class="form-group">
                     <label class="demo-q" for="other-name">If you have name(s) other than your legal name (like a nickname) that people call you by, please write them here.</label>
                     <input id="other-name" class="form-control" placeholder="Enter name(s)">
                 </div>
-                <!-- <div class="form-group">
-                    <label class="demo-q" for="major">What is (or will likely be) your major?</label>
-                    <input id="major" class="form-control" placeholder="Enter major" required>
-                </div> -->
-                <!-- <div class="form-group">
-                    <label class="demo-q" for="zipcode">What was your home zipcode before moving to UCLA? If it's outside the US, please also indicate the country you moved here from.</label>
-                    <div id="international-zip" class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="international-check">
-                        <label class="custom-control-label" for="international-check">Check this box if you moved from outside the US</label>
-                    </div>
-                    <div class="row">
-                        <div class="col-6"><input id="zipcode" class="form-control" placeholder="Zipcode/postal code" required></div>
-                        <div class="col-6"><input id="country" class="form-control" placeholder="Your country"></div>
-                    </div>
-                </div> -->
             </form>
         </div>
 
+        <!-- roster -->
         <div id="p1" class="page central">
             <div class="question-text"></div>
             <div class="form-group">
                 <small class="form-text text-muted">For the following questions, please enter people's first name and last name (for example, Daniel Kim), and click "Add" or hit Enter after each person.</small>
                 <small id="duplicate" class="form-text text-muted">If you know different people with the same name, please add a descriptive term that's meaningful to yourself, 
-                    so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim newYorkCity, Daniel Kim chessClub, etc.).</small>
+                    so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).</small>
                 <p id="dorm-name-instr" class="sm-instr">
                     i) Please name the people who fit the above criteria for you from <strong>Hedrick Hall</strong>
                 </p>
@@ -86,18 +70,48 @@
             </div>
         </div>
 
+        <div id="invalid1" class="invalid">You didn't nominate anyone for this question. Is that response accurate?</div>
+        <div class="row central">
+            <div class="col-4"><button id="btn-prev" class="btn btn-secondary">Previous</button></div>
+            <div class="col-4" align="center"><button id="btn-next" class="btn btn-primary">Next</button></div>
+            <div class="col-4"></div>
+        </div>
+        <div id="invalid2" class="invalid">Please answer the questions before proceeding</div>
+
+        <!-- tie strength -->
         <div id="p2" class="page central">
             <div id="p2-reminder"></div>
             <small id="name-note" class="form-text text-muted">Note: <i>2</i> or <i>non-2</i> has been added to each name to indicate if someone lives on your wing of floor 2 or outside of it.</small>
             <div id="p2-questions"></div>
         </div>
 
+        <!-- likert -->
         <div id="p3" class="page central">
             <div class="question-text"></div>
-            <div id="p5-questions"></div>
+            <div id="p3-questions"></div>
         </div>
 
+        <!-- demographic -->
         <div id="p4" class="page central">
+            <div class="form-group">
+                <label class="demo-q" for="major">What is (or will likely be) your major?</label>
+                <input id="major" class="form-control" placeholder="Enter major" required>
+            </div>
+            <div class="form-group">
+                <label class="demo-q" for="zipcode">What was your home zipcode before moving to UCLA? If it's outside the US, please also indicate the country you moved here from.</label>
+                <div id="international-zip" class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="international-check">
+                    <label class="custom-control-label" for="international-check">Check this box if you moved from outside the US</label>
+                </div>
+                <div class="row">
+                    <div class="col-6"><input id="zipcode" class="form-control" placeholder="Zipcode/postal code" required></div>
+                    <div class="col-6"><input id="country" class="form-control" placeholder="Your country"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- payment -->
+        <div id="p5" class="page central">
             <div class="question-text"></div>
             <div align="center">
                 <form id="payment-form">
@@ -122,18 +136,92 @@
 
         <div id="no-prev">You won't be able to come back and change any of your answers after proceeding to the next question</div>
 
-        <div id="invalid1" class="invalid">You didn't nominate anyone for this question. Is that response accurate?</div>
-        <div class="row central">
-            <div class="col-4"><button id="btn-prev" class="btn btn-secondary">Previous</button></div>
-            <div class="col-4" align="center"><button id="btn-next" class="btn btn-primary">Next</button></div>
-            <div class="col-4"></div>
-        </div>
-        <div id="invalid2" class="invalid">Please answer the questions before proceeding</div>
 
-        <!-- JavaScript -->
-        <script type="module" src="js/questions.js"></script>
-        <!-- <script type="module" src="js/user.js"></script> -->
-        <script type="module" src="js/levenshtein.js"></script>
-        <script type="module" src="js/survey.js"></script>
+        <!-- Firebase -->
+        <script type="module">
+            var DB_TYPE = 'test_';  // 'test_' or 'prod_'
+
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+            import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js';
+            import { getFirestore, collection, doc, addDoc, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js';
+            // import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-analytics.js";
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyAmOb9FOQh-gSwgNknNBIU9kCbtMDlFyEM",
+                authDomain: "dorm---questionnaire.firebaseapp.com",
+                projectId: "dorm---questionnaire",
+                storageBucket: "dorm---questionnaire.appspot.com",
+                messagingSenderId: "7204112419",
+                appId: "1:7204112419:web:ebe91abba04302ee490996",
+                measurementId: "G-X1SQS73M77"
+            };
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+
+            // sign in
+            // signInWithEmailAndPassword(user.email, user.pw).catch(function(error) {
+            signInAnonymously(auth).catch(function(error) {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+
+                alert('Failed to access database. Please check your internet connection and try again.\n' +
+                    'If it doesn\'t work, please contact the experimenters.\n' + 
+                    'Error: ' + errorCode + '\n' + errorMessage);
+                window.location.replace('login.html');  // refresh page
+                console.log(error);
+            });
+
+            // +1 to # of completions
+            async function increase_completion_count() {
+                await updateDoc(doc(db, DB_TYPE + 'count', 'count'), {
+                    count: FieldValue.increment(1)
+                })
+            }
+
+            // send data to firebase
+            async function save2firebase(data, page_i, question_i, new_doc=false, end=false) {
+                let db_key = page_i + '.' + question_i;
+                try {
+                    let ref = doc(db, DB_TYPE + 'data', survey_id);
+                    if (new_doc) {
+                        const docRef = await setDoc(ref, data, { merge: true }); // todo
+                        console.log(docRef);
+                    } else {
+                        const docRef = await updateDoc(ref, {[db_key]: data});
+                    }
+                    if (end) {
+                        // show end page
+                        window.hookWindow = false;
+                        window.location.replace('progress.html?completed=' + survey_id.split('.')[0]);
+                    }
+                } catch (e) {
+                    alert('Failed to save your data. Please check your internet connection and try again.\n' +
+                        'If this message shows up multiple times, please contact the experimenters.\n' + e);
+                    location.reload();  // refresh page
+                    console.log(e);
+                }
+            }
+            window.save2firebase = save2firebase; // global variable
+
+            // initialize user response id
+            var parameters = window.location.search.substring(1).split(/[&=]/);
+            var survey_id = parameters[1];
+            var dorm_wing = parameters[3];
+            if (!survey_id || !dorm_wing) {
+                alert('This URL is invalid. Please contact the experimenters.');
+                $('body').hide();
+            }
+            else {
+                save2firebase({start_time: Date.now()}, 0, 0, true);
+            }
+
+        </script>
+
+        <!-- other JavaScript -->
+        <script type="text/javascript" src="js/questions.js"></script>
+        <!-- <script type="text/javascript" src="js/user.js"></script> -->
+        <script type="text/javascript" src="js/levenshtein.js"></script>
+        <script type="text/javascript" src="js/survey.js"></script>
     </body>
 </html>
