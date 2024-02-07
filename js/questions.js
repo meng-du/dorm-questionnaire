@@ -1,7 +1,7 @@
 'use strict';
 
 var roster_questions = [  // page 1
-    'Consider the people you like to spend your free time with. Who are the people you\'ve socialized with most often? ' +
+    'Consider the people you like to spend your free time with. Who are the people you socialize with most often? ' +
     '(Examples: eat meals with, hang out with, study with, spent time with.)',
 
     'Who do you work with most often or go to for academic support? ' +
@@ -18,18 +18,17 @@ var roster_questions = [  // page 1
     'Whose social media posts or messages (such as texts, group messages) or social media posts do you see most often?'
 ];
 var tie_strength_questions = [  // page 2
-    'How close do you feel to <strong>*</strong>?',
-    'How often do you interact with <strong>*</strong>, either <u>in person or online</u>?'
+    'How close do you feel to the following people?',
+    'How often do you interact with the following people, either <u>in person, calling/texting, or online</u>?'
 ];
 var freq_slider = {
     step: 1, min: 1, max: 6, value: 0,
     ticks: [1, 2, 3, 4, 5, 6],
     ticks_labels: ['Never',
-                   'Less than once a week',
-                   'About once a week',
+                   'About once a week or less',
                    '2-3 times a week',
                    '4-5 times a week',
-                   'Almost everyday'],
+                   'Almost everyday or more'],
 };
 var close_slider = {
     step: 1, min: 1, max: 4, value: 0,
@@ -39,7 +38,7 @@ var close_slider = {
                    'Very close',
                    'Extremely close'],
 }
-var slider_configs = [freq_slider, close_slider];
+var tie_strength_slider_configs = [freq_slider, close_slider];
 
 var likert_questions = {questions:[  // page 3
     'We are now interested in your thoughts and attitudes toward current events. Please indicate how much you agree or ' +
@@ -49,7 +48,7 @@ var likert_questions = {questions:[  // page 3
     '<small>These questions ask about your attitudes and interpretations regarding some of the issues and behaviors that are ' +
     'common among college students. When questions ask about what kinds of behaviors or opinions seem “normal,” you can just ' +
     'consider college students in general as your reference point.</small>'
-], slider_qs: [[
+], slider_texts: [[
     'COVID-19 poses a large threat to me personally.',
     'COVID-19 poses a large threat to people in my immediate community, including my family, friends, and neighbors.',
     'The COVID-19 pandemic is likely to end by the summer, and life will soon return to normal.',
@@ -119,7 +118,7 @@ var likert_questions = {questions:[  // page 3
                    'Strongly agree'],
 }]};
 var payment_question = {questions: ['Thank you for completing the survey! How would you like to be paid?']};
-var question_texts = [roster_questions, tie_strength_questions, likert_questions, {}, payment_question];
+var question_texts = [{}, roster_questions, tie_strength_questions, likert_questions, {}, payment_question];
 
 // constants
-var ROSTER_PAGE = 0;
+var ROSTER_PAGE = 1;

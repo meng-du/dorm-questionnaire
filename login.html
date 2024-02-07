@@ -8,9 +8,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-app.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-firestore.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-auth.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
         <link rel="stylesheet" href="css/login.css">
     </head>
@@ -78,8 +76,70 @@
             <button id="start" class="btn btn-primary central-btn disabled">Start</button>
         </div>
 
-        <!-- JavaScript -->
-        <script type="text/javascript" src="js/user.js"></script>
+        <!-- Firebase -->
+        <script type="module">
+            var DB_NAME = 'test_data';
+
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+            import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js';
+            import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js';
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyAmOb9FOQh-gSwgNknNBIU9kCbtMDlFyEM",
+                authDomain: "dorm---questionnaire.firebaseapp.com",
+                projectId: "dorm---questionnaire",
+                storageBucket: "dorm---questionnaire.appspot.com",
+                messagingSenderId: "7204112419",
+                appId: "1:7204112419:web:ebe91abba04302ee490996",
+                measurementId: "G-X1SQS73M77"
+            };
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+
+            // sign in
+            // signInWithEmailAndPassword(user.email, user.pw).catch(function(error) {
+            signInAnonymously(auth).catch(function(error) {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+
+                alert('Failed to access database. Please check your internet connection and try again.\n' +
+                    'If it doesn\'t work, please contact the experimenters.\n' + 
+                    'Error: ' + errorCode + '\n' + errorMessage);
+                window.location.replace('login.html');  // refresh page
+                console.log(error);
+            });
+
+            // send data to firebase
+            async function save_user2firebase(user_id, timestamp, data) {
+                try {
+                    // retrieve past progress
+                    let progress = 0;
+                    const docSnap = await getDoc(doc(db, DB_NAME, user_id));
+                    if (docSnap.exists()) {
+                        progress = Math.max(progress, docSnap.data().progress);
+                    }
+                    window.progress = progress;
+
+                    let ref = doc(db, DB_NAME, user_id);
+                    await setDoc(ref, {
+                        progress: progress,
+                        [timestamp]: data
+                    }, { merge: true });
+
+                } catch (e) {
+                    alert('Failed to save your data. Please check your internet connection and try again.\n' +
+                        'If this message shows up multiple times, please contact the experimenters.\n' + e);
+                    location.reload();  // refresh page
+                    console.log(e);
+                }
+            }
+            window.save_user2firebase = save_user2firebase;  // global function
+
+        </script>
+
+        <!-- <script type="text/javascript" src="js/user.js"></script> -->
         <script type="text/javascript" src="js/login.js"></script>
+        
     </body>
 </html>

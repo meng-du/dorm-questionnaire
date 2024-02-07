@@ -35,13 +35,14 @@
 
         <!-- roster -->
         <div id="p1" class="page central">
-            <div class="question-text"></div>
             <div class="form-group">
-                <small class="form-text text-muted">For the following questions, please enter people's first name and last name (for example, Daniel Kim), and click "Add" or hit Enter after each person.</small>
+                <span class="form-text">For the following questions, please consider your social interactions since you arrived at UCLA. 
+                    Please enter people's first name and last name (for example, Daniel Kim), and click "Add" or hit Enter after each person.</span>
                 <small id="duplicate" class="form-text text-muted">If you know different people with the same name, please add a descriptive term that's meaningful to yourself, 
                     so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).</small>
+                <div class="question-text"></div>
                 <p id="dorm-name-instr" class="sm-instr">
-                    i) Please name the people who fit the above criteria for you from <strong>Hedrick Hall</strong>
+                    i) Please name the people who fit the above criteria for you from <strong>your wing of Hedrick Hall</strong>
                 </p>
                 <div class="row">
                     <div class="col">
@@ -76,11 +77,12 @@
             <div class="col-4" align="center"><button id="btn-next" class="btn btn-primary">Next</button></div>
             <div class="col-4"></div>
         </div>
-        <div id="invalid2" class="invalid">Please answer the questions before proceeding</div>
+        <div id="invalid2" class="invalid">Please answer the required questions before proceeding</div>
 
         <!-- tie strength -->
         <div id="p2" class="page central">
             <div id="p2-reminder"></div>
+            <!-- TODO: 2 -->
             <small id="name-note" class="form-text text-muted">Note: <i>2</i> or <i>non-2</i> has been added to each name to indicate if someone lives on your wing of floor 2 or outside of it.</small>
             <div id="p2-questions"></div>
         </div>
@@ -180,17 +182,18 @@
             }
 
             // send data to firebase
-            async function save2firebase(data, page_i, question_i, new_doc=false, end=false) {
-                let db_key = page_i + '.' + question_i;
+            async function save2firebase(data, page_i=false, question_i=false, end=false) {
                 try {
                     let ref = doc(db, DB_TYPE + 'data', survey_id);
-                    if (new_doc) {
-                        const docRef = await setDoc(ref, data, { merge: true }); // todo
-                        console.log(docRef);
+                    if (page_i === false && question_i === false) {
+                        await setDoc(ref, data, { merge: true });
                     } else {
-                        const docRef = await updateDoc(ref, {[db_key]: data});
+                        let db_key = page_i + '.' + question_i;
+                        await updateDoc(ref, {[db_key]: data});
                     }
                     if (end) {
+                        await setDoc(ref, {end_time: Date.now()}, { merge: true });
+                        increase_completion_count();
                         // show end page
                         window.hookWindow = false;
                         window.location.replace('progress.html?completed=' + survey_id.split('.')[0]);
@@ -202,7 +205,8 @@
                     console.log(e);
                 }
             }
-            window.save2firebase = save2firebase; // global variable
+            // global functions
+            window.save2firebase = save2firebase;
 
             // initialize user response id
             var parameters = window.location.search.substring(1).split(/[&=]/);
@@ -213,7 +217,7 @@
                 $('body').hide();
             }
             else {
-                save2firebase({start_time: Date.now()}, 0, 0, true);
+                save2firebase({start_time: Date.now()});
             }
 
         </script>
