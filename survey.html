@@ -10,7 +10,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tagmanager/3.0.2/tagmanager.min.js" integrity="sha256-01/49ElxlWe2RC+C+QOxBu1OzIUM5BV7/ONHZ8MR5Aw=" crossorigin="anonymous"></script>
+        <script src="js/tagmanager.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tagmanager/3.0.2/tagmanager.min.css" integrity="sha256-bOEaK4HVga5gZsjsEWTe2m8GUDvK+mHcoj4N9W56uBo=" crossorigin="anonymous" />
         <script src="js/multi-switch.js"></script>
         <script src="js/progressbar.min.js"></script>
@@ -40,7 +40,7 @@
                     Please enter people's first name and last name (for example, Daniel Kim), and click "Add" or hit Enter after each person.</span>
                 <small id="duplicate" class="form-text text-muted">If you know different people with the same name, please add a descriptive term that's meaningful to yourself, 
                     so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).</small>
-                <div class="question-text"></div>
+                <div class="question-text roster-text"></div>
                 <p id="dorm-name-instr" class="sm-instr">
                     i) Please name the people who fit the above criteria for you from <strong>your wing of Hedrick Hall</strong>
                 </p>
@@ -119,15 +119,15 @@
                 <form id="payment-form">
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="payment" value="amazon" required>
-                        <label class="form-check-label" for="payment">Amazon gift card</label>
+                        <label class="form-check-label">Amazon gift card</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="payment" value="target">
-                        <label class="form-check-label" for="payment">Target gift card</label>
+                        <label class="form-check-label">Target gift card</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="payment" value="bruincard">
-                        <label class="form-check-label" for="payment">Bruincard deposit</label>
+                        <label class="form-check-label">Bruincard deposit</label>
                     </div>
                 </form>
             </div>
@@ -145,7 +145,7 @@
 
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
             import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js';
-            import { getFirestore, collection, doc, addDoc, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js';
+            import { getFirestore, doc, getDoc, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js';
             // import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-analytics.js";
 
             const firebaseConfig = {
@@ -181,22 +181,41 @@
                 })
             }
 
-            // send data to firebase
-            async function save2firebase(data, page_i=false, question_i=false, end=false) {
+            // retrieve and load previous user progress
+            async function get_user_progress(proc_func) {
+                var docSnap = null;
                 try {
-                    let ref = doc(db, DB_TYPE + 'data', survey_id);
-                    if (page_i === false && question_i === false) {
-                        await setDoc(ref, data, { merge: true });
-                    } else {
-                        let db_key = page_i + '.' + question_i;
-                        await updateDoc(ref, {[db_key]: data});
+                    docSnap = await getDoc(doc(db, DB_TYPE + 'data', user_id));
+                    // console.log(docSnap.data());
+                } catch (e) {
+                    alert('Failed to load your data. Please check your internet connection and try again.\n' +
+                        'If this message shows up multiple times, please contact the experimenters.\n' + e);
+                    location.reload();  // refresh page
+                    console.log(e);
+                }
+                if (docSnap.exists()) {
+                    proc_func(docSnap.data());
+                } else {
+                    console.log('No existing progress.');
+                }
+            }
+
+            // send data to firebase
+            async function save2firebase(data, page_i, question_i, progress=true, end=false) {
+                try {
+                    let db_key = page_i + '.' + question_i;
+                    let ref = doc(db, DB_TYPE + 'data', user_id);
+                    let save_data = { [timestamp]: {[db_key]: data}};
+                    if (progress) {
+                        save_data.progress = db_key;
                     }
+                    await setDoc(ref, save_data, { merge: true });
                     if (end) {
                         await setDoc(ref, {end_time: Date.now()}, { merge: true });
                         increase_completion_count();
                         // show end page
                         window.hookWindow = false;
-                        window.location.replace('progress.html?completed=' + survey_id.split('.')[0]);
+                        window.location.replace('progress.html?completed=' + user_id);
                     }
                 } catch (e) {
                     alert('Failed to save your data. Please check your internet connection and try again.\n' +
@@ -206,18 +225,16 @@
                 }
             }
             // global functions
+            window.get_user_progress = get_user_progress;
             window.save2firebase = save2firebase;
 
             // initialize user response id
             var parameters = window.location.search.substring(1).split(/[&=]/);
-            var survey_id = parameters[1];
-            var dorm_wing = parameters[3];
-            if (!survey_id || !dorm_wing) {
+            var user_id = parameters[1];
+            var timestamp = parameters[3];
+            if (!user_id || user_id.length != 64) {
                 alert('This URL is invalid. Please contact the experimenters.');
                 $('body').hide();
-            }
-            else {
-                save2firebase({start_time: Date.now()});
             }
 
         </script>

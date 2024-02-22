@@ -9,8 +9,11 @@ jQuery(document).ready(function() {
     $('#no-prev').hide();
     var page_i = 0;
     var question_i = 0;
+    window.page_i = page_i;
+    window.question_i = question_i;
     var roster_data = {};
     var all_names = {in_dorm: new Set(['abcd enm', 'ajsb eokm', 'as mc']), outside: new Set([])};
+    var skip_check = false;
 
     // prevent closing window
     window.onbeforeunload = function() {
@@ -30,26 +33,9 @@ jQuery(document).ready(function() {
         }
     }
 
-    function check_duplicate(name) {
-        for (let t of ['in_dorm', 'outside']) {
-            all_names[t].forEach((n) => {
-                dist = levenshtein(name, n);
-                if (dist <= 1 || dist / name.length < 0.3) {
-                    return n;
-                }
-            });
-        }
-        return false;
-    }
-
     // PARSE PARAMETERS
     var parameters = window.location.search.substring(1).split(/[&=]/);
-    var dorm_wing = parameters[3];
-
-    var progress = '0';
-    if (parameters.length > 5) {
-        progress = parameters[5];
-    }
+    // var dorm_wing = parameters[5];
 
     // PROGRESS BAR
     var prog_bar = new ProgressBar.Line('#prog-bar', { color: '#ffc107' });
@@ -58,35 +44,35 @@ jQuery(document).ready(function() {
 
     // LOAD PREVIOUS PROGRESS
 
-    function setup_curr_names(exclude=[]) {
-        // remove names that are also in the past
-        let intersection = new Set([...all_named_people['current_q']]
-                           .filter(x => all_named_people['past_q'].has(x)));
-        all_named_people['current_q'] = new Set([...all_named_people['current_q']]
-                                        .filter(x => !intersection.has(x)));
-        // exclude
-        if (exclude.size && exclude.size > 0) {
-            intersection = new Set([...intersection].filter(x => !exclude.has(x)));
-        }
-        // put intersection at the beginning of attitude questions
-        let person_q_later = [];
-        let person_slider_q_later = [];
-        let person_slider_later = [];
-        for (let name of intersection) {
-            person_q_later.push('<small id="name-note" class="form-text text-muted">' +
-                                $('#name-note').html() + '</small>');
-            person_slider_later.push([{}, freq_slider2, freq_slider2, freq_slider2, freq_slider2,
-                                      {}, freq_slider2, freq_slider2, freq_slider2, freq_slider2]);
-            let person_slider_q = [];
-            for (let q of person_questions.followup) {
-                person_slider_q.push(q.replace('*', name));
-            }
-            person_slider_q_later.push(person_slider_q);
-        }
-        attitude_questions.questions = person_q_later.concat(attitude_questions.questions);
-        attitude_questions.slider_qs = person_slider_q_later.concat(attitude_questions.slider_qs);
-        attitude_questions.sliders = person_slider_later.concat(attitude_questions.sliders);
-    }
+    // function setup_curr_names(exclude=[]) {
+    //     // remove names that are also in the past
+    //     let intersection = new Set([...all_named_people['current_q']]
+    //                        .filter(x => all_named_people['past_q'].has(x)));
+    //     all_named_people['current_q'] = new Set([...all_named_people['current_q']]
+    //                                     .filter(x => !intersection.has(x)));
+    //     // exclude
+    //     if (exclude.size && exclude.size > 0) {
+    //         intersection = new Set([...intersection].filter(x => !exclude.has(x)));
+    //     }
+    //     // put intersection at the beginning of attitude questions
+    //     let person_q_later = [];
+    //     let person_slider_q_later = [];
+    //     let person_slider_later = [];
+    //     for (let name of intersection) {
+    //         person_q_later.push('<small id="name-note" class="form-text text-muted">' +
+    //                             $('#name-note').html() + '</small>');
+    //         person_slider_later.push([{}, freq_slider2, freq_slider2, freq_slider2, freq_slider2,
+    //                                   {}, freq_slider2, freq_slider2, freq_slider2, freq_slider2]);
+    //         let person_slider_q = [];
+    //         for (let q of person_questions.followup) {
+    //             person_slider_q.push(q.replace('*', name));
+    //         }
+    //         person_slider_q_later.push(person_slider_q);
+    //     }
+    //     attitude_questions.questions = person_q_later.concat(attitude_questions.questions);
+    //     attitude_questions.slider_qs = person_slider_q_later.concat(attitude_questions.slider_qs);
+    //     attitude_questions.sliders = person_slider_later.concat(attitude_questions.sliders);
+    // }
 
     function push_names(names_in_dorm, names_outside) {
         // let dorm_names = [];
@@ -102,115 +88,51 @@ jQuery(document).ready(function() {
         all_names.outside = new Set([...names_outside, ...all_names.outside])
     }
 
-    function load_progress() {
-
-    }
-
-    // check prev progress
-    console.log(progress);
-    // var show_covid_residency = true;
-    // if (progress == '2.current_q') {
-    //     show_covid_residency = false;
-    //     progress = '1.current_q';
-    // }
-    if (progress != '0') {
-        let prog = progress.split('.');
+    function load_progress(user_data) {
+        if (!user_data || !('progress' in user_data)) {
+            $('#p' + page_i).show();
+            console.log('No existing progress.');
+            return;
+        }
+        let prog = user_data.progress.split('.');
         page_i = parseInt(prog[0]);
-        if (page_i != NAME_GEN_PAGE - 1) {
-            $('#btn-next').addClass('disabled');
+        question_i = parseInt(prog[1]);
+        console.log(page_i, question_i);
+        skip_check = true;
+        if (page_i == 0 || page_i > 2) {
+            $('#btn-next').click();
+            return;
         }
-        if (prog[1]) {
-            if (prog[1].length > 1) {
-                q_type = prog[1];
-                if (page_i > 0 && page_i < 5) {
-                    if (page_i <= NAME_GEN_PAGE && q_type == 'past_q') {
-                        $('.precovid-in-q').show();
-                        $('#duringcovid-in-q').hide();
-                    }
-                    if (q_type != 'initial') {
-                        $('#instr-public').hide();
-                    }
-                    db.collection(DB_DATA_COLLECTION).doc(survey_id).get().then((doc) => {
-                        if (!('2' in doc.data())) {
-                            return;
-                        }
-                        for (let t in doc.data()['2']) {
-                            for (let q_i in doc.data()['2'][t]) {
-                                if (t != 'initial') {
-                                    push_names(doc.data()['2'][t][q_i]['names_in_dorm'],
-                                               doc.data()['2'][t][q_i]['names_outside'], t);
-                                }
-                            }
-                        }
-                        if (page_i == 3) {
-                            $('#p3-reminder').html('For questions of the <span class="precovid">pre-COVID</span> ' +
-                                'period, please think back to <u>before</u> the "safer at home" policy was ' +
-                                'implemented in mid-March.');
-                            if (q_type == 'current_q') {
-                                $('#p3-reminder').html($('#p3-reminder').html() + '<br>For questions of the ' +
-                                '<span class="duringcovid">during-COVID</span> period, please consider the ' +
-                                'time <u>since</u> the "safer at home" policy was implemented in mid-March.');
-                            }
-                            let names = [];
-                            let exclude = [];
-                            if ('3' in doc.data() && q_type in doc.data()['3']) {
-                                exclude = new Set([]);
-                                Object.keys(doc.data()['3'][q_type]).forEach(item => exclude.add(item.split(' - ')[0]));
-                                if (q_type == 'current_q') {
-                                    setup_curr_names(exclude);
-                                }
-                                names = new Set([...all_names[q_type]].filter(x => !exclude.has(x)));
-                            } else {
-                                if (q_type == 'current_q') {
-                                    setup_curr_names(exclude);
-                                }
-                                names = all_names[q_type];
-                            }
-                            if (names.size == 0) {
-                                page_i = 5;
-                                q_type = 'questions';
-                                append_p5_slider_qs(question_i);
-                                $('#p3').hide();
-                                $('#p5').show();
-                                $('.slide').slider('refresh');
-                            } else {
-                                person_q_prepare(names);
-                                friend_q_prepare(all_names[q_type]);
-                            }
-                        } else if (page_i == 4) {
-                            friend_q_prepare(all_names[q_type]);
-                        }
-                    });
-                }
-            } else if (prog[0] == '5') {
-                question_i = parseInt(prog[1]);
-                q_type = 'questions';
-                if (isNaN(question_i) || question_i < 0 || question_i > 2) {
-                    console.log('Progress Error: ' + progress);
-                }
-                append_p5_slider_qs(question_i);
-            } else {
-                console.log('Progress Error: ' + progress);
+        // load roster data for page 1 or 2
+        console.log(Object.keys(user_data).sort());  // TODO test
+        for (let t of Object.keys(user_data).sort()) { // sort so that new data overwrites old data
+            if (t.length < 13) {
+                continue;
             }
-        } else if (prog[0] == '6') {
-            q_type = 'questions';
-        } else {
-            console.log('Progress Error: ' + progress);
+            for (let i = 0; i < roster_questions.length; i++) {
+                let key = '1.' + i.toString();
+                if (key in user_data[t]) {
+                    roster_data[i] = {
+                        names_in_dorm: user_data[t][key]['names_in_dorm'],
+                        names_outside: user_data[t][key]['names_outside']
+                    };
+                }
+            }
         }
-        if (page_i != 5) {
-            $('.question-text').html(question_texts[page_i][q_type][question_i]);
+        for (let q_i in roster_data) {
+            push_names(roster_data[q_i]['names_in_dorm'], roster_data[q_i]['names_outside']);
         }
+        console.log(page_i, question_i);
+        $('#btn-next').click();
+        console.log(page_i, question_i);
+        $('#p' + page_i).show();
     }
-    $('#p' + page_i).show();
-    $('.slide').slider('refresh');
-
-    // ----- TODO above -----
+    window.get_user_progress(load_progress);
 
 
     // ----- NICKNAME -----
 
     function nickname_onfinish() {
-        console.log('nickname!!!');
         window.save2firebase({
             'other_name': $('#other-name').val(),
             timestamp: Date.now()
@@ -221,58 +143,99 @@ jQuery(document).ready(function() {
 
 
     // ----- ROSTER QUESTIONS -----
+    function check_duplicate(name1, name2) {
+        let dist = window.levenshtein(name1, name2);
+        console.log('dist', name1, name2, dist);
+        if ((dist <= 1) || (dist / name1.length < 0.25)) {
+            return true;
+        }
+        return false;
+    }
+    function check_duplicate_against_list(name, namelist) {
+        for (let n of namelist) {
+            if (check_duplicate(name, n)) {
+                return n;
+            }
+        }
+        return false;
+    }
+    function check_duplicate_against_exist_names(name, types=['in_dorm', 'outside'], allow_repeat=false) {
+        for (let type of types) {
+            for (let n of all_names[type]) {
+                if (allow_repeat && name == n) {
+                    continue;
+                } else if (check_duplicate(name, n)) {
+                    return n;
+                }
+            }
+        }
+        return false;
+    }
 
     // validator
     function validate_name(tag) {
         let valid = true;
-        all_names // TODO
         let fields = ['#dorm-names', '#outsider-names'];  // TODO use an aggregated list rather than just the list from the current page
         for (let i in fields) {
             let field = $(fields[i]);
-            if (tag == field.val().trim()) {
-                // test if using alphabets and spaces
-                if (! /^[a-zA-Z-]+\s+[a-zA-Z-\s]*[a-zA-Z-]+$/.test(tag)) {
-                    field.get(0).setCustomValidity('Please enter one name at a time (first & last name) with alphabets, spaces and hyphens only');
+            console.log(i, field.val().trim());
+            if (tag == name_to_title_case(field.val())) {
+                // test if using valid characters
+                if (! /^[a-zA-Z-]+\s+[a-zA-Z-'\s]*[a-zA-Z-]+$/.test(tag)) {
+                    field.get(0).setCustomValidity('Please enter one name at a time with alphabets, spaces, hyphens and apostrophes only');
                     field.get(0).reportValidity();
                     valid = false;
+                }
+                // test if repeating names on the same page
+                let repeat_this_field = field.tagsManager('tags').indexOf(tag);
+                let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);
+                console.log(tag, field.tagsManager('tags'), repeat_this_field, $(fields[1 - i]).tagsManager('tags'), repeat_other_field);
+                let blink = false;
+                let rep = false;
+                if (repeat_this_field > -1) {
+                    blink = $(fields[i] + '-container' + ' .tm-tag')[repeat_this_field];
+                } else if (repeat_other_field > -1) {
+                    blink = $(fields[1 - i] + '-container' + ' .tm-tag')[repeat_other_field];
                 } else {
-                    field.get(0).setCustomValidity('');
+                    // test for similar names on the same page
+                    rep = check_duplicate_against_list(tag, field.tagsManager('tags'));
+                    console.log('1xx', rep, field.tagsManager('tags'));
+                    if (rep) {
+                        blink = $(fields[i] + '-container' + ' .tm-tag')[field.tagsManager('tags').indexOf(rep)];
+                    } else {
+                        rep = check_duplicate_against_list(tag, $(fields[1 - i]).tagsManager('tags'));
+                        console.log('2xx', rep, $(fields[1 - i]).tagsManager('tags'));
+                        if (rep) {
+                            blink = $(fields[1 - i] + '-container' + ' .tm-tag')[$(fields[1 - i]).tagsManager('tags').indexOf(rep)];
+                        }
+                    }
+                }
+                if (blink) {  // blinks
+                    valid = false;
+                    $(blink).stop()
+                        .animate({ backgroundColor: '#d90000' }, 100)
+                        .animate({ backgroundColor: '#ffc107' }, 100)
+                        .animate({ backgroundColor: '#d90000' }, 100)
+                        .animate({ backgroundColor: '#ffc107' }, 100)
+                        .animate({ backgroundColor: '#d90000' }, 100)
+                        .animate({ backgroundColor: '#ffc107' }, 100);
+                }
+                // test if repeating saved names
+                if (!rep) {
+                    rep = check_duplicate_against_exist_names(tag, [['in_dorm', 'outside'][i]], true);   // forbid similar names in the same field
+                }
+                if (!rep) {
+                    rep = check_duplicate_against_exist_names(tag, [['in_dorm', 'outside'][1 - i]], false);  // forbid repeating or similar names in the other
+                }
+                if (rep) {
+                    console.log('invalid!!!');
+                    field.get(0).setCustomValidity('You have already entered this name or a similar name: ' + rep +
+                        '. If you are entering different people with the same name, please add a descriptive term (e.g., Daniel Kim artist).');
                     field.get(0).reportValidity();
                 }
-                // test if repeated
-                let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);  // TODO use an aggregated list
-                if (field.tagsManager('tags').includes(tag) || repeat_other_field > -1) {
-                    field.get(0).setCustomValidity('You have already entered this name. ' + 
-                        'If you are entering different people with the same name, please add a descriptive term ' +
-                        'so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
+                if (valid) {
+                    field.get(0).setCustomValidity('');
                     field.get(0).reportValidity();
-                    if (repeat_other_field > -1) {
-                        field.val('');
-                        valid = false;
-                        // blinks
-                        $($(fields[1 - i] + '-container' + ' .tm-tag')[repeat_other_field]).stop()
-                            .animate({ backgroundColor: '#d90000' }, 100)
-                            .animate({ backgroundColor: '#ffc107' }, 100)
-                            .animate({ backgroundColor: '#d90000' }, 100)
-                            .animate({ backgroundColor: '#ffc107' }, 100)
-                            .animate({ backgroundColor: '#d90000' }, 100)
-                            .animate({ backgroundColor: '#ffc107' }, 100);
-                    }
-                } else {    
-                    // test if similar
-                    var duplicate = check_duplicate(tag);
-                    if (duplicate) {
-                        field.get(0).setCustomValidity('You have entered "' + duplicate + '" which is similar to this one. ' +
-                            'If you are entering different people with similar names, please add a descriptive term ' +
-                            'so that you can disambiguate them later (for example, Daniel Kim artist, Daniel Kim new-york, Daniel Kim chess-club, etc.).');
-                        field.get(0).reportValidity();
-                        valid = false;
-                        // TODO
-                    }
-                    if (valid) {
-                        field.get(0).setCustomValidity('');
-                        field.get(0).reportValidity();
-                    }
                 }
             }
         }
@@ -285,6 +248,7 @@ jQuery(document).ready(function() {
     // set up naming question
     $('#dorm-names').tagsManager({
         deleteTagsOnBackspace: false,
+        CapitalizeFirstLetter: true,
         tagsContainer: '#dorm-names-container',
         blinkBGColor_1: '#d90000',
         blinkBGColor_2: '#ffc107',
@@ -295,6 +259,7 @@ jQuery(document).ready(function() {
     });
     $('#outsider-names').tagsManager({
         deleteTagsOnBackspace: false,
+        CapitalizeFirstLetter: true,
         tagsContainer: '#outsider-names-container',
         blinkBGColor_1: '#d90000',
         blinkBGColor_2: '#ffc107',
@@ -308,13 +273,15 @@ jQuery(document).ready(function() {
     $('#btn-dorm-add').on('click', () => {
         let name = $('#dorm-names').val();
         $('#dorm-names').tagsManager('pushTag', name);
-        $('#dorm-names').val('');
     });
     $('#btn-outsider-add').on('click', () => {
         let name = $('#outsider-names').val();
         $('#outsider-names').tagsManager('pushTag', name);
-        $('#outsider-names').val('');
     });
+    // $(".tm-input").on('tm:pushed', function(e, tag) {
+    //     $(e.target).tagsManager('popTag');
+    //     $(e.target).tagsManager('pushTag', name_to_title_case(tag));
+    // });
 
     // set up instructions to include wing
     // $('#dorm-name-instr').html($('#dorm-name-instr').html().replace('Hall</strong>', 'Hall</strong> 2' + dorm_wing[0].toUpperCase())); // TODO: 2
@@ -349,14 +316,18 @@ jQuery(document).ready(function() {
         return true;
     }
 
-    function to_title_case(str_list) {
+    function name_to_title_case(name) {
+        let str = name.trim().toLowerCase().split(/([-' ])/);  // split at space/hyphen/apostrophe
+        for (let i = 0; i < str.length; i++) {
+            str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+        }
+        return str.join('');
+    }
+
+    function list_to_title_case(str_list) {
         let new_list = [];
         for (let s of str_list) {
-            let str = s.toLowerCase().split(' ');
-            for (var i = 0; i < str.length; i++) {
-                str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
-            }
-            new_list.push(str.join(' '));
+            new_list.push(name_to_title_case(s));
         }
         return new_list;
     }
@@ -366,8 +337,8 @@ jQuery(document).ready(function() {
         if (!check_entered_text()) {
             return false;
         }
-        let dorm_names = to_title_case($('#dorm-names').tagsManager('tags'));
-        let outsider_names = to_title_case($('#outsider-names').tagsManager('tags'));
+        let dorm_names = list_to_title_case($('#dorm-names').tagsManager('tags'));
+        let outsider_names = list_to_title_case($('#outsider-names').tagsManager('tags'));
         $('#dorm-names').val('');
         $('#outsider-names').val('');
         // name_typeahead_source.push(...dorm_names, ...outsider_names);
@@ -662,7 +633,7 @@ jQuery(document).ready(function() {
         }
         window.save2firebase({
             payment: $('input[name=payment]:checked').val()
-        }, page_i, question_i, true);
+        }, page_i, question_i, true, true);
         return true;
     }
 
@@ -687,6 +658,8 @@ jQuery(document).ready(function() {
         if ($('#btn-prev').hasClass('disabled')) {
             return;
         }
+
+        console.log('prev btn', page_i, question_i);
         // save current data
         let result = onfinish_funcs[page_i](question_i);
         if (!result) { // TODO validate or not? maybe no?
@@ -699,13 +672,14 @@ jQuery(document).ready(function() {
         add_data();
 
         // first question
-        if (page_i == ROSTER_PAGE && question_i == 0) {
+        if (page_i == ROSTER_PAGE && question_i < 1) {
             // remove prev button
             $('#btn-prev').hide();
         }
         $('.invalid').hide();
         normal_next_btn();
         $('#no-prev').hide();
+        console.log('prev btn', page_i, question_i);
     });
 
     // NEXT BUTTON
@@ -717,35 +691,39 @@ jQuery(document).ready(function() {
     }
 
     $('#btn-next').on('click', (e) => {
-        if (page_i == ROSTER_PAGE && !check_entered_text()) {
-            return;  // entered text but didn't add for naming question
-        }
-        // no answer
-        if ($('#btn-next').hasClass('disabled')) {
-            if (page_i == ROSTER_PAGE) {
-                $('#invalid1').show();
-                $('#btn-next').text('Yes, I can\'t think of anyone that fits this question');
-                $('#btn-next').addClass('btn-warning');
-                $('#btn-next').addClass('btn-sm');
-                $('#btn-next').removeClass('disabled');
-            } else {
-                $('#invalid2').show();
-                setTimeout(() => {
-                    $('#invalid2').hide();
-                }, 5000);
+        console.log('next btn', page_i, question_i);
+        if (!skip_check) {
+            if (page_i == ROSTER_PAGE && !check_entered_text()) {
+                return;  // entered text but didn't add for naming question
             }
-            return;
+            // no answer
+            if ($('#btn-next').hasClass('disabled')) {
+                if (page_i == ROSTER_PAGE) {
+                    $('#invalid1').show();
+                    $('#btn-next').text('Yes, I can\'t think of anyone that fits this question');
+                    $('#btn-next').addClass('btn-warning');
+                    $('#btn-next').addClass('btn-sm');
+                    $('#btn-next').removeClass('disabled');
+                } else {
+                    $('#invalid2').show();
+                    setTimeout(() => {
+                        $('#invalid2').hide();
+                    }, 5000);
+                }
+                return;
+            }
+            // submit data
+            let result = onfinish_funcs[page_i]();
+            console.log(page_i, question_texts[page_i][question_i], result)
+            if (!result) {
+                return;
+            }
         }
-        // submit data
-        let result = onfinish_funcs[page_i]();
-        console.log(page_i, question_texts[page_i][question_i], result)
-        if (!result) {
-            return;
-        }
+        skip_check = false;
         window.scrollTo(0, 0);
         // proceed
         if (question_i < question_texts[page_i].length - 1) {
-            console.log('next 1', page_i, question_i);
+            // console.log('next 1', page_i, question_i);
             // next question of the same type
             ++question_i;
             $('.question-text').html(question_texts[page_i][question_i]);
@@ -756,6 +734,7 @@ jQuery(document).ready(function() {
             }
 
             // add data if there is any
+            console.log(page_i, question_i, roster_data.hasOwnProperty(question_i), roster_data);
             if (page_i == ROSTER_PAGE && roster_data.hasOwnProperty(question_i)) {
                 add_data();
             } else {
@@ -775,7 +754,7 @@ jQuery(document).ready(function() {
                                 { duration: 1000 });
             }
         } else {
-            console.log('next 2', page_i, question_i);
+            // console.log('next 2', page_i, question_i);
             // next page, first question
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();

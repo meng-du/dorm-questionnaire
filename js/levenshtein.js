@@ -101,4 +101,5 @@
 
     return dd;
   };
+  window.levenshtein = levenshtein;
 })();

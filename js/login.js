@@ -74,8 +74,7 @@
             email: email,
             dorm_room: dorm_room,
             dorm_wing: dorm_wing,
-            start_time: timestamp.toString(),
-            // login_time: (new Date()).toString()
+            login_start_time: timestamp.toString()
         });
 
         $('#info-form').hide();
@@ -96,7 +95,7 @@
         if ($('#start').hasClass('disabled')) {
             return;
         }
-        window.location.replace('survey.html?user=' + user_id + '&prog=' + window.progress + '&wing=' + dorm_wing);
+        window.location.replace('survey.html?user=' + user_id + '&timestamp=' + timestamp.valueOf().toString() + '&wing=' + dorm_wing);
     });
 
     timestamp = new Date();

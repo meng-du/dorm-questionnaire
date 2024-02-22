@@ -113,20 +113,10 @@
             // send data to firebase
             async function save_user2firebase(user_id, timestamp, data) {
                 try {
-                    // retrieve past progress
-                    let progress = 0;
-                    const docSnap = await getDoc(doc(db, DB_NAME, user_id));
-                    if (docSnap.exists()) {
-                        progress = Math.max(progress, docSnap.data().progress);
-                    }
-                    window.progress = progress;
-
                     let ref = doc(db, DB_NAME, user_id);
                     await setDoc(ref, {
-                        progress: progress,
                         [timestamp]: data
                     }, { merge: true });
-
                 } catch (e) {
                     alert('Failed to save your data. Please check your internet connection and try again.\n' +
                         'If this message shows up multiple times, please contact the experimenters.\n' + e);
