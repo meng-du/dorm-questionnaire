@@ -21,15 +21,6 @@ var tie_strength_questions = [  // page 2
     'How close do you feel to the following people?',
     'How often do you interact with the following people, either <u>in person, calling/texting, or online</u>?'
 ];
-var freq_slider = {
-    step: 1, min: 1, max: 6, value: 0,
-    ticks: [1, 2, 3, 4, 5, 6],
-    ticks_labels: ['Never',
-                   'About once a week or less',
-                   '2-3 times a week',
-                   '4-5 times a week',
-                   'Almost everyday or more'],
-};
 var close_slider = {
     step: 1, min: 1, max: 4, value: 0,
     ticks: [1, 2, 3, 4],
@@ -38,23 +29,25 @@ var close_slider = {
                    'Very close',
                    'Extremely close'],
 }
-var tie_strength_slider_configs = [freq_slider, close_slider];
+var freq_slider = {
+    step: 1, min: 1, max: 5, value: 0,
+    ticks: [1, 2, 3, 4, 5],
+    ticks_labels: ['Never',
+                   'About once a week or less',
+                   '2-3 times a week',
+                   '4-5 times a week',
+                   'Almost everyday or more'],
+};
+var tie_strength_slider_configs = [close_slider, freq_slider];
 
 var likert_questions = {questions:[  // page 3
-    'We are now interested in your thoughts and attitudes toward current events. Please indicate how much you agree or ' +
-    'disagree with the following statements.',
-    'Indicate how often each of the statements below is descriptive of you.',
-    'How much do you agree with the following statements?<br><br>' +
-    '<small>These questions ask about your attitudes and interpretations regarding some of the issues and behaviors that are ' +
-    'common among college students. When questions ask about what kinds of behaviors or opinions seem “normal,” you can just ' +
-    'consider college students in general as your reference point.</small>'
+    'Please indicate how often each of the statements below is descriptive of you.',
+    'Below are statements people often use to describe themselves. ' +
+    'Please use the scale below to indicate the degree to which these statements accurately describe you. ' +
+    'There are no right or wrong answers.',
+    'Please indicate whether you agree or disagree with the following statements.',
+    'I see myself as:'
 ], slider_texts: [[
-    'COVID-19 poses a large threat to me personally.',
-    'COVID-19 poses a large threat to people in my immediate community, including my family, friends, and neighbors.',
-    'The COVID-19 pandemic is likely to end by the summer, and life will soon return to normal.',
-    'Having public places (e.g., parks, beaches) open right now is too risky.',
-    'Having “non-essential” businesses (e.g., retail shops, gyms) open right now is too risky.'
-],[
     'I lack companionship.',
     'There is no one I can turn to.',
     'I am an outgoing person.',
@@ -64,44 +57,64 @@ var likert_questions = {questions:[  // page 3
     'I am unhappy being so withdrawn.',
     'People are around me but not with me.'
 ],[
-    'Traveling is an important way to learn about other cultures.',
-    'It\'s important to get 6-8 hours of sleep every night.',
-    'The primary goal of college is to get good grades and succeed academically.',
-    'Being deceitful or tricking others is OK as long as it’s relatively harmless.',
-    'Food production needs to be done more sustainably.',
-    'It\'s normal for people to be concerned about climate change.',
-    'It\'s normal for people to drink until they can’t remember.',
-    'If someone believed they were having a mental breakdown, their first inclination should be to get professional attention.',
-    'Most people do not do enough physical activity.',
-    'It’s normal to eat a lot of junk food.',
-    'College football should be banned.',
-    'It\'s normal for people to vape nicotine.',
-    'It\'s normal for people to get fewer than 6 hours of sleep per night.',
-    'Vaping should only be allowed in certain public places.',
-    'People should pursue whatever they’re interested in, no matter what others think.',
-    'A person should work out his or her own problems; getting psychological counseling should be a last resort.',
-    'People should always make time for exercise, no matter how busy they are.',
-    'Vaping is risky to health.',
-    'It\'s normal for people to pull an all-nighter (for studying or to have fun).',
-    'It\'s important to get one\'s money\'s worth in the dining hall, even if it means eating too much or eating unhealthily.',
-    'Global warming is an important problem.',
-    'It\'s normal for people to be friends with people who disagree with them about important issues.',
-    'It\'s normal for people to be hungover on weekends.',
-    'People should keep track of the nutritional content of what they eat at every meal.',
-    'It\'s normal for people to consume a lot of caffeine.',
-    'College is a time to try something that you’ve never tried before.',
-    'It\'s normal for people to vape in general (with or without nicotine).',
-    'It\'s acceptable for people to skip classes without a valid excuse.',
-    'College is an exciting time to make new friends and form new connections.'
-]], sliders: [{
-    step: 1, min: 1, max: 5, value: 0,
-    ticks: [1, 2, 3, 4, 5],
-    ticks_labels: ['Strongly disagree',
-                   'Disagree',
-                   'Neutral',
-                   'Agree',
-                   'Strongly agree'],
-}, {
+    'I view challenging situations as an opportunity to grow and learn.',
+    'I seek out situations where it is likely that I will have to think in depth about something.',
+    'I enjoy learning about subjects that are unfamiliar to me.',
+    'I find it fascinating to learn new information.',
+    'Thinking about solutions to difficult conceptual problems can keep me awake at night.',
+    'I can spend hours on a single problem because I just can\'t rest without knowing the answer.',
+    'I feel frustrated if I can\'t figure out the solution to a problem, so I work even harder to solve it.',
+    'I work relentlessly at problems that I feel must be solved.',
+    'The smallest doubt can stop me from seeking out new experiences.',
+    'I cannot handle the stress that comes from entering uncertain situations.',
+    'I find it hard to explore new places when I lack confidence in my abilities.',
+    'It is difficult to concentrate when there is a possibility that I will be taken by surprise.',
+    'Risk-taking is exciting to me.',
+    'When I have free time, I want to do things that are a little scary.',
+    'Creating an adventure as I go is much more appealing than a planned adventure.',
+    'I prefer friends who are excitingly unpredictable.',
+    'I ask a lot of questions to figure out what interests other people.',
+    'When talking to someone who is excited, I am curious to find out why.',
+    'When talking to someone, I try to discover interesting details about them.',
+    'I like finding out why people behave the way they do.',
+    'When other people are having a conversation, I like to find out what it\'s about.',
+    'When around other people, I like listening to their conversations.',
+    'When people quarrel, I like to know what\'s going on.',
+    'I seek out information about the private lives of people in my life.'
+],
+[
+    'I find it hard to imitate the behavior of other people.',
+    'At parties and social gatherings, I do not attempt to do or say things that others will like.',
+    'I can only argue for ideas which I already believe.',
+    'I can make impromptu speeches even on topics about which I have almost no information.',
+    'I guess I put on a show to impress or entertain others.',
+    'I would probably make a good actor. ',
+    'In a group of people, I am rarely the center of attention.',
+    'In different situations and with different people, I often act like very different persons.',
+    'I am not particularly good at making other people like me.',
+    'I\'m not always the person I appear to be.',
+    'I would not change my opinions (or the way I do things) in order to please someone or win their favor.',
+    'I have considered being an entertainer.',
+    'I have never been good at games like charades or improvisational acting.',
+    'I have trouble changing my behavior to suit different people and different situations.',
+    'At a party I let others keep the jokes and stories going.',
+    'I feel a bit awkward in public and do not show up quite as well as I should.',
+    'I can look anyone in the eye and tell a lie with a straight face (if for a right end).',
+    'I may deceive people by being friendly when I really dislike them.'
+],
+[
+    'Extraverted, enthusiastic.',
+    'Critical, quarrelsome.',
+    'Dependable, self-disciplined.',
+    'Anxious, easily upset.',
+    'Open to new experiences, complex.',
+    'Reserved, quiet.',
+    'Sympathetic, warm.',
+    'Disorganized, careless.',
+    'Calm, emotionally stable.',
+    'Conventional, uncreative.'
+]
+], sliders: [{
     step: 1, min: 1, max: 4, value: 0,
     ticks: [1, 2, 3, 4],
     ticks_labels: ['Never',
@@ -109,13 +122,30 @@ var likert_questions = {questions:[  // page 3
                    'Sometimes',
                    'Often'],
 }, {
-    step: 1, min: 1, max: 5, value: 0,
-    ticks: [1, 2, 3, 4, 5],
-    ticks_labels: ['Strongly disagree',
-                   'Disagree',
+    step: 1, min: 1, max: 7, value: 0,
+    ticks: [1, 2, 3, 4, 5, 6, 7],
+    ticks_labels: ['Does not describe me at all',
+                   'Barely describes me',
+                   'Somewhat describes me',
                    'Neutral',
-                   'Agree',
-                   'Strongly agree'],
+                   'Generally describes me',
+                   'Mostly describes me',
+                   'Completely describes me'],
+}, {
+    step: 1, min: 1, max: 2, value: 0,
+    ticks: [1, 2],
+    ticks_labels: ['True',
+                   'False'],
+}, {
+    step: 1, min: 1, max: 7, value: 0,
+    ticks: [1, 2, 3, 4, 5, 6, 7],
+    ticks_labels: ['Disagree strongly',
+                   'Disagree moderately',
+                   'Disagree a little',
+                   'Neither agree or disagree',
+                   'Agree a little',
+                   'Agree moderately',
+                   'Agree strongly'],
 }]};
 var payment_question = {questions: ['Thank you for completing the survey! How would you like to be paid?']};
 var question_texts = [{}, roster_questions, tie_strength_questions, likert_questions, {}, payment_question];

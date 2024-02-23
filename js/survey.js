@@ -97,7 +97,6 @@ jQuery(document).ready(function() {
         let prog = user_data.progress.split('.');
         page_i = parseInt(prog[0]);
         question_i = parseInt(prog[1]);
-        console.log(page_i, question_i);
         skip_check = true;
         if (page_i == 0 || page_i > 2) {
             $('#btn-next').click();
@@ -122,10 +121,14 @@ jQuery(document).ready(function() {
         for (let q_i in roster_data) {
             push_names(roster_data[q_i]['names_in_dorm'], roster_data[q_i]['names_outside']);
         }
-        console.log(page_i, question_i);
+        if (page_i == ROSTER_PAGE && question_i == roster_questions.length - 1) {
+            question_i -= 1;  // go back to show the last roster question in case it hasn't been answered
+        }
         $('#btn-next').click();
-        console.log(page_i, question_i);
         $('#p' + page_i).show();
+        if (page_i == 2 || page_i == 3) {
+            $('.slide').slider('refresh');
+        }
     }
     window.get_user_progress(load_progress);
 
@@ -145,7 +148,6 @@ jQuery(document).ready(function() {
     // ----- ROSTER QUESTIONS -----
     function check_duplicate(name1, name2) {
         let dist = window.levenshtein(name1, name2);
-        console.log('dist', name1, name2, dist);
         if ((dist <= 1) || (dist / name1.length < 0.25)) {
             return true;
         }
@@ -178,7 +180,6 @@ jQuery(document).ready(function() {
         let fields = ['#dorm-names', '#outsider-names'];  // TODO use an aggregated list rather than just the list from the current page
         for (let i in fields) {
             let field = $(fields[i]);
-            console.log(i, field.val().trim());
             if (tag == name_to_title_case(field.val())) {
                 // test if using valid characters
                 if (! /^[a-zA-Z-]+\s+[a-zA-Z-'\s]*[a-zA-Z-]+$/.test(tag)) {
@@ -189,7 +190,6 @@ jQuery(document).ready(function() {
                 // test if repeating names on the same page
                 let repeat_this_field = field.tagsManager('tags').indexOf(tag);
                 let repeat_other_field = $(fields[1 - i]).tagsManager('tags').indexOf(tag);
-                console.log(tag, field.tagsManager('tags'), repeat_this_field, $(fields[1 - i]).tagsManager('tags'), repeat_other_field);
                 let blink = false;
                 let rep = false;
                 if (repeat_this_field > -1) {
@@ -199,12 +199,10 @@ jQuery(document).ready(function() {
                 } else {
                     // test for similar names on the same page
                     rep = check_duplicate_against_list(tag, field.tagsManager('tags'));
-                    console.log('1xx', rep, field.tagsManager('tags'));
                     if (rep) {
                         blink = $(fields[i] + '-container' + ' .tm-tag')[field.tagsManager('tags').indexOf(rep)];
                     } else {
                         rep = check_duplicate_against_list(tag, $(fields[1 - i]).tagsManager('tags'));
-                        console.log('2xx', rep, $(fields[1 - i]).tagsManager('tags'));
                         if (rep) {
                             blink = $(fields[1 - i] + '-container' + ' .tm-tag')[$(fields[1 - i]).tagsManager('tags').indexOf(rep)];
                         }
@@ -221,17 +219,20 @@ jQuery(document).ready(function() {
                         .animate({ backgroundColor: '#ffc107' }, 100);
                 }
                 // test if repeating saved names
+                let msg_where = '';
                 if (!rep) {
                     rep = check_duplicate_against_exist_names(tag, [['in_dorm', 'outside'][i]], true);   // forbid similar names in the same field
+                    msg_where = rep ? ['in', 'outside'][i] : '';
                 }
                 if (!rep) {
                     rep = check_duplicate_against_exist_names(tag, [['in_dorm', 'outside'][1 - i]], false);  // forbid repeating or similar names in the other
+                    msg_where = rep ? ['in', 'outside'][1 - i] : '';
                 }
                 if (rep) {
-                    console.log('invalid!!!');
-                    field.get(0).setCustomValidity('You have already entered this name or a similar name: ' + rep +
-                        '. If you are entering different people with the same name, please add a descriptive term (e.g., Daniel Kim artist).');
+                    field.get(0).setCustomValidity('You have already entered this name or a similar name (' + rep + ') ' + msg_where +
+                        ' your wing of Hedrick. If you are entering different people with the same name, please add a descriptive term (e.g., Daniel Kim artist).');
                     field.get(0).reportValidity();
+                    valid = false;
                 }
                 if (valid) {
                     field.get(0).setCustomValidity('');
@@ -278,10 +279,6 @@ jQuery(document).ready(function() {
         let name = $('#outsider-names').val();
         $('#outsider-names').tagsManager('pushTag', name);
     });
-    // $(".tm-input").on('tm:pushed', function(e, tag) {
-    //     $(e.target).tagsManager('popTag');
-    //     $(e.target).tagsManager('pushTag', name_to_title_case(tag));
-    // });
 
     // set up instructions to include wing
     // $('#dorm-name-instr').html($('#dorm-name-instr').html().replace('Hall</strong>', 'Hall</strong> 2' + dorm_wing[0].toUpperCase())); // TODO: 2
@@ -392,7 +389,7 @@ jQuery(document).ready(function() {
             rotation = (body_width < 500) ? (150 - body_width / 4): rotation;
             rotation = (rotation < 9) ? 9 : rotation;
         } else if (num_labels == 5) {
-            rotation = 32 - body_width / 30;
+            rotation = 45 - body_width / 30;
             rotation = (body_width < 480) ? (144 - body_width * 4 / 15) : rotation;
         } else {
             rotation = 54 - body_width / 10;
@@ -431,18 +428,18 @@ jQuery(document).ready(function() {
         slider_times.push(-1);
     }
 
-    function append_sliders(div, questions, slider_config, orient) {
+    function append_sliders(div, questions, slider_config, orient='horizontal') {
         // reset
         $(div).empty();
         slider_clicks = [];
         slider_times = [];
 
         let slider_i = -1;
-        for (let question in questions) { // TODO wtf
+        for (let question of questions) {
             slider_i++;
             $(div).append($('<div>', {
                 id: 'q-text' + slider_i,
-                class: "question-text slider-q-text",
+                class: "slider-" + page_i.toString(),
                 html: question
             }));
             $(div).append($('<div>', {
@@ -456,24 +453,22 @@ jQuery(document).ready(function() {
                 'data-slider-orientation': orient
             })));
             create_slider('#slider' + slider_i, '#slider-wrapper' + slider_i,
-                          slider_config, orient)
+                          slider_config, orient);
         }
+        $('.slide').slider('refresh');
     }
 
-    function tie_strength_prepare(names) {
-        // TODO shuffle names? add appendix to names?
+    function tie_strength_prepare(index) {
+        let tie_names = [...all_names['in_dorm'], ...all_names['outside']];
+        shuffle(tie_names);
         // append questions to DOM
-        for (let i = 0; i < names.length; i++) {
-            $('#p3 .question-text').html(names[i]);
-            append_sliders('#p3-questions', names, tie_strength_slider_configs[i])
-        }
+        append_sliders('#p2-questions', tie_names, tie_strength_slider_configs[index]);
     }
 
     // data & reset
     function tie_strength_onfinish() {
-        // let invalid = false;
         // save data
-        $('.slider-q-text').each((q_i, elt) => {
+        $('.slider-2').each((name_i, elt) => {
             let question = $(elt).get(0).textContent;
             let i = -1;
             if ($(elt).attr('id')) {
@@ -483,57 +478,16 @@ jQuery(document).ready(function() {
             }
             let response = $('#slider' + i).val();
             let resp_txt = $('#slider-wrapper' + i + ' .label-is-selection').text();
-            let person = $(elt).html();//.match(/(""\>.+\<\/sp|ng\>.+\<\/st)/g)[0].split('>')[1].split('<')[0];
 
-            // check other freq is answered
-            // let input = $('#' + $(elt).attr('id') + ' input');
-            // let specification = '';
-            // if (input.length > 0 && input.val().length > 0) {  // check slider
-            //     let index = $(elt).attr('id').substring(6);
-            //     if (slider_clicks[index] % 10 == 0) {  // unselected slider
-            //         input.get(0).setCustomValidity('Please select a freqency below');
-            //         input.get(0).reportValidity();
-            //         invalid = true;
-            //         return false;
-            //     } else {
-            //         specification = input.val();
-            //     }
-            // }
-
-            let data = {
+            let data = {[name_i]: {
                 question: question,
                 response: response,
                 response_text: resp_txt,
                 timestamp: slider_times[i]
-            }
-            // if (specification.length > 0) {
-            //     data['specification'] = specification;
-            // }
+            }}
             window.save2firebase(data, page_i, question_i);
         });
         // if (invalid) { return false; }
-
-        // next question
-        // if (!next_q) {
-        //     $('#p3-questions').empty();
-        //     slider_clicks = [];
-        //     slider_times = [];
-        //     return true;
-        // }
-        // // reset slider value and color
-        // $('.slide').val(1);
-        // $('.slide').slider('refresh');
-        // $('.label-is-selection').css('font-weight', '400');
-        // $('.slider-handle').css('background-image',
-        //                         'linear-gradient(to bottom,#ccc 0,#eee 100%)');
-        // // reset clicks
-        // for (let i in slider_clicks) {
-        //     slider_clicks[i] -= slider_clicks[i] % 10;
-        // }
-        // // put up new questions
-        // $('.slider-q-text').each((i, elt) => {
-        //     $(elt).html(next_q[i]);
-        // });
         return true;
     }
 
@@ -541,30 +495,29 @@ jQuery(document).ready(function() {
     // ----- LIKERT QUESTIONS -----
 
     function likert_prepare(question_i) {
-        $('#p5 .question-text').html(likert_questions.questions[question_i]);
+        $('#p3 .question-text').html(likert_questions.questions[question_i]);
         // reset
         slider_clicks = [];
         slider_times = [];
         // append
-        for (let i = 0; i < likert_questions.slider_texts.length; i++) {
-            append_sliders('#p3-questions', likert_questions.slider_texts[i], likert_questions.sliders[i])
-        }
+        // for (let i = 0; i < likert_questions.slider_texts.length; i++) {
+        append_sliders('#p3-questions', likert_questions.slider_texts[question_i], likert_questions.sliders[question_i])
     }
 
     function likert_onfinish() {
         // save data
-        $('.slider-q-text').each((q_i, elt) => {
+        $('.slider-3').each((q_i, elt) => {
             let question = $(elt).get(0).textContent;
             let i = $(elt).attr('id').substring(6);
             let response = $('#slider' + i).val();
             let resp_txt = $('#slider-wrapper' + i + ' .label-is-selection').text();
 
-            let data = {
+            let data = {[q_i]: {
                 question: question,
                 response: response,
                 response_text: resp_txt,
                 timestamp: slider_times[i]
-            }
+            }};
             window.save2firebase(data, page_i, question_i);
         });
 
@@ -641,7 +594,7 @@ jQuery(document).ready(function() {
     var onfinish_funcs = [nickname_onfinish, roster_onfinish, tie_strength_onfinish,
                           likert_onfinish, demographic_onfinish, payment_onfinish];
 
-    function add_data() {  // TODO TEST
+    function add_data() {
         // show previous data
         roster_data[question_i].names_in_dorm.forEach(
             (tag) => $('#dorm-names').tagsManager('pushTag', tag)
@@ -659,7 +612,6 @@ jQuery(document).ready(function() {
             return;
         }
 
-        console.log('prev btn', page_i, question_i);
         // save current data
         let result = onfinish_funcs[page_i](question_i);
         if (!result) { // TODO validate or not? maybe no?
@@ -679,7 +631,6 @@ jQuery(document).ready(function() {
         $('.invalid').hide();
         normal_next_btn();
         $('#no-prev').hide();
-        console.log('prev btn', page_i, question_i);
     });
 
     // NEXT BUTTON
@@ -691,7 +642,6 @@ jQuery(document).ready(function() {
     }
 
     $('#btn-next').on('click', (e) => {
-        console.log('next btn', page_i, question_i);
         if (!skip_check) {
             if (page_i == ROSTER_PAGE && !check_entered_text()) {
                 return;  // entered text but didn't add for naming question
@@ -714,7 +664,6 @@ jQuery(document).ready(function() {
             }
             // submit data
             let result = onfinish_funcs[page_i]();
-            console.log(page_i, question_texts[page_i][question_i], result)
             if (!result) {
                 return;
             }
@@ -723,7 +672,6 @@ jQuery(document).ready(function() {
         window.scrollTo(0, 0);
         // proceed
         if (question_i < question_texts[page_i].length - 1) {
-            // console.log('next 1', page_i, question_i);
             // next question of the same type
             ++question_i;
             $('.question-text').html(question_texts[page_i][question_i]);
@@ -734,17 +682,17 @@ jQuery(document).ready(function() {
             }
 
             // add data if there is any
-            console.log(page_i, question_i, roster_data.hasOwnProperty(question_i), roster_data);
             if (page_i == ROSTER_PAGE && roster_data.hasOwnProperty(question_i)) {
                 add_data();
             } else {
                 $('#btn-next').addClass('disabled');
             }
 
-            if (page_i == 3) {
-                likert_prepare(question_i)
-            }
-            if (page_i == 2 || page_i == 3) {
+            if (page_i == 2) {
+                tie_strength_prepare(question_i);
+                $('.slide').slider('refresh');
+            } else if (page_i == 3) {
+                likert_prepare(question_i);
                 $('.slide').slider('refresh');
             }
 
@@ -754,7 +702,6 @@ jQuery(document).ready(function() {
                                 { duration: 1000 });
             }
         } else {
-            // console.log('next 2', page_i, question_i);
             // next page, first question
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
@@ -766,7 +713,6 @@ jQuery(document).ready(function() {
                     push_names(roster_data[q_i].names_in_dorm,
                                roster_data[q_i].names_outside);
                 }
-                tie_strength_prepare(all_names);
                 // remove prev button
                 $('#btn-prev').hide();
                 $('#no-prev').hide();
@@ -792,44 +738,16 @@ jQuery(document).ready(function() {
             if (page_i == $('.page').length) {
                 return;  // DONE
             }
-            // if (page_i == NAME_GEN_PAGE && q_type == 'initial') {
-            //     page_i = NAME_GEN_PAGE - 1;
-            //     q_type = 'past_q';
-            //     $('.precovid-in-q').show();
-            //     $('#duringcovid-in-q').hide();
-            //     $('#instr-public').hide();
-            //     $('#btn-prev').hide();
-            //     $('#no-prev').hide();
-            // } else if (page_i == NAME_GEN_PAGE + 2) {  // last repetitive question
-            //     if (q_type == 'past_q') {
-            //         page_i = 1;  // restart from name gen 1
-            //         pair_i = 0;
-            //         q_type = 'current_q';  // change to current time
-            //         $('.precovid-in-q').hide();
-            //         $('#duringcovid-in-q').show();
-            //     } else if (q_type == 'current_q') {
-            //         q_type = 'questions'
-            //         ++page_i;
-            //     }
-            // }
-            // if (page_i == NAME_GEN_PAGE - 1) {
-            //     $('#btn-next').removeClass('disabled');
-            //     if (q_type == 'current_q' && $('.question-text').text().length > 0 && show_covid_residency) {
-            //         page_i = 1;  // stay on the page to show more questions
-            //     }
-            // }
-            // if (page_i == 5) {
-            //     $('#p3-reminder').hide();
-            //     append_p5_slider_qs(0);
-            // }
-            if (page_i == 3) {
-                likert_prepare(question_i)
-                $('.slide').slider('refresh');
+            if (page_i == 2) {
+                tie_strength_prepare(question_i);
+            } else if (page_i == 3) {
+                likert_prepare(question_i);
             }
             if (question_texts[page_i].length > 0) {
                 $('.question-text').html(question_texts[page_i][question_i]);
             }
             $('#p' + page_i).show();
+            $('.slide').slider('refresh');
         }
         // hide warning
         $('.invalid').hide();
