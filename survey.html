@@ -85,21 +85,98 @@
 
         <!-- demographic -->
         <div id="p4" class="page central">
-            <div class="form-group">
-                <label class="demo-q" for="major">What is (or will likely be) your major?</label>
-                <input id="major" class="form-control" placeholder="Enter major" required>
-            </div>
-            <div class="form-group">
-                <label class="demo-q" for="zipcode">What was your home zipcode before moving to UCLA? If it's outside the US, please also indicate the country you moved here from.</label>
-                <div id="international-zip" class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="international-check">
-                    <label class="custom-control-label" for="international-check">Check this box if you moved from outside the US</label>
+            <form id="demographic">
+                <div class="form-group">
+                    <label class="demo-q" for="age">What is your age?</label>
+                    <input id="age" class="form-control" placeholder="Enter age" type="number" required>
                 </div>
-                <div class="row">
-                    <div class="col-6"><input id="zipcode" class="form-control" placeholder="Zipcode/postal code" required></div>
-                    <div class="col-6"><input id="country" class="form-control" placeholder="Your country"></div>
+                <div class="form-group">
+                    <label class="demo-q" for="year">What year are you?</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="year" value="1" required>
+                            <label class="form-check-label">Freshman</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="year" value="2">
+                            <label class="form-check-label">Sophomore</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="year" value="3">
+                            <label class="form-check-label">Junior</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="year" value="4">
+                            <label class="form-check-label">Senior</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="year" value="other" id="other-year-check">
+                            <label class="form-check-label">Other</label>
+                            <input id="other-year" class="form-control" placeholder="Please specify" style="margin: 0 5px;">
+                        </div>
                 </div>
-            </div>
+                <div class="form-group">
+                    <label class="demo-q" for="gender">What gender do you identify with?</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" value="male" required>
+                        <label class="form-check-label">Male</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" value="female">
+                        <label class="form-check-label">Female</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" value="other">
+                        <label class="form-check-label">Other</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" value="no_answer">
+                        <label class="form-check-label">Prefer not to answer</label>
+                    </div>
+                </div>
+                <div class="form-group" id="race-group">
+                    <label class="demo-q" for="race">What race(s) do you consider yourself to be?</label>
+                    <div class="form-check">
+                        <input id="race" class="form-check-input" type="checkbox" name="race" value="white">
+                        <label class="form-check-label">White/Caucasian</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="race" value="hispanic">
+                        <label class="form-check-label">Hispanic/Latino</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="race" value="black">
+                        <label class="form-check-label">Black/African American</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="race" value="asian">
+                        <label class="form-check-label">Asian</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="race" value="native">
+                        <label class="form-check-label">American Indian or Alaskan Native</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="race" value="other" id="other-race-check">
+                        <label class="form-check-label">Other</label>
+                        <input id="other-race" class="form-control" placeholder="Please specify" style="margin: 0 5px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="demo-q" for="major">What is (or will likely be) your major?</label>
+                    <input id="major" class="form-control" placeholder="Enter major" required>
+                </div>
+                <div class="form-group">
+                    <label class="demo-q" for="zipcode">What was your home zipcode before moving to UCLA? If it's outside the US, please also indicate the country you moved here from.</label>
+                    <div id="international-zip" class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="international-check">
+                        <label class="custom-control-label" for="international-check">Check this box if you moved from outside the US</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-6"><input id="zipcode" class="form-control" placeholder="Zipcode/postal code" required></div>
+                        <div class="col-6"><input id="country" class="form-control" placeholder="Your country"></div>
+                    </div>
+                </div>
+            </form>
         </div>
 
         <!-- payment -->

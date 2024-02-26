@@ -526,7 +526,6 @@ jQuery(document).ready(function() {
 
 
     // ----- DEMOGRAPHIC QUESTIONS -----
-    // TODO
     $('#country').hide();
 
     // set up checkbox for international zipcode
@@ -556,12 +555,43 @@ jQuery(document).ready(function() {
         }
     });
 
+    $('input[type=radio][name=year]').change(() => {
+        if ($('#other-year-check').is(':checked')) {
+            $('#other-year').attr('required', true);
+        } else {
+            $('#other-year').attr('required', false);
+        }
+    });
+
+    $('#other-race-check').change(() => {
+        if ($('#other-race-check').is(':checked')) {
+            $('#other-race').attr('required', true);
+        } else {
+            $('#other-race').attr('required', false);
+        }
+    });
+
+    $('#race').get(0).setCustomValidity('Please select at least one');
+    $('input[type=checkbox][name=race]').change(() => {
+        if ($('#race-group :checkbox:checked').length > 0) {
+            $('#race').get(0).setCustomValidity('');
+        } else {
+            $('#race').get(0).setCustomValidity('Please select at least one');
+        }
+    });
+
     function demographic_onfinish() {
         if (! $('#demographic').get(0).reportValidity()) {
             return false;
         }
 
         let data = {
+            age: $('#age').val(),
+            year: $('input[name=year]:checked').val(),
+            year_other: $('#other-year').val(),
+            gender: $('input[name=gender]:checked').val(),
+            race: $('input[name=race]:checked').toArray().map(x =>x.value),
+            race_other: $('#other-race').val(),
             major: $('#major').val(),
             zipcode: $('#zipcode').val(),
             country: $('#international-check').is(':checked') ? $('#country').val() : 'US',
@@ -742,6 +772,8 @@ jQuery(document).ready(function() {
                 tie_strength_prepare(question_i);
             } else if (page_i == 3) {
                 likert_prepare(question_i);
+            } else if (page_i == 4) {
+                $('#btn-next').removeClass('disabled');
             }
             if (question_texts[page_i].length > 0) {
                 $('.question-text').html(question_texts[page_i][question_i]);
