@@ -12,7 +12,7 @@ jQuery(document).ready(function() {
     window.page_i = page_i;
     window.question_i = question_i;
     var roster_data = {};
-    var all_names = {in_dorm: new Set(['abcd enm', 'ajsb eokm', 'as mc']), outside: new Set([])};
+    var all_names = {in_dorm: new Set(), outside: new Set([])};
     var skip_check = false;
 
     // prevent closing window
@@ -40,50 +40,7 @@ jQuery(document).ready(function() {
     // PROGRESS BAR
     var prog_bar = new ProgressBar.Line('#prog-bar', { color: '#ffc107' });
 
-    // ----- TODO below -----
-
-    // LOAD PREVIOUS PROGRESS
-
-    // function setup_curr_names(exclude=[]) {
-    //     // remove names that are also in the past
-    //     let intersection = new Set([...all_named_people['current_q']]
-    //                        .filter(x => all_named_people['past_q'].has(x)));
-    //     all_named_people['current_q'] = new Set([...all_named_people['current_q']]
-    //                                     .filter(x => !intersection.has(x)));
-    //     // exclude
-    //     if (exclude.size && exclude.size > 0) {
-    //         intersection = new Set([...intersection].filter(x => !exclude.has(x)));
-    //     }
-    //     // put intersection at the beginning of attitude questions
-    //     let person_q_later = [];
-    //     let person_slider_q_later = [];
-    //     let person_slider_later = [];
-    //     for (let name of intersection) {
-    //         person_q_later.push('<small id="name-note" class="form-text text-muted">' +
-    //                             $('#name-note').html() + '</small>');
-    //         person_slider_later.push([{}, freq_slider2, freq_slider2, freq_slider2, freq_slider2,
-    //                                   {}, freq_slider2, freq_slider2, freq_slider2, freq_slider2]);
-    //         let person_slider_q = [];
-    //         for (let q of person_questions.followup) {
-    //             person_slider_q.push(q.replace('*', name));
-    //         }
-    //         person_slider_q_later.push(person_slider_q);
-    //     }
-    //     attitude_questions.questions = person_q_later.concat(attitude_questions.questions);
-    //     attitude_questions.slider_qs = person_slider_q_later.concat(attitude_questions.slider_qs);
-    //     attitude_questions.sliders = person_slider_later.concat(attitude_questions.sliders);
-    // }
-
     function push_names(names_in_dorm, names_outside) {
-        // let dorm_names = [];
-        // let outside_names = [];
-        // names_in_dorm.forEach(
-        //     (tag) => dorm_names.push(tag + ' (2' + dorm_wing[0].toUpperCase() + ')')  // TODO 2
-        // );
-        // names_outside.forEach(
-        //     (tag) => outside_names.push(tag + ' (non-2' + dorm_wing[0].toUpperCase() + ')')  // TODO 2
-        // );
-        // append to set
         all_names.in_dorm = new Set([...names_in_dorm, ...all_names.in_dorm]);
         all_names.outside = new Set([...names_outside, ...all_names.outside])
     }

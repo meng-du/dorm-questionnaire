@@ -253,7 +253,7 @@
             async function increase_completion_count() {
                 await updateDoc(doc(db, DB_TYPE + 'count', 'count'), {
                     count: FieldValue.increment(1)
-                })
+                });
             }
 
             // retrieve and load previous user progress
