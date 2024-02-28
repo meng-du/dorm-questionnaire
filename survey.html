@@ -91,7 +91,7 @@
                     <input id="age" class="form-control" placeholder="Enter age" type="number" required>
                 </div>
                 <div class="form-group">
-                    <label class="demo-q" for="year">What year are you?</label>
+                    <label class="demo-q" for="year">What year are you?</label> <br>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="year" value="1" required>
                             <label class="form-check-label">Freshman</label>
@@ -115,7 +115,7 @@
                         </div>
                 </div>
                 <div class="form-group">
-                    <label class="demo-q" for="gender">What gender do you identify with?</label>
+                    <label class="demo-q" for="gender">What gender do you identify with?</label> <br>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="gender" value="male" required>
                         <label class="form-check-label">Male</label>
@@ -216,12 +216,20 @@
 
         <!-- Firebase -->
         <script type="module">
+            // initialize user response id
+            var parameters = window.location.search.substring(1).split(/[&=]/);
+            var user_id = parameters[1];
+            var timestamp = parameters[3];
+            if (!user_id || user_id.length != 64) {
+                alert('This URL is invalid. Please contact the experimenters.');
+                $('body').hide();
+            }
+
             var DB_TYPE = 'test_';  // 'test_' or 'prod_'
 
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
             import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js';
-            import { getFirestore, doc, getDoc, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js';
-            // import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-analytics.js";
+            import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js';
 
             const firebaseConfig = {
                 apiKey: "AIzaSyAmOb9FOQh-gSwgNknNBIU9kCbtMDlFyEM",
@@ -252,7 +260,7 @@
             // +1 to # of completions
             async function increase_completion_count() {
                 await updateDoc(doc(db, DB_TYPE + 'count', 'count'), {
-                    count: FieldValue.increment(1)
+                    count: increment(1)
                 });
             }
 
@@ -290,7 +298,7 @@
                         increase_completion_count();
                         // show end page
                         window.hookWindow = false;
-                        window.location.replace('progress.html?completed=' + user_id);
+                        window.location.replace('progress.html?l=' + parameters[5]);
                     }
                 } catch (e) {
                     alert('Failed to save your data. Please check your internet connection and try again.\n' +
@@ -302,21 +310,10 @@
             // global functions
             window.get_user_progress = get_user_progress;
             window.save2firebase = save2firebase;
-
-            // initialize user response id
-            var parameters = window.location.search.substring(1).split(/[&=]/);
-            var user_id = parameters[1];
-            var timestamp = parameters[3];
-            if (!user_id || user_id.length != 64) {
-                alert('This URL is invalid. Please contact the experimenters.');
-                $('body').hide();
-            }
-
         </script>
 
         <!-- other JavaScript -->
         <script type="text/javascript" src="js/questions.js"></script>
-        <!-- <script type="text/javascript" src="js/user.js"></script> -->
         <script type="text/javascript" src="js/levenshtein.js"></script>
         <script type="text/javascript" src="js/survey.js"></script>
     </body>

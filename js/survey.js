@@ -35,7 +35,9 @@ jQuery(document).ready(function() {
 
     // PARSE PARAMETERS
     var parameters = window.location.search.substring(1).split(/[&=]/);
-    // var dorm_wing = parameters[5];
+    var likert_length = parseInt(parameters[5]);
+    likert_questions = likert_questions.slice(0, likert_length);
+    question_texts[3] = likert_questions;
 
     // PROGRESS BAR
     var prog_bar = new ProgressBar.Line('#prog-bar', { color: '#ffc107' });
@@ -57,6 +59,10 @@ jQuery(document).ready(function() {
         skip_check = true;
         if (page_i == 0 || page_i > 2) {
             $('#btn-next').click();
+            $('#p' + page_i).show();
+            if (page_i == 3) {
+                $('.slide').slider('refresh');
+            }
             return;
         }
         // load roster data for page 1 or 2
@@ -83,7 +89,7 @@ jQuery(document).ready(function() {
         }
         $('#btn-next').click();
         $('#p' + page_i).show();
-        if (page_i == 2 || page_i == 3) {
+        if (page_i == 2) {
             $('.slide').slider('refresh');
         }
     }
@@ -121,6 +127,7 @@ jQuery(document).ready(function() {
     function check_duplicate_against_exist_names(name, types=['in_dorm', 'outside'], allow_repeat=false) {
         for (let type of types) {
             for (let n of all_names[type]) {
+                console.log(n);
                 if (allow_repeat && name == n) {
                     continue;
                 } else if (check_duplicate(name, n)) {
@@ -183,6 +190,7 @@ jQuery(document).ready(function() {
                 }
                 if (!rep) {
                     rep = check_duplicate_against_exist_names(tag, [['in_dorm', 'outside'][1 - i]], false);  // forbid repeating or similar names in the other
+                    console.log(rep);
                     msg_where = rep ? ['in', 'outside'][1 - i] : '';
                 }
                 if (rep) {
@@ -237,9 +245,18 @@ jQuery(document).ready(function() {
         $('#outsider-names').tagsManager('pushTag', name);
     });
 
-    // set up instructions to include wing
-    // $('#dorm-name-instr').html($('#dorm-name-instr').html().replace('Hall</strong>', 'Hall</strong> 2' + dorm_wing[0].toUpperCase())); // TODO: 2
-    // $('#name-note').html($('#name-note').html().replace(/2</g, '2' + dorm_wing[0].toUpperCase() + '<')); // TODO: 2
+    $('#dorm-names').on('tm:pushed',(e, tag) => {
+        all_names.in_dorm.add(tag);
+    });
+    $('#outsider-names').on('tm:pushed',(e, tag) => {
+        all_names.outside.add(tag);
+    });
+    $('#dorm-names').on('tm:spliced',(e, tag) => {
+        all_names.in_dorm.delete(tag);
+    });
+    $('#outsider-names').on('tm:spliced',(e, tag) => {
+        all_names.outside.delete(tag);
+    });
 
     // enable/disable next button
     function tag_onchange(e, tag) {
@@ -444,7 +461,6 @@ jQuery(document).ready(function() {
             }}
             window.save2firebase(data, page_i, question_i);
         });
-        // if (invalid) { return false; }
         return true;
     }
 
@@ -452,13 +468,12 @@ jQuery(document).ready(function() {
     // ----- LIKERT QUESTIONS -----
 
     function likert_prepare(question_i) {
-        $('#p3 .question-text').html(likert_questions.questions[question_i]);
+        $('#p3 .question-text').html(likert_questions[question_i]);
         // reset
         slider_clicks = [];
         slider_times = [];
         // append
-        // for (let i = 0; i < likert_questions.slider_texts.length; i++) {
-        append_sliders('#p3-questions', likert_questions.slider_texts[question_i], likert_questions.sliders[question_i])
+        append_sliders('#p3-questions', likert_sliders.texts[question_i], likert_sliders.sliders[question_i])
     }
 
     function likert_onfinish() {
@@ -695,11 +710,6 @@ jQuery(document).ready(function() {
             // prepare subsequent questions
             if (page_i == ROSTER_PAGE) {
                 prog_bar.animate(prog_bar.value() + 0.05, { duration: 1000 });  // TODO
-                // get all named people
-                for (let q_i = 0; q_i < roster_questions.length; q_i++) {
-                    push_names(roster_data[q_i].names_in_dorm,
-                               roster_data[q_i].names_outside);
-                }
                 // remove prev button
                 $('#btn-prev').hide();
                 $('#no-prev').hide();
@@ -724,6 +734,9 @@ jQuery(document).ready(function() {
             question_i = 0;
             if (page_i == $('.page').length) {
                 return;  // DONE
+            }
+            if (page_i == 2 && all_names.in_dorm.size == 0 && all_names.outside.size == 0) {
+                page_i = 3;
             }
             if (page_i == 2) {
                 tie_strength_prepare(question_i);

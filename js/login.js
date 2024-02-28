@@ -95,7 +95,7 @@
         if ($('#start').hasClass('disabled')) {
             return;
         }
-        window.location.replace('survey.html?user=' + user_id + '&timestamp=' + timestamp.valueOf().toString() + '&wing=' + dorm_wing);
+        window.location.replace('survey.html?user=' + user_id + '&timestamp=' + timestamp.valueOf().toString() + '&l=4');
     });
 
     timestamp = new Date();
