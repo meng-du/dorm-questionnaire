@@ -127,7 +127,6 @@ jQuery(document).ready(function() {
     function check_duplicate_against_exist_names(name, types=['in_dorm', 'outside'], allow_repeat=false) {
         for (let type of types) {
             for (let n of all_names[type]) {
-                console.log(n);
                 if (allow_repeat && name == n) {
                     continue;
                 } else if (check_duplicate(name, n)) {
@@ -141,7 +140,7 @@ jQuery(document).ready(function() {
     // validator
     function validate_name(tag) {
         let valid = true;
-        let fields = ['#dorm-names', '#outsider-names'];  // TODO use an aggregated list rather than just the list from the current page
+        let fields = ['#dorm-names', '#outsider-names'];
         for (let i in fields) {
             let field = $(fields[i]);
             if (tag == name_to_title_case(field.val())) {
@@ -190,7 +189,6 @@ jQuery(document).ready(function() {
                 }
                 if (!rep) {
                     rep = check_duplicate_against_exist_names(tag, [['in_dorm', 'outside'][1 - i]], false);  // forbid repeating or similar names in the other
-                    console.log(rep);
                     msg_where = rep ? ['in', 'outside'][1 - i] : '';
                 }
                 if (rep) {
@@ -616,7 +614,7 @@ jQuery(document).ready(function() {
 
         // save current data
         let result = onfinish_funcs[page_i](question_i);
-        if (!result) { // TODO validate or not? maybe no?
+        if (!result) {
             return;
         }
 
@@ -624,6 +622,9 @@ jQuery(document).ready(function() {
         --question_i;
         $('.question-text').html(question_texts[page_i][question_i]);
         add_data();
+
+        prog_bar.animate(prog_bar.value() - 0.3 / question_texts[page_i].length,
+                        { duration: 1000 });
 
         // first question
         if (page_i == ROSTER_PAGE && question_i < 1) {
@@ -697,36 +698,19 @@ jQuery(document).ready(function() {
                 likert_prepare(question_i);
                 $('.slide').slider('refresh');
             }
-
-            if (page_i > 1) {
-                let percent = page_i == 4 ? 0.1 : 0.2;  // TODO ??
-                prog_bar.animate(prog_bar.value() + percent / question_texts[page_i].length,
-                                { duration: 1000 });
-            }
+            
+            let percent = page_i == 2 ? 0.2 : 0.3;
+            prog_bar.animate(prog_bar.value() + percent / question_texts[page_i].length,
+                            { duration: 1000 });
         } else {
             // next page, first question
             $('#btn-next').addClass('disabled');
             $('#p' + page_i).hide();
             // prepare subsequent questions
             if (page_i == ROSTER_PAGE) {
-                prog_bar.animate(prog_bar.value() + 0.05, { duration: 1000 });  // TODO
                 // remove prev button
                 $('#btn-prev').hide();
                 $('#no-prev').hide();
-            }
-            // progress bar TODO
-            let percent;
-            // switch (page_i) {
-            //     case 0: percent = q_type == 'initial'? 0.05 : prog_bar.value(); break;
-            //     case 1: percent = q_type == 'current_q'? 0.55 : prog_bar.value(); break;
-            //     case 2: percent = q_type == 'initial'? 0.15 : prog_bar.value(); break;
-            //     case 3: percent = q_type == 'past_q' ? 0.4 : 0.8; break;
-            //     case 4: percent = 0.5; break;
-            //     case 5: percent = 1; break;
-            //     default: percent = prog_bar.value(); break;
-            // }
-            if (percent > prog_bar.value()) { // TODO   
-                prog_bar.animate(percent, { duration: 1000 });
             }
 
             // next page
@@ -738,6 +722,20 @@ jQuery(document).ready(function() {
             if (page_i == 2 && all_names.in_dorm.size == 0 && all_names.outside.size == 0) {
                 page_i = 3;
             }
+
+            // progress bar
+            let percent;
+            switch (page_i) {
+                case 1: percent = 0.05; break;
+                case 2: percent = 0.35; break;
+                case 3: percent = 0.55; break;
+                case 4: percent = 0.85; break;
+                case 5: percent = 0.95; break;
+                default: percent = prog_bar.value(); break;
+            }
+            prog_bar.animate(Math.max(prog_bar.value(), percent), { duration: 1000 });
+
+            // prepare next page
             if (page_i == 2) {
                 tie_strength_prepare(question_i);
             } else if (page_i == 3) {
