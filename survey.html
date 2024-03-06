@@ -220,6 +220,7 @@
             var parameters = window.location.search.substring(1).split(/[&=]/);
             var user_id = parameters[1];
             var timestamp = parameters[3];
+            var tally = parameters[7];
             if (!user_id || user_id.length != 64) {
                 alert('This URL is invalid. Please contact the experimenters.');
                 $('body').hide();
@@ -260,7 +261,7 @@
             // +1 to # of completions
             async function increase_completion_count() {
                 await updateDoc(doc(db, DB_TYPE + 'count', 'count'), {
-                    count: increment(1)
+                    [tally]: increment(1)
                 });
             }
 
@@ -298,7 +299,7 @@
                         await increase_completion_count();
                         // show end page
                         window.hookWindow = false;
-                        window.location.replace('progress.html?l=' + parameters[5]);
+                        window.location.replace('progress.html?l=' + parameters[5] + '&t=' + parameters[7]);
                     }
                 } catch (e) {
                     alert('Failed to save your data. Please check your internet connection and try again.\n' +

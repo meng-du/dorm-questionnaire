@@ -61,7 +61,7 @@ jQuery(document).ready(function() {
             $('#btn-next').click();
             $('#p' + page_i).show();
             if (page_i == 3) {
-                $('.slide').slider('refresh');
+                // $('.slide').slider('refresh');
             }
             return;
         }
@@ -90,7 +90,7 @@ jQuery(document).ready(function() {
         $('#btn-next').click();
         $('#p' + page_i).show();
         if (page_i == 2) {
-            $('.slide').slider('refresh');
+            // $('.slide').slider('refresh');
         }
     }
     window.get_user_progress(load_progress);
@@ -146,7 +146,7 @@ jQuery(document).ready(function() {
             if (tag == name_to_title_case(field.val())) {
                 // test if using valid characters
                 if (! /^[a-zA-Z-]+\s+[a-zA-Z-'\s]*[a-zA-Z-]+$/.test(tag)) {
-                    field.get(0).setCustomValidity('Please enter one name at a time with alphabets, spaces, hyphens and apostrophes only');
+                    field.get(0).setCustomValidity('Please enter first and last name, one name at a time, with alphabets, spaces, hyphens and apostrophes only');
                     field.get(0).reportValidity();
                     valid = false;
                 }
@@ -388,7 +388,7 @@ jQuery(document).ready(function() {
         } else {
             rotate_labels(wrapper, config['ticks'].length);
         }
-        $(elt).slider('refresh');
+        // $(elt).slider('refresh');
 
         // initialize to unselected css
         $('.label-is-selection').css('font-weight', '400');
@@ -427,7 +427,7 @@ jQuery(document).ready(function() {
             create_slider('#slider' + slider_i, '#slider-wrapper' + slider_i,
                           slider_config, orient);
         }
-        $('.slide').slider('refresh');
+        // $('.slide').slider('refresh');
     }
 
     function tie_strength_prepare(index) {
@@ -693,10 +693,10 @@ jQuery(document).ready(function() {
 
             if (page_i == 2) {
                 tie_strength_prepare(question_i);
-                $('.slide').slider('refresh');
+                // $('.slide').slider('refresh');
             } else if (page_i == 3) {
                 likert_prepare(question_i);
-                $('.slide').slider('refresh');
+                // $('.slide').slider('refresh');
             }
             
             let percent = page_i == 2 ? 0.2 : 0.3;
@@ -747,7 +747,7 @@ jQuery(document).ready(function() {
                 $('.question-text').html(question_texts[page_i][question_i]);
             }
             $('#p' + page_i).show();
-            $('.slide').slider('refresh');
+            // $('.slide').slider('refresh');
         }
         // hide warning
         $('.invalid').hide();

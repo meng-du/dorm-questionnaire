@@ -96,6 +96,7 @@
             });
 
             // retrieve # of completions
+            var tally = window.location.search.substring(1).split(/[&=]/)[3];
             var docSnap = null;
             try {
                 docSnap = await getDoc(doc(db, DB_TYPE + 'count', 'count'));
@@ -106,7 +107,7 @@
                 console.log(e);
             }
             if (docSnap && docSnap.exists()) {
-                let count = docSnap.data().count;
+                let count = docSnap.data()[tally];
                 let percent = Math.floor(count/194 * 100);  // TODO: change this number
                 $('#bar').css('width', percent + '%').attr('aria-valuenow', percent);
                 $('#bar').text(percent + '% of your wing have completed');
