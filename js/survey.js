@@ -57,41 +57,33 @@ jQuery(document).ready(function() {
         page_i = parseInt(prog[0]);
         question_i = parseInt(prog[1]);
         skip_check = true;
-        if (page_i == 0 || page_i > 2) {
-            $('#btn-next').click();
-            $('#p' + page_i).show();
-            if (page_i == 3) {
-                // $('.slide').slider('refresh');
-            }
-            return;
-        }
-        // load roster data for page 1 or 2
-        console.log(Object.keys(user_data).sort());  // TODO test
-        for (let t of Object.keys(user_data).sort()) { // sort so that new data overwrites old data
-            if (t.length < 13) {
-                continue;
-            }
-            for (let i = 0; i < roster_questions.length; i++) {
-                let key = '1.' + i.toString();
-                if (key in user_data[t]) {
-                    roster_data[i] = {
-                        names_in_dorm: user_data[t][key]['names_in_dorm'],
-                        names_outside: user_data[t][key]['names_outside']
-                    };
-                }
-            }
-        }
-        for (let q_i in roster_data) {
-            push_names(roster_data[q_i]['names_in_dorm'], roster_data[q_i]['names_outside']);
-        }
+        console.log('Loading', page_i, question_i);
         if (page_i == ROSTER_PAGE && question_i == roster_questions.length - 1) {
             question_i -= 1;  // go back to show the last roster question in case it hasn't been answered
         }
+        if (page_i == 1 || page_i == 2) {
+            // load roster data for page 1 or 2
+            console.log(Object.keys(user_data).sort());  // TODO test
+            for (let t of Object.keys(user_data).sort()) { // sort so that new data overwrites old data
+                if (t.length < 13) {
+                    continue;
+                }
+                for (let i = 0; i < roster_questions.length; i++) {
+                    let key = '1.' + i.toString();
+                    if (key in user_data[t]) {
+                        roster_data[i] = {
+                            names_in_dorm: user_data[t][key]['names_in_dorm'],
+                            names_outside: user_data[t][key]['names_outside']
+                        };
+                    }
+                }
+            }
+            for (let q_i in roster_data) {
+                push_names(roster_data[q_i]['names_in_dorm'], roster_data[q_i]['names_outside']);
+            }
+        }
         $('#btn-next').click();
         $('#p' + page_i).show();
-        if (page_i == 2) {
-            // $('.slide').slider('refresh');
-        }
     }
     window.get_user_progress(load_progress);
 
@@ -388,7 +380,6 @@ jQuery(document).ready(function() {
         } else {
             rotate_labels(wrapper, config['ticks'].length);
         }
-        // $(elt).slider('refresh');
 
         // initialize to unselected css
         $('.label-is-selection').css('font-weight', '400');
@@ -427,7 +418,6 @@ jQuery(document).ready(function() {
             create_slider('#slider' + slider_i, '#slider-wrapper' + slider_i,
                           slider_config, orient);
         }
-        // $('.slide').slider('refresh');
     }
 
     function tie_strength_prepare(index) {
@@ -467,10 +457,6 @@ jQuery(document).ready(function() {
 
     function likert_prepare(question_i) {
         $('#p3 .question-text').html(likert_questions[question_i]);
-        // reset
-        slider_clicks = [];
-        slider_times = [];
-        // append
         append_sliders('#p3-questions', likert_sliders.texts[question_i], likert_sliders.sliders[question_i])
     }
 
@@ -693,10 +679,8 @@ jQuery(document).ready(function() {
 
             if (page_i == 2) {
                 tie_strength_prepare(question_i);
-                // $('.slide').slider('refresh');
             } else if (page_i == 3) {
                 likert_prepare(question_i);
-                // $('.slide').slider('refresh');
             }
             
             let percent = page_i == 2 ? 0.2 : 0.3;
@@ -705,7 +689,7 @@ jQuery(document).ready(function() {
         } else {
             // next page, first question
             $('#btn-next').addClass('disabled');
-            $('#p' + page_i).hide();
+            $('#p' + page_i).empty();
             // prepare subsequent questions
             if (page_i == ROSTER_PAGE) {
                 // remove prev button
@@ -736,6 +720,7 @@ jQuery(document).ready(function() {
             prog_bar.animate(Math.max(prog_bar.value(), percent), { duration: 1000 });
 
             // prepare next page
+            $('#p' + page_i).show();
             if (page_i == 2) {
                 tie_strength_prepare(question_i);
             } else if (page_i == 3) {
@@ -746,8 +731,6 @@ jQuery(document).ready(function() {
             if (question_texts[page_i].length > 0) {
                 $('.question-text').html(question_texts[page_i][question_i]);
             }
-            $('#p' + page_i).show();
-            // $('.slide').slider('refresh');
         }
         // hide warning
         $('.invalid').hide();
