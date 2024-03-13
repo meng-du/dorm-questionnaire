@@ -221,9 +221,12 @@
             var user_id = parameters[1];
             var timestamp = parameters[3];
             var tally = parameters[7];
-            if (!user_id || user_id.length != 64) {
+            if (!user_id || user_id.length != 64 || !timestamp || timestamp.length != 13 || !tally || tally.length != 2) {
                 alert('This URL is invalid. Please contact the experimenters.');
                 $('body').hide();
+            }
+            if (parseInt(timestamp) == 0) {
+                timestamp = Date.now().toString();
             }
 
             var DB_TYPE = 'test_';  // 'test_' or 'prod_'
@@ -295,7 +298,12 @@
                     }
                     await setDoc(ref, save_data, { merge: true });
                     if (end) {
-                        await setDoc(ref, {end_time: Date.now()}, { merge: true });
+                        let end_time = Date.now();
+                        let pid = user_id.slice(0, 3) + end_time.toString().slice(3, 7);  // ID for other tasks
+                        await setDoc(ref, {
+                            end_time: end_time,
+                            participant_id: pid
+                        }, { merge: true });
                         await increase_completion_count();
                         // show end page
                         window.hookWindow = false;
@@ -308,6 +316,9 @@
                     console.log(e);
                 }
             }
+            setDoc(doc(db, DB_TYPE + 'data', user_id), {  // save the url where the survey can be continued
+                resume_url: window.location.href.replace(timestamp, '0000000000000')
+            }, { merge: true });
             // global functions
             window.get_user_progress = get_user_progress;
             window.save2firebase = save2firebase;

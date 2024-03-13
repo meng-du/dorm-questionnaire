@@ -625,7 +625,9 @@ jQuery(document).ready(function() {
     // NEXT BUTTON
 
     function normal_next_btn() {
-        $('#btn-next').text('Next');
+        if ($('#btn-next').text() != 'Finish') {
+            $('#btn-next').text('Next');
+        }
         $('#btn-next').removeClass('btn-warning');
         $('#btn-next').removeClass('btn-sm');
     }

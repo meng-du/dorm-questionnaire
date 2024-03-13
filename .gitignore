@@ -1,6 +1,6 @@
 .*
-js/user.js
 data/*.csv
-data/*.json
 *.pyc
-
+*.docx
+*.json
+gmail_auth.py
