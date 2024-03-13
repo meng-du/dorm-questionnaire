@@ -146,7 +146,7 @@ sliders: [{
                    'Agree moderately',
                    'Agree strongly'],
 }]};
-var payment_question = ['Thank you for completing the survey! How would you like to be paid?'];
+var payment_question = ['Thank you for completing the survey!'];
 var question_texts = [{}, roster_questions, tie_strength_questions, likert_questions, {}, payment_question];
 
 // constants
