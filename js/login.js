@@ -2,8 +2,7 @@
 
 (function () {
     var firstname, lastname, uid, dorm_room, dorm_wing, email, timestamp;
-    var user_id;
-    var survey_id = (Date.now() + Math.random()).toString();
+    var url;
 
     $('#instr').hide();
     $('#confirmation').hide();
@@ -31,18 +30,6 @@
         dorm_room = $('#dorm').val();
         dorm_wing = $('input[name="dorm-wing"]:checked').val();
 
-        // check dorm entry TODO
-        // if (dorm_room < 201 || (dorm_room > 238 && dorm_room < 252) || dorm_room > 287) {
-        //     // wrong dorm #
-        //     $('#dorm').addClass('is-invalid');
-        //     return;
-        // } else if ((dorm_room < 250 && dorm_wing == 'south') || (dorm_room > 250 && dorm_wing == 'north')) {
-        //     // mismatched dorm and wing
-        //     $('#dorm').addClass('is-invalid');
-        //     $('#dorm-wing-group input').addClass('is-invalid');
-        //     return;
-        // }
-
         firstname = $('#firstname').val();
         lastname = $('#lastname').val();
         uid = $('#uid').val();
@@ -65,9 +52,12 @@
     });
 
     $('#confirm-btn').click(() => {
-        user_id = CryptoJS.SHA256(dorm_room + uid).toString();
+        let user_id = CryptoJS.SHA256(dorm_room + uid).toString();
+        let ts = timestamp.valueOf().toString();
+        let param = window.location.search.substring(1).split(/[&=]/)[1];
+        url = 'user=' + user_id + '&timestamp=' + ts + '&l=' + param + '&t=' + dorm_room[0] + dorm_wing[0].toUpperCase();
 
-        window.save_user2firebase(user_id, timestamp.valueOf().toString(), {
+        window.save_user2firebase(user_id, ts, url.replace(ts, '0000000000000'), {
             firstname: firstname,
             lastname: lastname,
             uid: uid,
@@ -95,9 +85,7 @@
         if ($('#start').hasClass('disabled')) {
             return;
         }
-        let param = window.location.search.substring(1).split(/[&=]/)[1];
-        window.location.replace('survey.html?user=' + user_id + '&timestamp=' + timestamp.valueOf().toString() + 
-                                '&l=' + param + '&t=' + dorm_room[0] + dorm_wing[0].toUpperCase());
+        window.location.replace('survey.html?' + url);
     });
 
     timestamp = new Date();

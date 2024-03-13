@@ -4,4 +4,4 @@ data/*.csv
 *.docx
 *.json
 gmail_auth.py
-participant_list.html
+participant_id_list.html

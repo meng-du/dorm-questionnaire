@@ -112,11 +112,12 @@
             });
 
             // send data to firebase
-            async function save_user2firebase(user_id, timestamp, data) {
+            async function save_user2firebase(user_id, timestamp, url, data) {
                 try {
                     let ref = doc(db, DB_NAME, user_id);
                     await setDoc(ref, {
-                        [timestamp]: data
+                        [timestamp]: data,
+                        resume_url: window.location.href.replace('login', 'survey').split('?')[0] + '?' + url
                     }, { merge: true });
                 } catch (e) {
                     alert('Failed to save your data. Please check your internet connection and try again.\n' +

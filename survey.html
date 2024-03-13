@@ -342,9 +342,6 @@
                     console.log(e);
                 }
             }
-            setDoc(doc(db, DB_TYPE + 'data', user_id), {  // save the url where the survey can be continued
-                resume_url: window.location.href.replace(timestamp, '0000000000000')
-            }, { merge: true });
             // global functions
             window.get_user_progress = get_user_progress;
             window.save2firebase = save2firebase;
