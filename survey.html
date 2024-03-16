@@ -183,50 +183,44 @@
         <div id="p5" class="page central">
             <div class="question-text"></div>
             <p>Our default is to pay you in one lump sum. For example, if you did this survey ($20), both fMRI sessions (2 x $50), and got the $5 bonus (if >80% of people in your wing of Hedrick do this survey), you would get a payment of of $125. Providng lump sum payment is our default because people have preferred this in the past and because it facilitates giving out the bonus payments. Is this OK with you or do you prefer to be paid in smaller increments?</p>
-            <div align="center">
-                <form id="lumpsum-form">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="lumpsum" value="yes" required>
-                        <label class="form-check-label">Yes, this is OK with me.</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="lumpsum" value="no">
-                        <label class="form-check-label">No, I prefer to be paid in smaller increments (if so, please email csnl@ucla.edu to arrange this).</label>
-                    </div>
-                </form>
-            </div>
-
+            <form id="lumpsum-form" class="pay-form">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="lumpsum" value="yes" required>
+                    <label class="form-check-label">Yes, this is OK with me.</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="lumpsum" value="no">
+                    <label class="form-check-label">No, I prefer to be paid in smaller increments (if so, please email csnl@ucla.edu to arrange this).</label>
+                </div>
+            </form>
+            <br><br>
             <p>We can pay you in cash or gift cards. Which do you prefer?</p>
-            <div align="center">
-                <form id="payment-form">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="payment" value="amazon" required>
-                        <label class="form-check-label">Amazon gift card</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="payment" value="target">
-                        <label class="form-check-label">Target gift card</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="payment" value="bruincard">
-                        <label class="form-check-label">Bruincard deposit</label>
-                    </div>
-                </form>
-            </div>
-
+            <form id="payment-form" class="pay-form">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="payment" value="cash" required>
+                    <label class="form-check-label">Cash</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="payment" value="amazon">
+                    <label class="form-check-label">Amazon gift card</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="payment" value="target">
+                    <label class="form-check-label">Target gift card</label>
+                </div>
+            </form>
+            <br><br>
             <p>If you also do the fMRI sessions, we can also provide you with a 3D print of your brain. Are you interested in this?</p>
-            <div align="center">
-                <form id="fmri-form">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="fmri" value="yes" required>
-                        <label class="form-check-label">Yes</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="fmri" value="no">
-                        <label class="form-check-label">No</label>
-                    </div>
-                </form>
-            </div>
+            <form id="fmri-form" class="pay-form">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="fmri" value="yes" required>
+                    <label class="form-check-label">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="fmri" value="no">
+                    <label class="form-check-label">No</label>
+                </div>
+            </form>
         </div>
 
         <div id="no-prev">You won't be able to come back and change any of your answers after proceeding to the next question</div>

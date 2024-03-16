@@ -110,7 +110,12 @@
             }
             if (docSnap && docSnap.exists()) {
                 let count = docSnap.data()[tally];
-                let percent = Math.floor(count/194 * 100);  // TODO: change this number
+                let totals = {
+                    '2N': 97,
+                    '7S': 90
+                }
+                let total = tally in totals ? totals[tally] : 100;
+                let percent = Math.floor(count/total * 100);
                 $('#bar').css('width', percent + '%').attr('aria-valuenow', percent);
                 $('#bar').text(percent + '% of your wing have completed');
             }
