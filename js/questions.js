@@ -9,11 +9,7 @@ var roster_questions = [  // page 1
 
     'Whom do you share good news with?',
 
-    'Who would you talk to if something bad or upsetting happened to you?',
-
-    'Who makes you feel supported and cared for?',
-
-    'Who usually makes you feel positive (e.g., happy, enthusiastic)?',
+    'Who would you talk to if something bad or upsetting happened to you so that you feel supported and cared for?',
 
     'Whose social media posts or messages (such as texts, group messages) or social media posts do you see most often?'
 ];

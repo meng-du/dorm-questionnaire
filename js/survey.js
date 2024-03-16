@@ -103,7 +103,7 @@ jQuery(document).ready(function() {
     // ----- ROSTER QUESTIONS -----
     function check_duplicate(name1, name2) {
         let dist = window.levenshtein(name1, name2);
-        if ((dist <= 1) || (dist / name1.length < 0.25)) {
+        if ((dist <= 1) || (dist / name1.length < 0.18)) {
             return true;
         }
         return false;
@@ -185,7 +185,7 @@ jQuery(document).ready(function() {
                 }
                 if (rep) {
                     field.get(0).setCustomValidity('You have already entered this name or a similar name (' + rep + ') ' + msg_where +
-                        ' your wing of Hedrick. If you are entering different people with the same name, please add a descriptive term (e.g., Daniel Kim artist).');
+                        ' your wing of Hedrick. If you are entering different people with the same name, please use a *distinct* descriptive term (e.g., Daniel Kim artist).');
                     field.get(0).reportValidity();
                     valid = false;
                 }
