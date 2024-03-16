@@ -63,7 +63,7 @@ jQuery(document).ready(function() {
         }
         if (page_i == 1 || page_i == 2) {
             // load roster data for page 1 or 2
-            console.log(Object.keys(user_data).sort());  // TODO test
+            console.log(Object.keys(user_data).sort());
             for (let t of Object.keys(user_data).sort()) { // sort so that new data overwrites old data
                 if (t.length < 13) {
                     continue;
