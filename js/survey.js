@@ -48,12 +48,6 @@ jQuery(document).ready(function() {
     }
 
     function load_progress(user_data) {
-        if (!user_data || !('progress' in user_data)) {
-            $('#p' + page_i).show();
-            console.log('No existing progress.');
-            $('#btn-next').removeClass('disabled');
-            return;
-        }
         let prog = user_data.progress.split('.');
         page_i = parseInt(prog[0]);
         question_i = parseInt(prog[1]);
@@ -404,7 +398,7 @@ jQuery(document).ready(function() {
             slider_i++;
             $(div).append($('<div>', {
                 id: 'q-text' + slider_i,
-                class: "slider-" + page_i.toString(),
+                class: "slider-q-text",
                 html: question
             }));
             $(div).append($('<div>', {
