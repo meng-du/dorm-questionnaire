@@ -10,8 +10,9 @@ from firebase_admin import firestore
 
 if __name__ == '__main__':
     # read sent email addresses:timestamp
+    print('Running email sender on', time.asctime())
     sent = set()
-    with open('email_list.txt', 'w') as f:
+    with open('email_list.txt', 'r') as f:
         emails = f.readlines()
     for email in emails:
         sent.add(email.strip())
@@ -25,7 +26,6 @@ if __name__ == '__main__':
         data = doc.to_dict()
         if 'progress' in data and data['progress'] == '5.0':
             continue
-        print(sorted(data.keys()))
         for key in sorted(data.keys()):
             if len(key) == 13:
                 timestamp = key
@@ -38,6 +38,7 @@ if __name__ == '__main__':
         elif url is None:
             print('No resume_url for', doc.id)
         else:
+            print('Incomplete:', doc.id)
             time_lapse = (time.time() * 1000 - int(timestamp)) / 1000 / 60  # in minutes
             if time_lapse < 60:
                 continue

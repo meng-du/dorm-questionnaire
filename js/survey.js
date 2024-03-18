@@ -63,14 +63,14 @@ jQuery(document).ready(function() {
         }
         if (page_i == 1 || page_i == 2) {
             // load roster data for page 1 or 2
-            console.log(Object.keys(user_data).sort());
             for (let t of Object.keys(user_data).sort()) { // sort so that new data overwrites old data
-                if (t.length < 13) {
+                if (t.length != 13) {
                     continue;
                 }
                 for (let i = 0; i < roster_questions.length; i++) {
                     let key = '1.' + i.toString();
-                    if (user_data[t].length == 13 && key in user_data[t]) {
+                    if (key in user_data[t]) {
+                        console.log(key, user_data[t][key]);
                         roster_data[i] = {
                             names_in_dorm: user_data[t][key]['names_in_dorm'],
                             names_outside: user_data[t][key]['names_outside']
