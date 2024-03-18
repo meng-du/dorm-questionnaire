@@ -290,6 +290,7 @@
 
             // retrieve and load previous user progress
             async function get_user_progress(proc_func) {
+                $('#btn-next').addClass('disabled');
                 var docSnap = null;
                 try {
                     docSnap = await getDoc(doc(db, DB_TYPE + 'data', user_id));
@@ -312,6 +313,7 @@
                 } else {
                     console.log('User does not exist.');
                 }
+                $('#btn-next').removeClass('disabled');
             }
 
             // send data to firebase

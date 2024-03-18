@@ -58,10 +58,10 @@ jQuery(document).ready(function() {
         question_i = parseInt(prog[1]);
         skip_check = true;
         console.log('Loading', page_i, question_i);
-        if (page_i == ROSTER_PAGE && question_i == roster_questions.length - 1) {
-            question_i -= 1;  // go back to show the last roster question in case it hasn't been answered
+        if (page_i == ROSTER_PAGE && question_i > 0) {
+            question_i -= 1;  // show the last answered roster question in case it hasn't been fully answered
         }
-        if (page_i == 1 || page_i == 2) {
+        if (page_i == ROSTER_PAGE || page_i == ROSTER_PAGE + 1) {
             // load roster data for page 1 or 2
             for (let t of Object.keys(user_data).sort()) { // sort so that new data overwrites old data
                 if (t.length != 13) {
@@ -84,6 +84,7 @@ jQuery(document).ready(function() {
         }
         $('#btn-next').click();
         $('#p' + page_i).show();
+        $('.slide').slider('refresh');
     }
     window.get_user_progress(load_progress);
 
@@ -622,7 +623,7 @@ jQuery(document).ready(function() {
         $('.question-text').html(question_texts[page_i][question_i]);
         add_data();
 
-        prog_bar.animate(prog_bar.value() - 0.3 / question_texts[page_i].length,
+        prog_bar.animate(Math.max(0.0, prog_bar.value() - 0.3 / question_texts[page_i].length),
                         { duration: 1000 });
 
         // first question
@@ -722,18 +723,6 @@ jQuery(document).ready(function() {
                 page_i = 3;
             }
 
-            // progress bar
-            let percent;
-            switch (page_i) {
-                case 1: percent = 0.05; break;
-                case 2: percent = 0.35; break;
-                case 3: percent = 0.55; break;
-                case 4: percent = 0.85; break;
-                case 5: percent = 0.95; break;
-                default: percent = prog_bar.value(); break;
-            }
-            prog_bar.animate(Math.max(prog_bar.value(), percent), { duration: 1000 });
-
             // prepare next page
             $('#p' + page_i).show();
             if (page_i == 2) {
@@ -747,6 +736,18 @@ jQuery(document).ready(function() {
                 $('.question-text').html(question_texts[page_i][question_i]);
             }
         }
+
+        // progress bar
+        let percent_map = {0: 0.05, 1: 0.3, 2: 0.2, 3: 0.3, 4: 0.1};
+        let percent = 0.0;
+        for (let i = 0; i < page_i; i++) {
+            percent += percent_map[i];
+        }
+        percent += question_i * percent_map[page_i] / question_texts[page_i].length
+        percent = Math.min(1.0, percent);
+        percent = Math.max(0.0, percent);
+        prog_bar.animate(Math.max(prog_bar.value(), percent), { duration: 1000 });
+
         // hide warning
         $('.invalid').hide();
         normal_next_btn();
