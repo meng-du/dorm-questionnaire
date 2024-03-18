@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <title>Survey</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    </head>
+
+    <style>
+        .central {
+          margin: 10% auto;
+          padding: 0 2rem;
+          max-width: 800px;
+          text-align: center;
+        }
+        .blue {
+          color: #0064e6;
+        }
+    </style>
+
+    <body>
+        <div class="central">
+            <h5>It looks like you have completed a part of this survey before. </h5>
+            <h5 id="email" class="blue">To continue this survey, please use the link we sent to your email address.</h5>
+            <h5>Thank you!</h5>
+            <br><br>
+            <p>Please check your spam folder if you cannot find the email.</p>
+            <p>If you have just started filling out the survey, it might take about an hour to receive the email.</p>
+            <br><br>
+
+            <span class="small">If you have additional questions, please contact a member of our research team:</span><br>
+            <span class="small">Email: csnl@ucla.edu</span><br>
+            <span class="small">SMS: (424)272-0550</span>
+        </div>
+    </body>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var email = window.location.search.substring(1).split(/[&=]/)[1].split('-');
+            if (email) {
+                email = email[0] + '*'.repeat(parseInt(email[1])) + '@' + email.slice(2, email.length).join('.');
+                $('#email').text('To continue this survey, please use the link we sent to your email address (' + email + ')');
+            }
+        });
+    </script>
+</html>

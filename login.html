@@ -52,7 +52,7 @@
 
                 <div class="blue warning">Make sure your <strong>UID</strong> and <strong>email</strong> are entered correctly! We will use them to pay you after you complete the survey.</div>
                 <div class="blue warning">Please complete this survey alone in a quiet, distraction-free environment.</div>
-                <div class="blue warning">This survey will take about 20 minutes. Please allocate sufficient time.</div>
+                <div class="blue warning">This survey will take about 20-30 minutes. Please allocate sufficient time.</div>
 
                 <button id="submit" type="submit" class="btn btn-primary central-btn">Submit</button>
                 <p id="confidential">All responses to this survey will be kept confidential. Only the principal investigators and their immediate staff who have been approved by the Institutional Review Board (IRB) at UCLA will have access to your responses. The data you provide will be stored with unique identification codes not related to your identity. If information from this study is published or presented at scientific meetings, your personal information will not be used.</p>
@@ -115,6 +115,30 @@
             async function save_user2firebase(user_id, timestamp, url, data) {
                 try {
                     let ref = doc(db, DB_NAME, user_id);
+                    let docSnap = await getDoc(ref);
+                    if (docSnap.exists()) {
+                        let email, progress;
+                        for (let t of Object.keys(docSnap.data()).sort()) {
+                            console.log(t);
+                            if (t.length == 13 && 'email' in docSnap.data()[t]) {
+                                email = docSnap.data()[t].email;
+                            } else if (t == 'progress') {
+                                progress = docSnap.data()[t];
+                                if (progress == '5.0') {
+                                    let param = docSnap.data().resume_url.slice(-8);
+                                    window.location.replace('progress.html?' + param);
+                                    return;
+                                }
+                            }
+                        }
+                        if (email) {
+                            email = email.split('@');
+                            console.log(email);
+                            window.location.replace('cont_instr.html' + '?' + 'm=' + email[0][0] + '-' +
+                                                    (email[0].length - 1).toString() + '-' + email[1].replace('.', '-'));
+                            return;
+                        }
+                    }
                     await setDoc(ref, {
                         [timestamp]: data,
                         resume_url: window.location.href.replace('login', 'survey').split('?')[0] + '?' + url

@@ -70,7 +70,7 @@ jQuery(document).ready(function() {
                 }
                 for (let i = 0; i < roster_questions.length; i++) {
                     let key = '1.' + i.toString();
-                    if (key in user_data[t]) {
+                    if (user_data[t].length == 13 && key in user_data[t]) {
                         roster_data[i] = {
                             names_in_dorm: user_data[t][key]['names_in_dorm'],
                             names_outside: user_data[t][key]['names_outside']
