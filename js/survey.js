@@ -51,6 +51,7 @@ jQuery(document).ready(function() {
         if (!user_data || !('progress' in user_data)) {
             $('#p' + page_i).show();
             console.log('No existing progress.');
+            $('#btn-next').removeClass('disabled');
             return;
         }
         let prog = user_data.progress.split('.');
