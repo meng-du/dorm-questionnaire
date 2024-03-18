@@ -419,13 +419,15 @@ jQuery(document).ready(function() {
             create_slider('#slider' + slider_i, '#slider-wrapper' + slider_i,
                           slider_config, orient);
         }
+        $('.slide').slider('refresh');
     }
 
     function tie_strength_prepare(index) {
         let tie_names = [...all_names['in_dorm'], ...all_names['outside']];
         shuffle(tie_names);
         // append questions to DOM
-        append_sliders('#p2-questions', tie_names, tie_strength_slider_configs[index]);
+        let orient = ($('body').width() < 800) ? 'vertical' : 'horizontal';
+        append_sliders('#p2-questions', tie_names, tie_strength_slider_configs[index], orient);
     }
 
     // data & reset
@@ -458,7 +460,8 @@ jQuery(document).ready(function() {
 
     function likert_prepare(question_i) {
         $('#p3 .question-text').html(likert_questions[question_i]);
-        append_sliders('#p3-questions', likert_sliders.texts[question_i], likert_sliders.sliders[question_i])
+        let orient = ($('body').width() < 800) ? 'vertical' : 'horizontal';
+        append_sliders('#p3-questions', likert_sliders.texts[question_i], likert_sliders.sliders[question_i], orient)
     }
 
     function likert_onfinish() {
