@@ -398,7 +398,7 @@ jQuery(document).ready(function() {
             slider_i++;
             $(div).append($('<div>', {
                 id: 'q-text' + slider_i,
-                class: "slider-q-text",
+                class: "slider-q-text slider-" + page_i.toString(),
                 html: question
             }));
             $(div).append($('<div>', {

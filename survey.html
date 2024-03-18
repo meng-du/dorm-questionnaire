@@ -308,7 +308,7 @@
                     $('#p0').show();
                     $('#btn-next').removeClass('disabled');
                 }
-                if (!docSnap.data() || ! ('participant_id' in docSnap.data())) {
+                if (docSnap.data() && !('participant_id' in docSnap.data())) {
                     let pid = user_id.slice(0, 3) + timestamp.toString().slice(3, 7);  // ID for other tasks
                     let ref = doc(db, DB_TYPE + 'data', user_id);
                     await setDoc(ref, {
