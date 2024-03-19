@@ -15,7 +15,7 @@
     $('#lastname').change(check_name);
 
     $('#dorm').change(() => {
-        var errmsg = 'Please enter your 3-digit room number';  // TODO: 2
+        var errmsg = 'Please enter your 3-digit room number';
         $('#dorm')[0].setCustomValidity(/^[0-9]{3}$/.test($('#dorm').val()) ? '' : errmsg);
     });
 

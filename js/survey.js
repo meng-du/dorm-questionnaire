@@ -48,29 +48,24 @@ jQuery(document).ready(function() {
     }
 
     function load_progress(user_data) {
-        if (!user_data || !('progress' in user_data)) {
-            $('#p' + page_i).show();
-            console.log('No existing progress.');
-            return;
-        }
         let prog = user_data.progress.split('.');
         page_i = parseInt(prog[0]);
         question_i = parseInt(prog[1]);
         skip_check = true;
         console.log('Loading', page_i, question_i);
-        if (page_i == ROSTER_PAGE && question_i == roster_questions.length - 1) {
-            question_i -= 1;  // go back to show the last roster question in case it hasn't been answered
+        if (page_i == ROSTER_PAGE && question_i > 0) {
+            question_i -= 1;  // show the last answered roster question in case it hasn't been fully answered
         }
-        if (page_i == 1 || page_i == 2) {
+        if (page_i == ROSTER_PAGE || page_i == ROSTER_PAGE + 1) {
             // load roster data for page 1 or 2
-            console.log(Object.keys(user_data).sort());
             for (let t of Object.keys(user_data).sort()) { // sort so that new data overwrites old data
-                if (t.length < 13) {
+                if (t.length != 13) {
                     continue;
                 }
                 for (let i = 0; i < roster_questions.length; i++) {
                     let key = '1.' + i.toString();
                     if (key in user_data[t]) {
+                        console.log(key, user_data[t][key]);
                         roster_data[i] = {
                             names_in_dorm: user_data[t][key]['names_in_dorm'],
                             names_outside: user_data[t][key]['names_outside']
@@ -84,6 +79,7 @@ jQuery(document).ready(function() {
         }
         $('#btn-next').click();
         $('#p' + page_i).show();
+        $('.slide').slider('refresh');
     }
     window.get_user_progress(load_progress);
 
@@ -402,7 +398,7 @@ jQuery(document).ready(function() {
             slider_i++;
             $(div).append($('<div>', {
                 id: 'q-text' + slider_i,
-                class: "slider-" + page_i.toString(),
+                class: "slider-q-text slider-" + page_i.toString(),
                 html: question
             }));
             $(div).append($('<div>', {
@@ -418,13 +414,15 @@ jQuery(document).ready(function() {
             create_slider('#slider' + slider_i, '#slider-wrapper' + slider_i,
                           slider_config, orient);
         }
+        $('.slide').slider('refresh');
     }
 
     function tie_strength_prepare(index) {
         let tie_names = [...all_names['in_dorm'], ...all_names['outside']];
         shuffle(tie_names);
         // append questions to DOM
-        append_sliders('#p2-questions', tie_names, tie_strength_slider_configs[index]);
+        let orient = ($('body').width() < 800) ? 'vertical' : 'horizontal';
+        append_sliders('#p2-questions', tie_names, tie_strength_slider_configs[index], orient);
     }
 
     // data & reset
@@ -457,7 +455,8 @@ jQuery(document).ready(function() {
 
     function likert_prepare(question_i) {
         $('#p3 .question-text').html(likert_questions[question_i]);
-        append_sliders('#p3-questions', likert_sliders.texts[question_i], likert_sliders.sliders[question_i])
+        let orient = ($('body').width() < 800) ? 'vertical' : 'horizontal';
+        append_sliders('#p3-questions', likert_sliders.texts[question_i], likert_sliders.sliders[question_i], orient)
     }
 
     function likert_onfinish() {
@@ -622,7 +621,7 @@ jQuery(document).ready(function() {
         $('.question-text').html(question_texts[page_i][question_i]);
         add_data();
 
-        prog_bar.animate(prog_bar.value() - 0.3 / question_texts[page_i].length,
+        prog_bar.animate(Math.max(0.0, prog_bar.value() - 0.3 / question_texts[page_i].length),
                         { duration: 1000 });
 
         // first question
@@ -722,18 +721,6 @@ jQuery(document).ready(function() {
                 page_i = 3;
             }
 
-            // progress bar
-            let percent;
-            switch (page_i) {
-                case 1: percent = 0.05; break;
-                case 2: percent = 0.35; break;
-                case 3: percent = 0.55; break;
-                case 4: percent = 0.85; break;
-                case 5: percent = 0.95; break;
-                default: percent = prog_bar.value(); break;
-            }
-            prog_bar.animate(Math.max(prog_bar.value(), percent), { duration: 1000 });
-
             // prepare next page
             $('#p' + page_i).show();
             if (page_i == 2) {
@@ -747,6 +734,18 @@ jQuery(document).ready(function() {
                 $('.question-text').html(question_texts[page_i][question_i]);
             }
         }
+
+        // progress bar
+        let percent_map = {0: 0.05, 1: 0.3, 2: 0.2, 3: 0.3, 4: 0.1};
+        let percent = 0.0;
+        for (let i = 0; i < page_i; i++) {
+            percent += percent_map[i];
+        }
+        percent += question_i * percent_map[page_i] / question_texts[page_i].length
+        percent = Math.min(1.0, percent);
+        percent = Math.max(0.0, percent);
+        prog_bar.animate(Math.max(prog_bar.value(), percent), { duration: 1000 });
+
         // hide warning
         $('.invalid').hide();
         normal_next_btn();

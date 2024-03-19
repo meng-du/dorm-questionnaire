@@ -290,6 +290,7 @@
 
             // retrieve and load previous user progress
             async function get_user_progress(proc_func) {
+                $('#btn-next').addClass('disabled');
                 var docSnap = null;
                 try {
                     docSnap = await getDoc(doc(db, DB_TYPE + 'data', user_id));
@@ -299,18 +300,20 @@
                     location.reload();  // refresh page
                     console.log(e);
                 }
-                if (docSnap && docSnap.exists()) {
+                if (docSnap && docSnap.exists() && docSnap.data() && ('progress' in docSnap.data())) {
                     console.log('data', docSnap.data());
                     proc_func(docSnap.data());
-                    if (! ('participant_id' in docSnap.data())) {
-                        let pid = user_id.slice(0, 3) + timestamp.toString().slice(3, 7);  // ID for other tasks
-                        let ref = doc(db, DB_TYPE + 'data', user_id);
-                        await setDoc(ref, {
-                            participant_id: pid
-                        }, { merge: true });
-                    }
                 } else {
-                    console.log('User does not exist.');
+                    console.log('No existing progress.');
+                    $('#p0').show();
+                    $('#btn-next').removeClass('disabled');
+                }
+                if (docSnap.data() && !('participant_id' in docSnap.data())) {
+                    let pid = user_id.slice(0, 3) + timestamp.toString().slice(3, 7);  // ID for other tasks
+                    let ref = doc(db, DB_TYPE + 'data', user_id);
+                    await setDoc(ref, {
+                        participant_id: pid
+                    }, { merge: true });
                 }
             }
 

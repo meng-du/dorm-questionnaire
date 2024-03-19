@@ -24,16 +24,13 @@
   margin: auto;
   display: table;
 }
-.slider-2 {
-  font-weight: 500;
-}
-.slider-3 {
+.slider-q-text {
   margin-top: 2rem;
   margin-bottom: 1.5rem;
   font-weight: 500;
 }
 #btn-next {
-  margin-bottom: 2rem;
+  margin-bottom: 6rem;
 }
 .invalid {
   margin: auto;
@@ -46,7 +43,7 @@
   font-size: 0.9rem;
 }
 #invalid2 {
-  margin: -1.8rem auto 0 auto;
+  margin: -5.8rem auto 0 auto;
   font-size: 0.8rem;
 }
 #no-prev {
