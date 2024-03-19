@@ -8,6 +8,8 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 
 
+TIME_INTERVAL = 10  # in minutes
+
 if __name__ == '__main__':
     # read sent email addresses:timestamp
     print('Running email sender on', time.asctime())
@@ -40,7 +42,7 @@ if __name__ == '__main__':
         else:
             print('Incomplete:', doc.id)
             time_lapse = (time.time() * 1000 - int(timestamp)) / 1000 / 60  # in minutes
-            if time_lapse < 60:
+            if time_lapse < TIME_INTERVAL:
                 continue
             if ':'.join([email, timestamp]) in sent:
                 continue
@@ -48,7 +50,7 @@ if __name__ == '__main__':
             msg = EmailMessage()
             msg.set_content('Thank you for participating in our study! It looks like you have started the social network survey but have not completed it. ' + \
                             'Please complete the survey at your earliest convenience using this link: ' + url + '\n\n' \
-                            'If you have any questions, please feel free to reach out to us (email csnl@ucla.edu or text 424-272-0550). Thank you!' + \
+                            'If you have any issues, concerns, or questions about anything in the survey, please feel free to reach out to us (email csnl@ucla.edu or text 424-272-0550). Thank you!' + \
                             '\n\nBest,\nCSNL Team')
 
             msg['Subject'] = 'Reminder for the Social Network Survey'
