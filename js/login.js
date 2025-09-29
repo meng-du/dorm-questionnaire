@@ -62,7 +62,8 @@
         let sha256 = CryptoJS.SHA256(dorm_room + dorm_wing[0] + uid).toString();
         let ts = timestamp.valueOf().toString();
         let dormfloor = dorm_room[0] + dorm_wing[0].toUpperCase();
-        let user_id = 'B' + dormfloor + '-' + sha256.slice(0, 5);  // ID for all tasks
+        let floor_index = window.selected_floors.indexOf(dormfloor);
+        let user_id = 'B' + floor_index + '-' + sha256.slice(0, 5);  // ID for all tasks
         let param = window.location.search.substring(1).split(/[&=]/)[1];
         url = 'user=' + user_id + '&timestamp=' + ts + '&l=' + param + '&t=' + dormfloor;
 
@@ -82,7 +83,7 @@
         $('#confirmation').hide();
         $('#correct-info').hide();
 
-        if (dormfloor === '2S' || dormfloor === '4S') {
+        if (window.selected_floors.includes(dormfloor)) {
             $('#instr').show();
         } else {
             $('#wrong-floor').show();
