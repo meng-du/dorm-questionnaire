@@ -112,8 +112,7 @@
             if (docSnap && docSnap.exists()) {
                 let count = docSnap.data()[tally];
                 let totals = {
-                    '2S': 98,
-                    '4S': 96
+                    '6S': 100,
                 }
                 let total = tally in totals ? totals[tally] : 100;
                 let percent = Math.floor(count/total * 100);
