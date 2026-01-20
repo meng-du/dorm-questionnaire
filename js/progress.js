@@ -1,8 +1,8 @@
 'use strict';
 
 jQuery(document).ready(function() {
-    let param = window.location.search.substring(1).split(/[&=]/)[1];
-    $('#link').val('https://meng-du.github.io/dorm-questionnaire/login.html?l=' + param);
+    // let param = window.location.search.substring(1).split(/[&=]/)[1];
+    $('#link').val('https://meng-du.github.io/dorm-questionnaire/login.html');
 
     $('#copied').hide();
     if (window.location.search.substring(1).length == 0) {

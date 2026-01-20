@@ -63,8 +63,8 @@
         let ts = timestamp.valueOf().toString();
         let dormfloor = dorm_room[0] + dorm_wing[0].toUpperCase();
         let floor_index = window.selected_floors.indexOf(dormfloor);
-        let user_id = 'B' + floor_index + '-' + sha256.slice(0, 5);  // ID for all tasks
-        let param = window.location.search.substring(1).split(/[&=]/)[1];
+        let user_id = 'C' + floor_index + '-' + sha256.slice(0, 5);  // ID for all tasks
+        let param = '4'; //window.location.search.substring(1).split(/[&=]/)[1];
         url = 'user=' + user_id + '&timestamp=' + ts + '&l=' + param + '&t=' + dormfloor;
 
         window.save_user2firebase(user_id, ts, url.replace(ts, '0000000000000'), {

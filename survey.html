@@ -32,7 +32,7 @@
                     <label class="demo-q" for="movein">When did you first move into your current floor and wing of Hedrick Hall?</label><br>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="movein" value="fall" required>
-                        <label class="form-check-label">Fall 2024</label>
+                        <label class="form-check-label">Fall 2025</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input id="other-movein-check" class="form-check-input" type="radio" name="movein" value="other">
@@ -251,7 +251,7 @@
             var user_id = parameters[1];
             var timestamp = parameters[3];
             var tally = parameters[7];
-            if (!user_id || user_id.length != 9 || !timestamp || timestamp.length != 13 || !tally || tally.length != 2) {
+            if (!user_id || user_id.length != 8 || !timestamp || timestamp.length != 13 || !tally || tally.length != 2) {
                 alert('This URL is invalid. Please contact the experimenters.');
                 $('body').hide();
             }
